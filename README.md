@@ -1,5 +1,13 @@
 # Financial Dashboard with AI Agent Integration
 
+[![Version](https://img.shields.io/github/v/release/docdyhr/financial-dashboard-mcp?style=flat-square)](https://github.com/docdyhr/financial-dashboard-mcp/releases)
+[![CI/CD](https://img.shields.io/github/actions/workflow/status/docdyhr/financial-dashboard-mcp/ci.yml?branch=main&style=flat-square&label=CI/CD)](https://github.com/docdyhr/financial-dashboard-mcp/actions/workflows/ci.yml)
+[![License](https://img.shields.io/github/license/docdyhr/financial-dashboard-mcp?style=flat-square)](LICENSE)
+[![Python](https://img.shields.io/badge/python-3.11+-blue?style=flat-square)](https://python.org)
+[![Code Style](https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-square)](https://github.com/psf/black)
+[![Semantic Versioning](https://img.shields.io/badge/semver-2.0.0-green?style=flat-square)](https://semver.org/)
+[![Conventional Commits](https://img.shields.io/badge/conventional%20commits-1.0.0-yellow?style=flat-square)](https://conventionalcommits.org)
+
 A comprehensive financial dashboard system for monitoring and analyzing investment portfolios with AI-powered insights through MCP (Model Context Protocol) integration.
 
 ## Overview
@@ -425,6 +433,27 @@ For support, please open an issue in the GitHub repository or contact the mainta
 
 See [TODO.md](TODO.md) for the detailed project roadmap and upcoming features.
 
+## 🔢 Versioning
+
+This project follows [Semantic Versioning](https://semver.org/) with automated releases:
+
+- 🏷️ **Automatic versioning** based on [Conventional Commits](https://conventionalcommits.org)
+- 📝 **Automated changelog** generation
+- 🚀 **GitHub releases** with Docker images
+- ✅ **Version consistency** across all project files
+
+### Commit Message Format
+```
+<type>[optional scope]: <description>
+
+Examples:
+feat(api): add portfolio export functionality     → Minor release
+fix(frontend): resolve chart rendering issue      → Patch release  
+feat!: redesign authentication system            → Major release
+```
+
+For detailed versioning guidelines, see [docs/SEMANTIC_VERSIONING.md](docs/SEMANTIC_VERSIONING.md).
+
 ---
 
-**Note**: This project is under active development. Features and documentation may change.
+**Note**: This project uses automated semantic versioning. Manual version bumps are not required.

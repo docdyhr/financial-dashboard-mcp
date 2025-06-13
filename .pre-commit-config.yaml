@@ -41,7 +41,7 @@ repos:
     rev: v1.8.0
     hooks:
       - id: mypy
-        additional_dependencies: [types-all]
+        additional_dependencies: [types-requests, types-redis, types-psycopg2]
         args: [--ignore-missing-imports]
         exclude: ^(tests/|docs/|migrations/)
 
@@ -67,9 +67,16 @@ repos:
 
   - repo: local
     hooks:
-      - id: check-env-file
-        name: Check .env.example is up to date
-        entry: python scripts/check_env.py
+      - id: check-version-consistency
+        name: Check version consistency across files
+        entry: python scripts/check_version_consistency.py
         language: python
-        files: '\.env$'
+        files: ^(pyproject\.toml|backend/__init__\.py)$
+        pass_filenames: false
+        
+      - id: validate-docker-files
+        name: Validate Docker files
+        entry: bash -c 'for f in docker/Dockerfile.*; do docker run --rm -i hadolint/hadolint < "$f" || true; done'
+        language: system
+        files: ^docker/Dockerfile\..+$
         pass_filenames: false

@@ -1,0 +1,170 @@
+name: 🚀 Release
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  id-token: write
+
+jobs:
+  release:
+    name: 🏷️ Semantic Release
+    runs-on: ubuntu-latest
+    if: github.repository_owner == 'docdyhr'
+    
+    outputs:
+      released: ${{ steps.semantic.outputs.released }}
+      version: ${{ steps.semantic.outputs.version }}
+      tag: ${{ steps.semantic.outputs.tag }}
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: 📦 Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install python-semantic-release[github]==8.7.0
+
+      - name: 🔍 Check for Release Conditions
+        id: check
+        run: |
+          # Check if there are any commits that should trigger a release
+          if git log --oneline --since="$(git describe --tags --abbrev=0 2>/dev/null || echo '1970-01-01')" --grep="^feat\|^fix\|^perf\|BREAKING CHANGE" --format="%s" | grep -q "^feat\|^fix\|^perf\|BREAKING CHANGE"; then
+            echo "should_release=true" >> $GITHUB_OUTPUT
+          else
+            echo "should_release=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: 🏷️ Generate Release
+        id: semantic
+        if: steps.check.outputs.should_release == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Configure git
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Run semantic release
+          semantic-release version --no-commit --no-tag --no-push
+          
+          # Check if version was bumped
+          NEW_VERSION=$(semantic-release version --print)
+          if [ "$NEW_VERSION" != "" ]; then
+            echo "released=true" >> $GITHUB_OUTPUT
+            echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+            echo "tag=v$NEW_VERSION" >> $GITHUB_OUTPUT
+            
+            # Create and push tag
+            git tag "v$NEW_VERSION"
+            git push origin "v$NEW_VERSION"
+            
+            # Generate changelog and create release
+            semantic-release changelog
+            semantic-release publish
+          else
+            echo "released=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: 📝 Update Version Files
+        if: steps.semantic.outputs.released == 'true'
+        run: |
+          # Update version in backend/__init__.py
+          sed -i "s/__version__ = \".*\"/__version__ = \"${{ steps.semantic.outputs.version }}\"/" backend/__init__.py
+          
+          # Update version in pyproject.toml
+          sed -i "s/version = \".*\"/version = \"${{ steps.semantic.outputs.version }}\"/" pyproject.toml
+          
+          # Commit version bump
+          git add backend/__init__.py pyproject.toml CHANGELOG.md
+          git commit -m "chore: bump version to ${{ steps.semantic.outputs.version }} [skip ci]"
+          git push origin main
+
+  docker:
+    name: 🐳 Build Docker Images
+    needs: release
+    runs-on: ubuntu-latest
+    if: needs.release.outputs.released == 'true'
+    
+    strategy:
+      matrix:
+        image: [backend, frontend, mcp]
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.release.outputs.tag }}
+
+      - name: 🐳 Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 🔑 Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 📊 Extract Metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}-${{ matrix.image }}
+          tags: |
+            type=semver,pattern={{version}},value=${{ needs.release.outputs.version }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ needs.release.outputs.version }}
+            type=semver,pattern={{major}},value=${{ needs.release.outputs.version }}
+            type=raw,value=latest
+
+      - name: 🏗️ Build and Push Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/Dockerfile.${{ matrix.image }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          platforms: linux/amd64,linux/arm64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  notify:
+    name: 📢 Notify Release
+    needs: [release, docker]
+    runs-on: ubuntu-latest
+    if: needs.release.outputs.released == 'true'
+
+    steps:
+      - name: 📢 Create Release Summary
+        run: |
+          echo "## 🚀 Release Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** ${{ needs.release.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Tag:** ${{ needs.release.outputs.tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📦 Artifacts Released:" >> $GITHUB_STEP_SUMMARY
+          echo "- GitHub Release with changelog" >> $GITHUB_STEP_SUMMARY
+          echo "- Docker images pushed to GHCR" >> $GITHUB_STEP_SUMMARY
+          echo "- Version bumped in codebase" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🔗 Links:" >> $GITHUB_STEP_SUMMARY
+          echo "- [Release Notes](https://github.com/${{ github.repository }}/releases/tag/${{ needs.release.outputs.tag }})" >> $GITHUB_STEP_SUMMARY
+          echo "- [Docker Images](https://github.com/${{ github.repository }}/pkgs/container/financial-dashboard-mcp-backend)" >> $GITHUB_STEP_SUMMARY

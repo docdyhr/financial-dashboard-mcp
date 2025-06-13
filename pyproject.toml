@@ -140,7 +140,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "financial-dashboard-mcp"
-version = "0.2.0"
+version = "1.0.0"
 description = "A hybrid financial dashboard with AI agent integration and task queue system"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -181,3 +181,106 @@ dev = [
 [tool.setuptools.packages.find]
 include = ["backend*", "frontend*", "mcp_server*"]
 exclude = ["tests*", "docs*", "docker*", "database*"]
+
+# Commitizen configuration for semantic versioning
+[tool.commitizen]
+name = "cz_conventional_commits"
+tag_format = "v$version"
+version_scheme = "semver"
+version_provider = "pep621"
+update_changelog_on_bump = true
+major_version_zero = false
+changelog_file = "CHANGELOG.md"
+changelog_format = "%(version)s (%(date)s)"
+changelog_pattern = "^(feat|fix|refactor|perf|style|test|build|ci|docs|chore)?(\\(.+\\))?(!)?"
+changelog_start_rev = "v1.0.0"
+style = [
+    ["qmark", "fg:#ff9d00 bold"],
+    ["question", "bold"],
+    ["answer", "fg:#ff9d00 bold"],
+    ["pointer", "fg:#ff9d00 bold"],
+    ["highlighted", "fg:#ff9d00 bold"],
+    ["selected", "fg:#cc5454"],
+    ["separator", "fg:#cc5454"],
+    ["instruction", ""],
+    ["text", ""],
+    ["disabled", "fg:#858585 italic"]
+]
+
+# Semantic release configuration
+[tool.semantic_release]
+version_toml = ["pyproject.toml:project.version"]
+version_variables = ["backend/__init__.py:__version__"]
+build_command = "pip install build && python -m build"
+dist_path = "dist/"
+upload_to_vcs_release = true
+upload_to_pypi = false
+remove_dist = false
+patch_without_tag = false
+changelog_sections = "feature,fix,breaking,documentation,performance,refactor"
+commit_version_number = true
+
+[tool.semantic_release.changelog]
+template_dir = ".github/templates"
+changelog_file = "CHANGELOG.md"
+exclude_commit_patterns = []
+
+[tool.semantic_release.changelog.environment]
+block_start_string = "{%"
+block_end_string = "%}"
+variable_start_string = "{{"
+variable_end_string = "}}"
+comment_start_string = "{#"
+comment_end_string = "#}"
+trim_blocks = false
+lstrip_blocks = false
+newline_sequence = "\n"
+keep_trailing_newline = false
+
+[tool.semantic_release.branches.main]
+match = "(main|master)"
+prerelease_token = "rc"
+prerelease = false
+
+[tool.semantic_release.commit_parser_options]
+allowed_tags = ["build", "chore", "ci", "docs", "feat", "fix", "perf", "style", "refactor", "test"]
+minor_tags = ["feat"]
+patch_tags = ["fix", "perf"]
+
+[tool.semantic_release.remote]
+name = "origin"
+type = "github"
+ignore_token_for_push = false
+
+# Bumpversion configuration (alternative to semantic-release)
+[tool.bumpversion]
+current_version = "1.0.0"
+parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)"
+serialize = ["{major}.{minor}.{patch}"]
+search = "{current_version}"
+replace = "{new_version}"
+regex = false
+ignore_missing_version = false
+tag = true
+sign_tags = false
+tag_name = "v{new_version}"
+tag_message = "Bump version: {current_version} → {new_version}"
+allow_dirty = false
+commit = true
+message = "chore: bump version {current_version} → {new_version}"
+commit_args = ""
+
+[[tool.bumpversion.files]]
+filename = "pyproject.toml"
+search = 'version = "{current_version}"'
+replace = 'version = "{new_version}"'
+
+[[tool.bumpversion.files]]
+filename = "backend/__init__.py"
+search = '__version__ = "{current_version}"'
+replace = '__version__ = "{new_version}"'
+
+[[tool.bumpversion.files]]
+filename = "CHANGELOG.md"
+search = "## [Unreleased]"
+replace = "## [Unreleased]\n\n## [{new_version}] - {now:%Y-%m-%d}"

@@ -1,0 +1,75 @@
+name: 🔢 Version Consistency Check
+
+on:
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  version-check:
+    name: 🔍 Check Version Consistency
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: 🔍 Extract Versions
+        id: versions
+        run: |
+          # Extract version from pyproject.toml
+          PYPROJECT_VERSION=$(grep '^version = ' pyproject.toml | sed 's/version = "\(.*\)"/\1/')
+          echo "pyproject_version=$PYPROJECT_VERSION" >> $GITHUB_OUTPUT
+          
+          # Extract version from backend/__init__.py
+          BACKEND_VERSION=$(grep '__version__ = ' backend/__init__.py | sed 's/__version__ = "\(.*\)"/\1/')
+          echo "backend_version=$BACKEND_VERSION" >> $GITHUB_OUTPUT
+          
+          # Extract version from CHANGELOG.md (latest release)
+          CHANGELOG_VERSION=$(grep -m 1 '^## \[' CHANGELOG.md | sed 's/## \[\(.*\)\].*/\1/')
+          echo "changelog_version=$CHANGELOG_VERSION" >> $GITHUB_OUTPUT
+
+      - name: ✅ Validate Version Consistency
+        run: |
+          echo "🔍 Version Consistency Check"
+          echo "=============================="
+          echo "PyProject.toml: ${{ steps.versions.outputs.pyproject_version }}"
+          echo "Backend __init__: ${{ steps.versions.outputs.backend_version }}"
+          echo "Changelog (latest): ${{ steps.versions.outputs.changelog_version }}"
+          echo ""
+          
+          # Check if all versions match
+          if [ "${{ steps.versions.outputs.pyproject_version }}" = "${{ steps.versions.outputs.backend_version }}" ]; then
+            echo "✅ PyProject and Backend versions match"
+          else
+            echo "❌ Version mismatch between pyproject.toml and backend/__init__.py"
+            exit 1
+          fi
+          
+          # Note: Changelog version might be different during development
+          echo "ℹ️ Changelog shows latest released version: ${{ steps.versions.outputs.changelog_version }}"
+
+      - name: 📊 Create Version Summary
+        run: |
+          echo "## 🔢 Version Consistency Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Location | Version |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|---------|" >> $GITHUB_STEP_SUMMARY
+          echo "| pyproject.toml | ${{ steps.versions.outputs.pyproject_version }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| backend/__init__.py | ${{ steps.versions.outputs.backend_version }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| CHANGELOG.md (latest) | ${{ steps.versions.outputs.changelog_version }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.versions.outputs.pyproject_version }}" = "${{ steps.versions.outputs.backend_version }}" ]; then
+            echo "✅ **Status:** All tracked versions are consistent" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ **Status:** Version inconsistency detected" >> $GITHUB_STEP_SUMMARY
+          fi
