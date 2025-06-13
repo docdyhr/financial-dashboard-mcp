@@ -1,0 +1,30 @@
+[flake8]
+max-line-length = 88
+extend-ignore = E203, E266, E501, W503, F403, F401
+max-complexity = 10
+exclude = 
+    .git,
+    __pycache__,
+    .venv,
+    venv,
+    env,
+    dist,
+    build,
+    *.egg,
+    migrations,
+    .mypy_cache,
+    .pytest_cache,
+    .coverage,
+    htmlcov,
+    node_modules,
+    .env
+
+per-file-ignores =
+    __init__.py:F401
+    tests/*:S101,S105,S106
+
+# Docstring configuration
+docstring-convention = google
+# Require docstrings for all public methods, classes, and modules
+# But allow missing docstrings in tests, migrations, and config files
+ignore-decorators = property, abstractmethod, override

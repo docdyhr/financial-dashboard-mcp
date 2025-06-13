@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "financial-dashboard": {
+      "command": "python",
+      "args": [
+        "/Users/thomas/Programming/financial-dashboard-mcp/scripts/start_mcp_server.py"
+      ],
+      "env": {
+        "BACKEND_URL": "http://localhost:8000"
+      }
+    }
+  }
+}

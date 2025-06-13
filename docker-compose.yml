@@ -1,0 +1,151 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: financial_dashboard_db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-financial_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-financial_pass}
+      POSTGRES_DB: ${POSTGRES_DB:-financial_dashboard}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-financial_user}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: financial_dashboard_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+    container_name: financial_dashboard_backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-financial_user}:${POSTGRES_PASSWORD:-financial_pass}@postgres:5432/${POSTGRES_DB:-financial_dashboard}
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app/backend
+      - ./logs:/app/logs
+    command: uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
+
+  celery_worker:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+    container_name: financial_dashboard_celery_worker
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-financial_user}:${POSTGRES_PASSWORD:-financial_pass}@postgres:5432/${POSTGRES_DB:-financial_dashboard}
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app/backend
+      - ./logs:/app/logs
+    command: celery -A backend.tasks worker --loglevel=info
+
+  celery_beat:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+    container_name: financial_dashboard_celery_beat
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-financial_user}:${POSTGRES_PASSWORD:-financial_pass}@postgres:5432/${POSTGRES_DB:-financial_dashboard}
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app/backend
+      - ./logs:/app/logs
+    command: celery -A backend.tasks beat --loglevel=info
+
+  flower:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+    container_name: financial_dashboard_flower
+    ports:
+      - "5555:5555"
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      - redis
+    command: celery -A backend.tasks flower
+
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.frontend
+    container_name: financial_dashboard_frontend
+    ports:
+      - "8501:8501"
+    environment:
+      - BACKEND_URL=http://backend:8000
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app/frontend
+      - ./logs:/app/logs
+    command: streamlit run frontend/app.py --server.port 8501 --server.address 0.0.0.0
+
+  mcp_server:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.mcp
+    container_name: financial_dashboard_mcp
+    ports:
+      - "8502:8502"
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-financial_user}:${POSTGRES_PASSWORD:-financial_pass}@postgres:5432/${POSTGRES_DB:-financial_dashboard}
+      - BACKEND_URL=http://backend:8000
+      - MCP_AUTH_TOKEN=${MCP_AUTH_TOKEN:-development-token}
+    depends_on:
+      - backend
+    volumes:
+      - ./mcp_server:/app/mcp_server
+      - ./logs:/app/logs
+    command: python mcp_server/server.py
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  default:
+    name: financial_dashboard_network
