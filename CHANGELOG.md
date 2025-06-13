@@ -2,6 +2,25 @@
 
 
 
+## v1.0.1 (2025-06-13)
+
+### Chore
+
+* chore: bump version to 1.0.0 [skip ci] ([`3802f1d`](https://github.com/docdyhr/financial-dashboard-mcp/commit/3802f1daf290e1c8bb0ef4f3eec26dd4f06b2268))
+
+### Fix
+
+* fix(config): resolve pre-commit hook configuration issues
+
+- Fix bandit security scanner arguments and file patterns
+- Comment out poetry-check hook since project uses setuptools
+- Ensure all pre-commit hooks work correctly with project structure
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude &lt;noreply@anthropic.com&gt; ([`8f42177`](https://github.com/docdyhr/financial-dashboard-mcp/commit/8f421775a6262b22e2195d17a3765d3f59ffff1e))
+
+
 ## v1.0.0 (2025-06-13)
 
 ### Breaking
