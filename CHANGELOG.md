@@ -2,6 +2,33 @@
 
 
 
+## v1.1.0 (2025-06-14)
+
+### Chore
+
+* chore: bump version to 1.0.1 [skip ci] ([`a20d827`](https://github.com/docdyhr/financial-dashboard-mcp/commit/a20d827625e6b6f27f89e88e8580b02427158bf9))
+
+### Feature
+
+* feat: harden and modernize codebase with comprehensive linting
+
+- Updated .flake8 and .bandit configs to ignore low-friction rules for non-core files
+- Fixed all critical B904 errors by adding &#39;from e&#39; to exception handling in API files
+- Fixed E722 bare except statements in frontend components
+- Updated script permissions to be executable
+- Configured extensive per-file-ignores for ruff and flake8 covering:
+  * frontend, scripts, mcp_server: Allow line length, complexity issues
+  * backend/api: Allow many args, exception patterns
+  * backend/services: Allow complexity, datetime usage patterns
+  * backend/models: Allow SQLAlchemy patterns, imports
+  * backend/schemas: Allow __all__ sorting
+  * tests: Allow all dev/test patterns
+- All core backend files now pass flake8 validation
+- Maintained code quality while allowing flexibility in demo/test code
+
+This enables clean commits while focusing linting on production code quality. ([`3575979`](https://github.com/docdyhr/financial-dashboard-mcp/commit/357597932a3a88b70569eb156553ac898d83144c))
+
+
 ## v1.0.1 (2025-06-13)
 
 ### Chore
