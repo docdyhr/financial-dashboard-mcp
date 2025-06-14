@@ -16,11 +16,12 @@ from backend.schemas.position import (
     PositionCreate,
     PositionFilters,
     PositionResponse,
+    PositionUpdate,
 )
 from backend.services.base import BaseService
 
 
-class PositionService(BaseService[Position, PositionCreate, PositionAdjustment]):
+class PositionService(BaseService[Position, PositionCreate, PositionUpdate]):
     """Service for position management operations."""
 
     def __init__(self) -> None:
@@ -70,7 +71,7 @@ class PositionService(BaseService[Position, PositionCreate, PositionAdjustment])
         positions = query.offset(skip).limit(limit).all()
 
         # Convert to response objects
-        position_responses = []
+        position_responses: list[PositionResponse] = []
         for position in positions:
             asset_summary = AssetSummary(
                 id=position.asset.id,
@@ -104,7 +105,7 @@ class PositionService(BaseService[Position, PositionCreate, PositionAdjustment])
                 current_value=position.current_value,
                 unrealized_gain_loss=position.unrealized_gain_loss,
                 unrealized_gain_loss_percent=position.unrealized_gain_loss_percent,
-                weight_in_portfolio=None,  # TODO: Calculate if needed
+                weight_in_portfolio=self._calculate_position_weight(position, db),
             )
             position_responses.append(position_response)
 
@@ -324,7 +325,7 @@ class PositionService(BaseService[Position, PositionCreate, PositionAdjustment])
         if total_value == 0:
             return []
 
-        rebalancing_needed = []
+        rebalancing_needed: list[dict[str, Any]] = []
 
         for position in positions:
             current_weight = (
@@ -414,3 +415,16 @@ class PositionService(BaseService[Position, PositionCreate, PositionAdjustment])
         db.commit()
         db.refresh(position)
         return position
+
+    def _calculate_position_weight(
+        self, position: Position, db: Session
+    ) -> Decimal | None:
+        """Calculate position weight as percentage of total portfolio value."""
+        try:
+            # Get total portfolio value for this user
+            total_value = self.calculate_total_portfolio_value(db, position.user_id)
+            if total_value and total_value > 0 and position.current_value:
+                return (position.current_value / total_value) * 100
+            return None
+        except Exception:
+            return None

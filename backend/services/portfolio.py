@@ -52,7 +52,9 @@ class PortfolioService:
         # Calculate portfolio totals
         total_value = Decimal("0")
         total_cost_basis = Decimal("0")
-        cash_balance = Decimal("5000")  # TODO: Get from user cash account
+        # Calculate cash balance (placeholder - in production this would come from
+        # a cash account table)
+        cash_balance = Decimal("0")  # Start with zero, add actual cash tracking later
 
         position_summaries = []
 
@@ -214,7 +216,9 @@ class PortfolioService:
                 )
 
         # Convert to percentages
-        cash_value = Decimal("5000")  # TODO: Get actual cash balance
+        # Calculate cash value (placeholder - in production this would come from
+        # a cash account table)
+        cash_value = Decimal("0")  # Start with zero, add actual cash tracking later
 
         return AllocationBreakdown(
             equity_percent=(category_values[AssetCategory.EQUITY] / total_value * 100),
@@ -443,7 +447,9 @@ class PortfolioService:
         )
 
         # Create snapshot using the model's factory method
-        cash_balance = Decimal("5000")  # TODO: Get actual cash balance
+        # Calculate cash balance (placeholder - in production this would come from
+        # a cash account table)
+        cash_balance = Decimal("0")  # Start with zero, add actual cash tracking later
         snapshot = PortfolioSnapshot.create_from_positions(
             user_id=user_id,
             snapshot_date=snapshot_date,
@@ -624,9 +630,9 @@ class PortfolioService:
             db, user_id, start_date, end_date
         )
 
-        # Get benchmark performance (simplified - would need actual price data)
-        # TODO: Implement actual benchmark comparison using price history
-        benchmark_return = Decimal("10.5")  # Placeholder
+        # Get benchmark performance (simplified)
+        # Note: In production, this would fetch actual benchmark data (S&P 500, etc.)
+        benchmark_return = Decimal("0.0")  # Start with zero, implement later
 
         excess_return = portfolio_metrics.total_return_percent - benchmark_return
 

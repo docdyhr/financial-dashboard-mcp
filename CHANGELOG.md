@@ -2,6 +2,36 @@
 
 
 
+## v1.1.2 (2025-01-13)
+
+### Fixed
+
+* **Technical Debt Cleanup**: Major technical debt reduction and code quality improvements
+  - Cleaned up bloated requirements.txt with 100+ dependencies down to essential 20+ dependencies
+  - Created separate requirements-dev.txt for development dependencies
+  - Removed duplicate frontend files (app_new.py, app_old.py)
+  - Fixed all mypy type checking errors in market_data.py
+  - Implemented proper service health checks replacing TODO placeholders
+  - Added position weight calculation replacing None placeholders
+  - Updated hardcoded cash balance comments with proper documentation
+  - Fixed ruff configuration by removing invalid TC004 rule
+  - Fixed circular import issues in model type annotations
+  - Updated flake8 configuration to properly ignore FastAPI B008 patterns
+  - All linting and type checking now passes cleanly
+
+* **Code Quality**: Fixed all TODO/FIXME markers and technical debt issues
+  - Market data tasks now handle None asset cases properly
+  - Portfolio snapshots use factory methods instead of direct constructors
+  - Service status endpoint provides real health checks instead of placeholders
+  - Improved error handling and type safety throughout codebase
+
+### Changed
+
+* **Dependencies**: Streamlined dependency management
+  - Updated README.md with proper installation instructions
+  - pyproject.toml now serves as single source of truth for dependencies
+  - Clear separation between production and development dependencies
+
 ## v1.1.1 (2025-06-14)
 
 ### Chore

@@ -109,7 +109,15 @@ source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 3. Install dependencies:
 
 ```bash
+# Production dependencies only
 pip install -r requirements.txt
+
+# OR for development (includes testing, linting, etc.)
+pip install -r requirements-dev.txt
+
+# OR using pyproject.toml (recommended)
+pip install -e .                    # Production
+pip install -e ".[dev]"            # Development
 ```
 
 4. Set up environment variables:
@@ -216,7 +224,9 @@ financial-dashboard-mcp/
 │   └── architecture.md   # Architecture details
 ├── .env.example          # Environment variables template
 ├── docker-compose.yml    # Docker compose configuration
-├── requirements.txt      # Python dependencies
+├── requirements.txt      # Core production dependencies
+├── requirements-dev.txt  # Development dependencies
+├── pyproject.toml        # Python project configuration
 ├── TODO.md              # Project roadmap and tasks
 └── README.md            # This file
 ```

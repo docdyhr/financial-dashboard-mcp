@@ -9,6 +9,7 @@ from fastapi.responses import JSONResponse
 
 from backend.api import assets, portfolio, positions, tasks
 from backend.config import get_settings
+from backend.database import get_db_session
 
 # Configure logging
 settings = get_settings()
@@ -17,6 +18,35 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger(__name__)
+
+
+async def _check_services() -> dict[str, str]:
+    """Check health of dependent services."""
+    services = {}
+
+    # Check database
+    try:
+        from sqlalchemy import text
+
+        with get_db_session() as db:
+            db.execute(text("SELECT 1"))
+        services["database"] = "healthy"
+    except Exception:
+        services["database"] = "unhealthy"
+
+    # Check Redis/Celery (simplified check)
+    try:
+        from backend.tasks import celery_app
+
+        # Simple ping to check if Celery is responding
+        result = celery_app.control.ping(timeout=1)
+        services["celery"] = "healthy" if result else "unhealthy"
+        services["redis"] = "healthy" if result else "unhealthy"
+    except Exception:
+        services["celery"] = "unhealthy"
+        services["redis"] = "unhealthy"
+
+    return services
 
 
 @asynccontextmanager
@@ -82,11 +112,7 @@ async def api_status():
         "api_version": "v1",
         "app_version": settings.app_version,
         "environment": settings.environment,
-        "services": {
-            "database": "pending",  # TODO: Add actual DB check
-            "redis": "pending",  # TODO: Add actual Redis check
-            "celery": "pending",  # TODO: Add actual Celery check
-        },
+        "services": await _check_services(),
     }
 
 

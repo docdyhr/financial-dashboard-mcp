@@ -151,13 +151,63 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/*" = ["S101", "C901", "F401", "E402", "SIM102", "DTZ011", "B007", "C401", "C403", "C408", "F841", "PLR0913", "PLR0915", "PLR0912", "PLR0911"]
+"tests/*" = [
+    "S101",
+    "C901",
+    "F401",
+    "E402",
+    "SIM102",
+    "DTZ011",
+    "B007",
+    "C401",
+    "C403",
+    "C408",
+    "F841",
+    "PLR0913",
+    "PLR0915",
+    "PLR0912",
+    "PLR0911",
+]
 "frontend/*" = ["F841", "E501", "C901", "PLR0912", "PLR0915", "C408"]
-"scripts/*" = ["F841", "E501", "E402", "C901", "PLR0912", "PLR0915", "B007", "PTH118", "PTH120", "PTH123", "F401", "SIM102", "SIM118"]
+"scripts/*" = [
+    "F841",
+    "E501",
+    "E402",
+    "C901",
+    "PLR0912",
+    "PLR0915",
+    "B007",
+    "PTH118",
+    "PTH120",
+    "PTH123",
+    "F401",
+    "SIM102",
+    "SIM118",
+]
 "mcp_server/*" = ["F841", "E501", "C901", "PLR0912", "PLR0915", "PLR0911"]
 "backend/api/*" = ["PLR0913", "B904", "E501", "RET504"]
-"backend/services/*" = ["F841", "PLR0913", "C901", "PLR0912", "PLR0915", "F401", "A002", "SIM108", "DTZ011", "C401", "C403"]
-"backend/models/*" = ["PLR0913", "E501", "C401", "UP035", "TC004", "RUF100", "UP006", "I001"]
+"backend/services/*" = [
+    "F841",
+    "PLR0913",
+    "C901",
+    "PLR0912",
+    "PLR0915",
+    "F401",
+    "A002",
+    "SIM108",
+    "DTZ011",
+    "C401",
+    "C403",
+]
+"backend/models/*" = [
+    "PLR0913",
+    "E501",
+    "C401",
+    "UP035",
+    "RUF100",
+    "UP006",
+    "I001",
+]
 "backend/schemas/*" = ["RUF022"]
 "backend/tasks/*" = ["F841", "E402", "I001", "B007", "C403", "E501"]
 
@@ -222,16 +272,46 @@ changelog_format = "%(version)s (%(date)s)"
 changelog_pattern = "^(feat|fix|refactor|perf|style|test|build|ci|docs|chore)?(\\(.+\\))?(!)?"
 changelog_start_rev = "v1.0.0"
 style = [
-    ["qmark", "fg:#ff9d00 bold"],
-    ["question", "bold"],
-    ["answer", "fg:#ff9d00 bold"],
-    ["pointer", "fg:#ff9d00 bold"],
-    ["highlighted", "fg:#ff9d00 bold"],
-    ["selected", "fg:#cc5454"],
-    ["separator", "fg:#cc5454"],
-    ["instruction", ""],
-    ["text", ""],
-    ["disabled", "fg:#858585 italic"]
+    [
+        "qmark",
+        "fg:#ff9d00 bold",
+    ],
+    [
+        "question",
+        "bold",
+    ],
+    [
+        "answer",
+        "fg:#ff9d00 bold",
+    ],
+    [
+        "pointer",
+        "fg:#ff9d00 bold",
+    ],
+    [
+        "highlighted",
+        "fg:#ff9d00 bold",
+    ],
+    [
+        "selected",
+        "fg:#cc5454",
+    ],
+    [
+        "separator",
+        "fg:#cc5454",
+    ],
+    [
+        "instruction",
+        "",
+    ],
+    [
+        "text",
+        "",
+    ],
+    [
+        "disabled",
+        "fg:#858585 italic",
+    ],
 ]
 
 # Semantic release configuration
@@ -270,7 +350,18 @@ prerelease_token = "rc"
 prerelease = false
 
 [tool.semantic_release.commit_parser_options]
-allowed_tags = ["build", "chore", "ci", "docs", "feat", "fix", "perf", "style", "refactor", "test"]
+allowed_tags = [
+    "build",
+    "chore",
+    "ci",
+    "docs",
+    "feat",
+    "fix",
+    "perf",
+    "style",
+    "refactor",
+    "test",
+]
 minor_tags = ["feat"]
 patch_tags = ["fix", "perf"]
 
@@ -314,7 +405,10 @@ replace = "## [Unreleased]\n\n## [{new_version}] - {now:%Y-%m-%d}"
 
 [tool.bandit]
 exclude_dirs = ["tests", "migrations", ".venv", "venv"]
-skips = ["B101", "B601"]  # Skip assert_used and shell_injection_subprocess for tests
+skips = [
+    "B101",
+    "B601",
+] # Skip assert_used and shell_injection_subprocess for tests
 
 [tool.bandit.assert_used]
 skips = ["*_test.py", "test_*.py"]

@@ -152,48 +152,48 @@ def update_portfolio_prices(self, user_id: int | None = None) -> dict[str, Any]:
                     # Update asset current price
                     asset = db.query(Asset).filter(Asset.ticker == ticker).first()
                     if asset:
-                        asset.current_price = Decimal(str(latest_price))
+                        asset.current_price = latest_price
                         asset.updated_at = datetime.now()
 
-                    # Update or create price history record
-                    price_record = (
-                        db.query(PriceHistory)
-                        .filter(
-                            PriceHistory.asset_id == asset.id,
-                            PriceHistory.price_date == latest_date,
+                        # Update or create price history record
+                        price_record = (
+                            db.query(PriceHistory)
+                            .filter(
+                                PriceHistory.asset_id == asset.id,
+                                PriceHistory.price_date == latest_date,
+                            )
+                            .first()
                         )
-                        .first()
-                    )
 
-                    if price_record:
-                        price_record.close_price = Decimal(str(latest_price))
-                        price_record.updated_at = datetime.now()
-                    else:
-                        price_record = PriceHistory(
-                            asset_id=asset.id,
-                            price_date=latest_date,
-                            open_price=Decimal(str(hist["Open"].iloc[-1])),
-                            high_price=Decimal(str(hist["High"].iloc[-1])),
-                            low_price=Decimal(str(hist["Low"].iloc[-1])),
-                            close_price=Decimal(str(latest_price)),
-                            volume=(
-                                int(hist["Volume"].iloc[-1])
-                                if "Volume" in hist
-                                else None
-                            ),
-                        )  # type: ignore[call-arg]
-                        db.add(price_record)
+                        if price_record:
+                            price_record.close_price = Decimal(str(latest_price))
+                            price_record.updated_at = datetime.now()
+                        else:
+                            price_record = PriceHistory(
+                                asset_id=asset.id,
+                                price_date=latest_date,
+                                open_price=Decimal(str(hist["Open"].iloc[-1])),
+                                high_price=Decimal(str(hist["High"].iloc[-1])),
+                                low_price=Decimal(str(hist["Low"].iloc[-1])),
+                                close_price=Decimal(str(latest_price)),
+                                volume=(
+                                    int(hist["Volume"].iloc[-1])
+                                    if "Volume" in hist
+                                    else None
+                                ),
+                            )  # type: ignore[call-arg]
+                            db.add(price_record)
 
-                    updated_count += 1
+                        updated_count += 1
 
-                    current_task.update_state(
-                        state="PROGRESS",
-                        meta={
-                            "current": i + 1,
-                            "total": len(tickers),
-                            "status": f"Updated {ticker}: ${latest_price:.2f}",
-                        },
-                    )
+                        current_task.update_state(
+                            state="PROGRESS",
+                            meta={
+                                "current": i + 1,
+                                "total": len(tickers),
+                                "status": f"Updated {ticker}",
+                            },
+                        )
 
                 except Exception as e:
                     logger.error(f"Error updating price for {ticker}: {e!s}")

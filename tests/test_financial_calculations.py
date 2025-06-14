@@ -148,7 +148,8 @@ class TestFinancialCalculations:
         variance = variance_sum / Decimal(len(returns))
 
         # The correct expected variance should be calculated properly
-        # Variance = [(0.02-0.006)² + (-0.01-0.006)² + (0.03-0.006)² + (-0.02-0.006)² + (0.01-0.006)²] / 5
+        # Variance = [(0.02-0.006)² + (-0.01-0.006)² + (0.03-0.006)² +
+        #            (-0.02-0.006)² + (0.01-0.006)²] / 5
         # = [0.000196 + 0.000256 + 0.000576 + 0.000676 + 0.000016] / 5
         # = 0.001720 / 5 = 0.000344
         expected_variance = Decimal("0.000344")

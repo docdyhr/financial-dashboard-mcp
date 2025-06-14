@@ -186,6 +186,12 @@ class Transaction(Base):
         **kwargs: Any,  # Changed to Any
     ) -> "Transaction":
         """Factory method to create a buy transaction."""
+        if commission is None:
+            commission = Decimal("0")
+        if regulatory_fees is None:
+            regulatory_fees = Decimal("0")
+        if other_fees is None:
+            other_fees = Decimal("0")
         final_total_amount: Decimal
         if total_amount is None:
             final_total_amount = quantity * price_per_share
@@ -222,6 +228,12 @@ class Transaction(Base):
         **kwargs: Any,  # Changed to Any
     ) -> "Transaction":
         """Factory method to create a sell transaction."""
+        if commission is None:
+            commission = Decimal("0")
+        if regulatory_fees is None:
+            regulatory_fees = Decimal("0")
+        if other_fees is None:
+            other_fees = Decimal("0")
         final_total_amount: Decimal
         if total_amount is None:
             final_total_amount = quantity * price_per_share

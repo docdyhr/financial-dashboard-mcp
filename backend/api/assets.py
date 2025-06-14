@@ -502,14 +502,12 @@ async def bulk_update_asset_prices(
 
         for update_item in bulk_update.updates:
             try:
-                ticker = update_item.get("ticker")
-                current_price = update_item.get("current_price")
-                previous_close = update_item.get("previous_close")
+                ticker = update_item.ticker
+                current_price = update_item.current_price
+                previous_close = update_item.previous_close
 
-                if not ticker or current_price is None:
-                    errors.append(
-                        f"Missing ticker or current_price for item: {update_item}"
-                    )
+                if not ticker:
+                    errors.append(f"Missing ticker for item: {update_item}")
                     continue
 
                 asset = asset_service.get_by_field(db, "ticker", ticker.upper())
@@ -607,7 +605,11 @@ async def search_asset_tickers(
                 name=asset.name,
                 asset_type=asset.asset_type,
                 category=asset.category,
-                current_price=asset.current_price,
+                current_price=(
+                    Decimal(str(asset.current_price))
+                    if asset.current_price is not None
+                    else None
+                ),
                 currency=asset.currency,
                 is_active=asset.is_active,
             )
