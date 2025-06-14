@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from backend.models import (
     AssetCategory,
+    AssetType,
     PortfolioSnapshot,
     Position,
     Transaction,
@@ -27,7 +28,7 @@ from backend.schemas.position import PositionSummary
 class PortfolioService:
     """Service for portfolio operations and calculations."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize portfolio service."""
 
     def get_portfolio_summary(self, db: Session, user_id: int) -> PortfolioSummary:
@@ -69,7 +70,11 @@ class PortfolioService:
                     name=position.asset.name,
                     asset_type=position.asset.asset_type,
                     category=position.asset.category,
-                    current_price=position.asset.current_price,
+                    current_price=(
+                        Decimal(str(position.asset.current_price))
+                        if position.asset.current_price
+                        else None
+                    ),
                     currency=position.asset.currency,
                     is_active=position.asset.is_active,
                 ),
@@ -178,9 +183,9 @@ class PortfolioService:
             AssetCategory.REAL_ESTATE: Decimal("0"),
         }
 
-        allocation_by_category = {}
-        allocation_by_sector = {}
-        allocation_by_asset_type = {}
+        allocation_by_category: dict[AssetCategory, Decimal] = {}
+        allocation_by_sector: dict[str, Decimal] = {}
+        allocation_by_asset_type: dict[AssetType, Decimal] = {}
 
         for position in positions:
             if position.current_value:
@@ -189,9 +194,8 @@ class PortfolioService:
                     category_values[category] += position.current_value
 
                 # Track by category
-                category_name = category.value
-                allocation_by_category[category_name] = (
-                    allocation_by_category.get(category_name, Decimal("0"))
+                allocation_by_category[category] = (
+                    allocation_by_category.get(category, Decimal("0"))
                     + position.current_value
                 )
 
@@ -203,7 +207,7 @@ class PortfolioService:
                     )
 
                 # Track by asset type
-                asset_type = position.asset.asset_type.value
+                asset_type = position.asset.asset_type
                 allocation_by_asset_type[asset_type] = (
                     allocation_by_asset_type.get(asset_type, Decimal("0"))
                     + position.current_value
@@ -301,21 +305,21 @@ class PortfolioService:
         )
 
         # Calculate time-based returns
-        daily_returns = []
+        daily_returns: list[Decimal] = []
         for i in range(1, len(snapshots)):
             prev_value = snapshots[i - 1].total_value
             curr_value = snapshots[i].total_value
             if prev_value > 0:
-                daily_return = (curr_value - prev_value) / prev_value * 100
-                daily_returns.append(daily_return)
+                return_rate = (curr_value - prev_value) / prev_value * 100
+                daily_returns.append(return_rate)
 
         # Calculate volatility (standard deviation of daily returns)
         volatility = None
         if daily_returns:
             mean_return = sum(daily_returns) / len(daily_returns)
-            variance = sum((float(r - mean_return) ** 2) for r in daily_returns) / len(
-                daily_returns
-            )
+            variance = sum(
+                (float(r) - float(mean_return)) ** 2 for r in daily_returns
+            ) / len(daily_returns)
             volatility = Decimal(str(variance**0.5))
 
         # Calculate annualized return
@@ -330,7 +334,7 @@ class PortfolioService:
         today = date.today()
 
         # Daily return
-        daily_return = None
+        daily_return: Decimal | None = None
         if len(snapshots) >= 2:
             yesterday_value = snapshots[-2].total_value
             today_value = snapshots[-1].total_value
@@ -386,7 +390,9 @@ class PortfolioService:
             .all()
         )
 
-        annual_dividend_income = sum(t.total_amount for t in dividend_transactions)
+        annual_dividend_income = sum(
+            t.total_amount for t in dividend_transactions
+        ) or Decimal("0")
         current_portfolio_value = end_value
         dividend_yield = (
             (annual_dividend_income / current_portfolio_value * 100)
@@ -516,7 +522,7 @@ class PortfolioService:
         weights = [(p.current_value or Decimal("0")) / total_value for p in positions]
 
         # Calculate Herfindahl-Hirschman Index
-        hhi = sum(w**2 for w in weights)
+        hhi = sum(w**2 for w in weights) or Decimal("0")
 
         # Effective number of assets
         effective_assets = Decimal("1") / hhi if hhi > 0 else Decimal("0")
@@ -526,7 +532,7 @@ class PortfolioService:
         concentration_risk = max_weight * 100
 
         # Sector concentration
-        sector_values = {}
+        sector_values: dict[str, Decimal] = {}
         for position in positions:
             sector = position.asset.sector or "Unknown"
             sector_values[sector] = sector_values.get(sector, Decimal("0")) + (
