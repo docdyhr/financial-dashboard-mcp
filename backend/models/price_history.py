@@ -1,11 +1,16 @@
 """Price history model for tracking historical asset prices."""
+
 from datetime import date
 from decimal import Decimal
+from typing import TYPE_CHECKING
 
 from sqlalchemy import Date, ForeignKey, Numeric, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from backend.models.base import Base
+
+if TYPE_CHECKING:
+    from backend.models.asset import Asset
 
 
 class PriceHistory(Base):
@@ -49,7 +54,7 @@ class PriceHistory(Base):
     is_adjusted: Mapped[bool] = mapped_column(default=False, nullable=False)
 
     # Relationships
-    asset = relationship("Asset", back_populates="price_history")
+    asset: Mapped[Asset] = relationship("Asset", back_populates="price_history")
 
     # Constraints
     __table_args__ = (
@@ -88,39 +93,56 @@ class PriceHistory(Base):
         cls,
         asset_id: int,
         price_date: date,
-        yahoo_data: dict,
+        yahoo_data: dict[str, float | int | str],
         data_source: str = "yfinance",
     ) -> "PriceHistory":
         """Factory method to create price history from Yahoo Finance data."""
-        return cls(
+        return cls(  # type: ignore[call-arg]
             asset_id=asset_id,
             price_date=price_date,
-            open_price=Decimal(str(yahoo_data.get("Open", 0))),
-            high_price=Decimal(str(yahoo_data.get("High", 0))),
-            low_price=Decimal(str(yahoo_data.get("Low", 0))),
-            close_price=Decimal(str(yahoo_data.get("Close", 0))),
-            adjusted_close=Decimal(str(yahoo_data.get("Adj Close", 0))),
-            volume=int(yahoo_data.get("Volume", 0))
-            if yahoo_data.get("Volume")
-            else None,
+            open_price=(
+                Decimal(str(yahoo_data.get("Open", 0)))
+                if yahoo_data.get("Open") is not None
+                else None
+            ),
+            high_price=(
+                Decimal(str(yahoo_data.get("High", 0)))
+                if yahoo_data.get("High") is not None
+                else None
+            ),
+            low_price=(
+                Decimal(str(yahoo_data.get("Low", 0)))
+                if yahoo_data.get("Low") is not None
+                else None
+            ),
+            close_price=Decimal(
+                str(yahoo_data.get("Close", 0))
+            ),  # Assuming Close is always present and non-null
+            adjusted_close=(
+                Decimal(str(yahoo_data.get("Adj Close", 0)))
+                if yahoo_data.get("Adj Close") is not None
+                else None
+            ),
+            volume=(
+                int(yahoo_data.get("Volume", 0))
+                if yahoo_data.get("Volume") is not None
+                else None
+            ),
             data_source=data_source,
-            is_adjusted=True,
+            is_adjusted=True,  # Assuming Yahoo data is typically adjusted
         )
 
     @classmethod
-    def create_simple_price(
-        cls,
-        asset_id: int,
-        price_date: date,
-        price: Decimal,
-        data_source: str = "manual",
+    def create_placeholder(
+        cls, asset_id: int, price_date: date, close_price: Decimal
     ) -> "PriceHistory":
-        """Factory method to create simple price history with just close price."""
-        return cls(
+        """Factory method to create a placeholder price history entry."""
+        return cls(  # type: ignore[call-arg]
             asset_id=asset_id,
             price_date=price_date,
-            close_price=price,
-            data_source=data_source,
+            close_price=close_price,
+            data_source="placeholder",
+            is_adjusted=False,
         )
 
     def calculate_daily_return(self, previous_close: Decimal | None) -> None:

@@ -7,6 +7,7 @@ The Financial Dashboard frontend is built with Streamlit and provides a comprehe
 ## Features
 
 ### 🏠 Dashboard Page
+
 - **Portfolio Overview**: Total value, cash position, number of positions, YTD return
 - **Performance Metrics**: Configurable time periods (1D, 1W, 1M, 3M, 6M, 1Y, YTD)
 - **Asset Allocation Chart**: Interactive pie chart showing portfolio distribution
@@ -15,22 +16,26 @@ The Financial Dashboard frontend is built with Streamlit and provides a comprehe
 - **Data Refresh Controls**: Manual refresh and snapshot creation
 
 ### 📊 Portfolio Page
+
 - **Current Holdings**: Detailed table with market values and performance
 - **Add Position**: Form to add new investments with validation
 - **Transaction History**: Track all portfolio changes (coming soon)
 
 ### ⚙️ Tasks Page
+
 - **System Status**: Real-time health monitoring of all services
 - **Active Tasks**: Monitor running background tasks
 - **Task Submission**: Submit market data, analytics, and snapshot tasks
 - **Task History**: Review completed tasks and their results
 
 ### 📈 Analytics Page
+
 - **Performance Analysis**: Detailed metrics with multiple time periods
 - **Risk Metrics**: Portfolio beta, VaR, max drawdown (placeholder)
 - **Benchmarking**: Compare against market indices (coming soon)
 
 ### ⚙️ Settings Page
+
 - **General Settings**: Theme, currency, date format preferences
 - **Data Sources**: Configure market data providers and update frequency
 - **Notifications**: Email alerts and notification preferences
@@ -62,15 +67,17 @@ python scripts/demo_setup.py
 ### 3. Access the Dashboard
 
 Open your browser and navigate to:
-- **Dashboard**: http://localhost:8501
-- **API Documentation**: http://localhost:8000/docs
-- **Task Monitor**: http://localhost:5555
+
+- **Dashboard**: <http://localhost:8501>
+- **API Documentation**: <http://localhost:8000/docs>
+- **Task Monitor**: <http://localhost:5555>
 
 ## Component Architecture
 
 ### Portfolio Components (`components/portfolio.py`)
 
-#### Key Functions:
+#### Key Functions
+
 - `portfolio_overview_widget()`: Main dashboard metrics
 - `performance_metrics_widget()`: Performance analysis with time period selection
 - `asset_allocation_chart()`: Interactive pie chart for allocation
@@ -78,7 +85,8 @@ Open your browser and navigate to:
 - `portfolio_value_chart()`: Historical value tracking
 - `refresh_data_button()`: Data refresh and task submission
 
-#### API Integration:
+#### API Integration
+
 - `GET /api/portfolio/summary`: Portfolio overview data
 - `GET /api/portfolio/positions`: Current holdings
 - `GET /api/portfolio/performance`: Performance metrics
@@ -87,13 +95,15 @@ Open your browser and navigate to:
 
 ### Task Components (`components/tasks.py`)
 
-#### Key Functions:
+#### Key Functions
+
 - `task_monitoring_widget()`: Display active tasks
 - `submit_task_widget()`: Submit new background tasks
 - `system_status_widget()`: Service health monitoring
 - `task_history_widget()`: Recent task history
 
-#### API Integration:
+#### API Integration
+
 - `GET /api/tasks/active`: List running tasks
 - `GET /api/tasks/{task_id}/status`: Check task status
 - `POST /api/tasks/market-data/fetch`: Submit market data tasks
@@ -115,6 +125,7 @@ STREAMLIT_SERVER_ADDRESS=localhost
 ### Streamlit Configuration
 
 The app is configured with:
+
 - **Wide layout**: Full-width pages for better data visualization
 - **Expanded sidebar**: Always-visible navigation
 - **Custom page config**: Optimized for financial dashboard use
@@ -130,22 +141,26 @@ The app is configured with:
 ## Key Features
 
 ### Real-time Data Refresh
+
 - Manual refresh button triggers market data updates
 - Automatic snapshot creation for portfolio tracking
 - Live task monitoring with status updates
 
 ### Interactive Charts
+
 - **Plotly Integration**: Interactive charts with zoom, pan, hover
 - **Responsive Design**: Charts adapt to container width
 - **Color Coding**: Visual indicators for positive/negative performance
 
 ### Task Management
+
 - Submit market data fetch tasks for specific symbols
 - Create portfolio snapshots on demand
 - Run analytics tasks and monitor progress
 - View task history and results
 
 ### Error Handling
+
 - Backend connectivity checks
 - Graceful degradation when services are unavailable
 - User-friendly error messages
@@ -160,11 +175,13 @@ The app is configured with:
 3. Follow the pattern of API integration with error handling
 
 ### Styling
+
 - Streamlit's built-in theming system
 - Custom CSS through `st.markdown()` for advanced styling
 - Consistent color scheme for financial data
 
 ### API Integration
+
 - All API calls include timeout handling
 - Consistent error message format
 - Graceful handling of backend unavailability
@@ -191,11 +208,12 @@ The app is configured with:
 4. **Tasks Not Working**
    - Check Celery worker status: `docker-compose logs celery-worker`
    - Verify Redis connectivity: `redis-cli ping`
-   - Check task queue through Flower: http://localhost:5555
+   - Check task queue through Flower: <http://localhost:5555>
 
 ### Debug Mode
 
 Enable detailed logging:
+
 ```python
 import logging
 logging.basicConfig(level=logging.DEBUG)
@@ -204,12 +222,14 @@ logging.basicConfig(level=logging.DEBUG)
 ## Performance
 
 ### Optimization Tips
+
 - Use `@st.cache_data` for expensive API calls
 - Implement pagination for large datasets
 - Use background tasks for heavy computations
 - Optimize chart rendering with appropriate data sampling
 
 ### Resource Usage
+
 - Frontend: ~50-100MB RAM
 - Real-time updates: Minimal CPU overhead
 - Network: Efficient API calls with caching
@@ -217,6 +237,7 @@ logging.basicConfig(level=logging.DEBUG)
 ## Future Enhancements
 
 ### Planned Features
+
 - WebSocket integration for real-time updates
 - Advanced filtering and search capabilities
 - Export functionality (PDF, Excel)
@@ -225,6 +246,7 @@ logging.basicConfig(level=logging.DEBUG)
 - Integration with additional data sources
 
 ### Technical Improvements
+
 - React/Next.js migration path
 - Progressive Web App (PWA) features
 - Offline functionality
@@ -234,11 +256,13 @@ logging.basicConfig(level=logging.DEBUG)
 ## Support
 
 For issues and feature requests:
+
 1. Check the troubleshooting section above
-2. Review API documentation at http://localhost:8000/docs
-3. Check task queue status at http://localhost:5555
+2. Review API documentation at <http://localhost:8000/docs>
+3. Check task queue status at <http://localhost:5555>
 4. Examine Docker logs: `docker-compose logs`
 
 ---
 
 This frontend provides a comprehensive interface for financial portfolio management with real-time data integration and task queue monitoring. The modular component architecture makes it easy to extend and customize for specific needs.
+*

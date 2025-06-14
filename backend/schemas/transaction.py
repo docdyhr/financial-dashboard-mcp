@@ -1,8 +1,10 @@
 """Transaction schemas for transaction history API."""
+
 from datetime import date
 from decimal import Decimal
+from typing import Any
 
-from pydantic import Field, validator
+from pydantic import Field, field_validator
 
 from backend.models.transaction import TransactionType
 from backend.schemas.asset import AssetSummary
@@ -28,17 +30,16 @@ class TransactionBase(BaseSchema):
     tax_withheld: Decimal = Field(
         default=Decimal("0"), ge=0, description="Tax withheld"
     )
-    account_name: str | None = Field(
-        None, max_length=100, description="Account name"
-    )
+    account_name: str | None = Field(None, max_length=100, description="Account name")
     notes: str | None = Field(None, description="Transaction notes")
     currency: str = Field(default="USD", max_length=3, description="Currency")
     exchange_rate: Decimal = Field(
         default=Decimal("1.0"), gt=0, description="Exchange rate"
     )
 
-    @validator("currency")
-    def validate_currency(cls, v):
+    @field_validator("currency")
+    @classmethod
+    def validate_currency(cls, v: str) -> str:
         """Validate currency format."""
         return v.upper()
 
@@ -131,9 +132,7 @@ class BuyTransactionRequest(BaseSchema):
     price_per_share: Decimal = Field(..., ge=0, description="Price per share")
     transaction_date: date = Field(..., description="Transaction date")
     commission: Decimal = Field(default=Decimal("0"), ge=0, description="Commission")
-    account_name: str | None = Field(
-        None, max_length=100, description="Account name"
-    )
+    account_name: str | None = Field(None, max_length=100, description="Account name")
     notes: str | None = Field(None, description="Transaction notes")
 
 
@@ -145,9 +144,7 @@ class SellTransactionRequest(BaseSchema):
     price_per_share: Decimal = Field(..., ge=0, description="Price per share")
     transaction_date: date = Field(..., description="Transaction date")
     commission: Decimal = Field(default=Decimal("0"), ge=0, description="Commission")
-    account_name: str | None = Field(
-        None, max_length=100, description="Account name"
-    )
+    account_name: str | None = Field(None, max_length=100, description="Account name")
     notes: str | None = Field(None, description="Transaction notes")
 
 
@@ -160,9 +157,7 @@ class DividendTransactionRequest(BaseSchema):
     tax_withheld: Decimal = Field(
         default=Decimal("0"), ge=0, description="Tax withheld"
     )
-    account_name: str | None = Field(
-        None, max_length=100, description="Account name"
-    )
+    account_name: str | None = Field(None, max_length=100, description="Account name")
     notes: str | None = Field(None, description="Transaction notes")
 
 
@@ -192,7 +187,9 @@ class TransactionPerformanceMetrics(BaseSchema):
 class BulkTransactionImport(BaseSchema):
     """Schema for bulk transaction import."""
 
-    transactions: list[dict] = Field(..., description="List of transactions to import")
+    transactions: list[dict[str, Any]] = Field(
+        ..., description="List of transactions to import"
+    )
     data_source: str = Field(
         ..., max_length=50, description="Source of transaction data"
     )

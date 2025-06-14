@@ -1,4 +1,5 @@
 """Base Pydantic schemas for common response models."""
+
 from datetime import datetime
 from typing import Generic, TypeVar
 

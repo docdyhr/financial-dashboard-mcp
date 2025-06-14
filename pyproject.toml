@@ -24,13 +24,13 @@ ensure_newline_before_comments = true
 skip_glob = ["*/migrations/*", "*/venv/*"]
 
 [tool.mypy]
-python_version = "1.0.1"
+python_version = "3.11"
 warn_return_any = true
 warn_unused_configs = true
-disallow_untyped_defs = false
-disallow_incomplete_defs = false
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
 check_untyped_defs = true
-disallow_untyped_decorators = false
+disallow_untyped_decorators = true
 no_implicit_optional = true
 warn_redundant_casts = true
 warn_unused_ignores = true
@@ -38,30 +38,46 @@ warn_no_return = true
 warn_unreachable = true
 strict_equality = true
 ignore_missing_imports = true
-exclude = ["migrations/", "venv/", ".venv/", "tests/"]
+exclude = ["migrations/", "venv/", ".venv/"]
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
 
 [tool.pytest.ini_options]
-minversion = "1.0.1"
+minversion = "7.0"
 testpaths = ["tests"]
 python_files = "test_*.py"
 python_classes = "Test*"
 python_functions = "test_*"
 addopts = [
     "--strict-markers",
+    "--strict-config",
     "--tb=short",
-    "--cov=backend",
-    "--cov=frontend",
-    "--cov=mcp_server",
-    "--cov-branch",
-    "--cov-report=term-missing:skip-covered",
-    "--cov-report=html",
-    "--cov-report=xml",
-    "--cov-fail-under=80",
+    "--durations=10",
+    "-ra",
 ]
 filterwarnings = [
     "ignore::DeprecationWarning",
     "ignore::PendingDeprecationWarning",
+    "ignore::UserWarning",
+    "error::pytest.PytestConfigWarning",
 ]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+    "financial: marks tests as financial calculation tests",
+    "security: marks tests as security tests",
+    "mcp: marks tests as MCP server tests",
+    "api: marks tests as API tests",
+    "database: marks tests as database tests",
+    "redis: marks tests as Redis tests",
+    "celery: marks tests as Celery task tests",
+    "external: marks tests that require external services",
+]
+asyncio_mode = "auto"
 
 [tool.coverage.run]
 source = ["backend", "frontend", "mcp_server"]
@@ -88,7 +104,7 @@ exclude_lines = [
 
 [tool.ruff]
 line-length = 88
-target-version = "1.0.1"
+target-version = "py311"
 exclude = [
     ".venv",
     "venv",
@@ -284,3 +300,18 @@ replace = '__version__ = "{new_version}"'
 filename = "CHANGELOG.md"
 search = "## [Unreleased]"
 replace = "## [Unreleased]\n\n## [{new_version}] - {now:%Y-%m-%d}"
+
+[tool.bandit]
+exclude_dirs = ["tests", "migrations", ".venv", "venv"]
+skips = ["B101", "B601"]  # Skip assert_used and shell_injection_subprocess for tests
+
+[tool.bandit.assert_used]
+skips = ["*_test.py", "test_*.py"]
+
+# Financial-specific security checks
+[tool.bandit.hardcoded_password_string]
+word_list = ["password", "pass", "pwd", "token", "secret", "key", "api_key"]
+
+[tool.bandit.hardcoded_sql_expressions]
+confidence = "HIGH"
+severity = "MEDIUM"

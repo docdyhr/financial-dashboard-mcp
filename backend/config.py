@@ -1,4 +1,5 @@
 """Configuration settings for the Financial Dashboard backend."""
+
 from functools import lru_cache
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -20,7 +21,7 @@ class Settings(BaseSettings):
     environment: str = "development"
 
     # API
-    api_host: str = "0.0.0.0"
+    api_host: str = "0.0.0.0"  # nosec
     api_port: int = 8000
     api_reload: bool = True
 

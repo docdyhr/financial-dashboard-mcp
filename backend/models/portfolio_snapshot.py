@@ -1,12 +1,17 @@
 """Portfolio snapshot model for tracking portfolio performance over time."""
+
 from datetime import date
 from decimal import Decimal
-from typing import Optional
+from typing import TYPE_CHECKING, Any, Optional
 
 from sqlalchemy import Date, ForeignKey, Numeric, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from backend.models.base import Base
+
+if TYPE_CHECKING:
+    from backend.models.position import Position
+    from backend.models.user import User
 
 
 class PortfolioSnapshot(Base):
@@ -103,7 +108,7 @@ class PortfolioSnapshot(Base):
     notes: Mapped[str | None] = mapped_column(String(500), nullable=True)
 
     # Relationships
-    user = relationship("User", back_populates="portfolio_snapshots")
+    user: Mapped["User"] = relationship("User", back_populates="portfolio_snapshots")
 
     # Constraints
     __table_args__ = (
@@ -155,7 +160,7 @@ class PortfolioSnapshot(Base):
         return self.total_gain_loss > 0
 
     @property
-    def allocation_summary(self) -> dict:
+    def allocation_summary(self) -> dict[str, float]:
         """Get allocation summary as percentages."""
         return {
             "equity": float(self.equity_allocation_percent),
@@ -195,9 +200,9 @@ class PortfolioSnapshot(Base):
         cls,
         user_id: int,
         snapshot_date: date,
-        positions: list,
+        positions: list["Position"],
         cash_balance: Decimal = Decimal("0"),
-        **kwargs,
+        **kwargs: Any,
     ) -> "PortfolioSnapshot":
         """Factory method to create portfolio snapshot from current positions."""
         total_value = cash_balance
@@ -253,4 +258,4 @@ class PortfolioSnapshot(Base):
             number_of_positions=len(positions),
             number_of_assets=len(set(p.asset_id for p in positions)),
             **kwargs,
-        )
+        )  # type: ignore[call-arg]

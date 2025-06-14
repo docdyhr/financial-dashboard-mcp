@@ -1,7 +1,9 @@
 """Market data fetching tasks."""
+
 import logging
 from datetime import datetime
 from decimal import Decimal
+from typing import Any
 
 import yfinance as yf
 from celery import current_task
@@ -15,8 +17,8 @@ from backend.tasks import celery_app
 logger = logging.getLogger(__name__)
 
 
-@celery_app.task(bind=True, name="fetch_market_data")
-def fetch_market_data(self, symbols: list[str], period: str = "1d") -> dict:
+@celery_app.task(bind=True, name="fetch_market_data")  # type: ignore[misc]
+def fetch_market_data(self, symbols: list[str], period: str = "1d") -> dict[str, Any]:
     """
     Fetch market data for given symbols.
 
@@ -90,8 +92,8 @@ def fetch_market_data(self, symbols: list[str], period: str = "1d") -> dict:
         raise
 
 
-@celery_app.task(bind=True, name="update_portfolio_prices")
-def update_portfolio_prices(self, user_id: int | None = None) -> dict:
+@celery_app.task(bind=True, name="update_portfolio_prices")  # type: ignore[misc]
+def update_portfolio_prices(self, user_id: int | None = None) -> dict[str, Any]:
     """
     Update prices for all assets in user portfolio(s).
 
@@ -136,7 +138,6 @@ def update_portfolio_prices(self, user_id: int | None = None) -> dict:
             for i, ticker in enumerate(tickers):
                 try:
                     yf_ticker = yf.Ticker(ticker)
-                    info = yf_ticker.info
                     hist = yf_ticker.history(period="2d")  # Get last 2 days
 
                     if hist.empty:
@@ -175,10 +176,12 @@ def update_portfolio_prices(self, user_id: int | None = None) -> dict:
                             high_price=Decimal(str(hist["High"].iloc[-1])),
                             low_price=Decimal(str(hist["Low"].iloc[-1])),
                             close_price=Decimal(str(latest_price)),
-                            volume=int(hist["Volume"].iloc[-1])
-                            if "Volume" in hist
-                            else None,
-                        )
+                            volume=(
+                                int(hist["Volume"].iloc[-1])
+                                if "Volume" in hist
+                                else None
+                            ),
+                        )  # type: ignore[call-arg]
                         db.add(price_record)
 
                     updated_count += 1
@@ -217,8 +220,8 @@ def update_portfolio_prices(self, user_id: int | None = None) -> dict:
         raise
 
 
-@celery_app.task(bind=True, name="fetch_asset_info")
-def fetch_asset_info(self, ticker: str) -> dict:
+@celery_app.task(bind=True, name="fetch_asset_info")  # type: ignore[misc]
+def fetch_asset_info(self, ticker: str) -> dict[str, Any]:
     """
     Fetch detailed information for a single asset.
 

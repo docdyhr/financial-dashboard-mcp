@@ -117,6 +117,19 @@ pip install -r requirements.txt
 ```bash
 cp .env.example .env
 # Edit .env with your configuration
+
+## Important: MCP Server Authentication
+
+The MCP server requires a token for all API access. Set `MCP_AUTH_TOKEN` in your `.env` file:
+
+```
+
+MCP_AUTH_TOKEN=your-mcp-auth-token-here
+
+```
+
+- Use a strong, unique value in production.
+- The same value must be used by clients (e.g., test scripts, frontend) in the `Authorization` header as `Bearer <token>`
 ```
 
 5. Initialize the database:
@@ -408,9 +421,9 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduc
 
 ## Project Status
 
-🟢 **Production Ready**: Backend API, Task Queue System, Database Layer, Frontend Dashboard, MCP Server  
-🟡 **In Development**: Claude Desktop Integration Testing  
-🔴 **Planned**: Multi-user Support, Advanced Analytics, WebSocket Updates  
+🟢 **Production Ready**: Backend API, Task Queue System, Database Layer, Frontend Dashboard, MCP Server
+🟡 **In Development**: Claude Desktop Integration Testing
+🔴 **Planned**: Multi-user Support, Advanced Analytics, WebSocket Updates
 
 The system is feature-complete with a production-ready backend infrastructure, comprehensive task queue system, interactive Streamlit dashboard, and fully functional MCP server for AI integration. All components have been tested and documented.
 
@@ -443,12 +456,13 @@ This project follows [Semantic Versioning](https://semver.org/) with automated r
 - ✅ **Version consistency** across all project files
 
 ### Commit Message Format
-```
+
+```text
 <type>[optional scope]: <description>
 
 Examples:
 feat(api): add portfolio export functionality     → Minor release
-fix(frontend): resolve chart rendering issue      → Patch release  
+fix(frontend): resolve chart rendering issue      → Patch release
 feat!: redesign authentication system            → Major release
 ```
 

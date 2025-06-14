@@ -1,4 +1,5 @@
 """Portfolio analytics and calculation tasks."""
+
 import logging
 from datetime import datetime, timedelta
 from decimal import Decimal
@@ -18,7 +19,7 @@ from backend.tasks import celery_app
 logger = logging.getLogger(__name__)
 
 
-@celery_app.task(bind=True, name="calculate_portfolio_performance")
+@celery_app.task(bind=True, name="calculate_portfolio_performance")  # type: ignore[misc]
 def calculate_portfolio_performance(
     self, user_id: int, days_back: int = 30
 ) -> dict[str, Any]:
@@ -42,7 +43,7 @@ def calculate_portfolio_performance(
                 .join(Asset)
                 .filter(
                     Position.user_id == user_id,
-                    Position.is_active == True,
+                    Position.is_active.is_(True),
                     Asset.current_price.isnot(None),
                 )
                 .all()
@@ -188,7 +189,7 @@ def calculate_portfolio_performance(
         raise
 
 
-@celery_app.task(bind=True, name="create_portfolio_snapshot")
+@celery_app.task(bind=True, name="create_portfolio_snapshot")  # type: ignore[misc]
 def create_portfolio_snapshot(self, user_id: int | None = None) -> dict[str, Any]:
     """
     Create daily portfolio snapshot(s) for tracking historical performance.
@@ -207,7 +208,7 @@ def create_portfolio_snapshot(self, user_id: int | None = None) -> dict[str, Any
             if user_id:
                 users = db.query(User).filter(User.id == user_id).all()
             else:
-                users = db.query(User).filter(User.is_active == True).all()
+                users = db.query(User).filter(User.is_active.is_(True)).all()
 
             if not users:
                 return {
@@ -252,7 +253,7 @@ def create_portfolio_snapshot(self, user_id: int | None = None) -> dict[str, Any
                         .join(Asset)
                         .filter(
                             Position.user_id == user.id,
-                            Position.is_active == True,
+                            Position.is_active.is_(True),
                             Asset.current_price.isnot(None),
                         )
                         .all()
@@ -288,7 +289,7 @@ def create_portfolio_snapshot(self, user_id: int | None = None) -> dict[str, Any
                         total_gain_loss_percent=Decimal(str(total_gain_loss_percent)),
                         total_positions=total_positions,
                         cash_balance=Decimal("0"),  # TODO: Implement cash tracking
-                    )
+                    )  # type: ignore[call-arg]
 
                     db.add(snapshot)
                     snapshots_created += 1
@@ -298,9 +299,7 @@ def create_portfolio_snapshot(self, user_id: int | None = None) -> dict[str, Any
                     )
 
                 except Exception as e:
-                    logger.error(
-                        f"Error creating snapshot for user {user.id}: {e!s}"
-                    )
+                    logger.error(f"Error creating snapshot for user {user.id}: {e!s}")
                     continue
 
                 current_task.update_state(
@@ -328,7 +327,7 @@ def create_portfolio_snapshot(self, user_id: int | None = None) -> dict[str, Any
         raise
 
 
-@celery_app.task(bind=True, name="generate_portfolio_report")
+@celery_app.task(bind=True, name="generate_portfolio_report")  # type: ignore[misc]
 def generate_portfolio_report(
     self, user_id: int, report_type: str = "monthly"
 ) -> dict[str, Any]:
@@ -416,14 +415,14 @@ def generate_portfolio_report(
                 "allocation_analysis": metrics["allocation"],
                 "historical_performance": metrics["performance_trend"],
                 "risk_metrics": {
-                    "concentration_risk": max([pos["weight"] for pos in positions])
-                    if positions
-                    else 0,
-                    "diversification_score": len(
-                        set([pos["ticker"][:2] for pos in positions])
-                    )
-                    if positions
-                    else 0,  # Simple sector diversity
+                    "concentration_risk": (
+                        max([pos["weight"] for pos in positions]) if positions else 0
+                    ),
+                    "diversification_score": (
+                        len(set([pos["ticker"][:2] for pos in positions]))
+                        if positions
+                        else 0
+                    ),  # Simple sector diversity
                 },
             }
 

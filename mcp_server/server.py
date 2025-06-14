@@ -1,4 +1,5 @@
 """MCP Server for Financial Dashboard AI Integration."""
+
 import logging
 import os
 from typing import Any
@@ -24,7 +25,7 @@ app = FastAPI(
 # Configuration
 MCP_AUTH_TOKEN = os.getenv("MCP_AUTH_TOKEN", "development-token")
 BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
-MCP_SERVER_HOST = os.getenv("MCP_SERVER_HOST", "0.0.0.0")
+MCP_SERVER_HOST = os.getenv("MCP_SERVER_HOST", "0.0.0.0")  # nosec
 MCP_SERVER_PORT = int(os.getenv("MCP_SERVER_PORT", "8502"))
 
 

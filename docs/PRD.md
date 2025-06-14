@@ -22,11 +22,11 @@ This project aims to build a **single-user financial dashboard** to monitor and 
 
 ## Architecture Overview
 
-**Frontend:** Streamlit (Python)  
-**Backend:** FastAPI (Python)  
-**Database:** PostgreSQL  
-**Async Tasks:** Celery + Redis  
-**AI Integration:** MCP Server (Python SDK)  
+**Frontend:** Streamlit (Python)
+**Backend:** FastAPI (Python)
+**Database:** PostgreSQL
+**Async Tasks:** Celery + Redis
+**AI Integration:** MCP Server (Python SDK)
 **Deployment:** Docker Compose (Streamlit, FastAPI, Redis, Celery, Postgres)
 
 ---
@@ -34,6 +34,7 @@ This project aims to build a **single-user financial dashboard** to monitor and 
 ## Key Features
 
 ### MVP
+
 - User-friendly dashboard (Streamlit) with:
   - Portfolio overview
   - Performance charts
@@ -51,6 +52,7 @@ This project aims to build a **single-user financial dashboard** to monitor and 
   - Tools like `get_portfolio_summary`, `rebalance_portfolio`
 
 ### Future (Post-MVP)
+
 - Replace Streamlit with React or Next.js frontend
 - Add multi-user authentication (OAuth2/JWT)
 - Advanced AI suggestions (e.g., opportunity scans)
@@ -74,6 +76,7 @@ This project aims to build a **single-user financial dashboard** to monitor and 
 ## Development Phases
 
 ### Phase 1: Core System Setup
+
 - Scaffold FastAPI + Postgres backend
 - Define DB schema (users, positions, transactions)
 - Set up Celery + Redis
@@ -81,18 +84,21 @@ This project aims to build a **single-user financial dashboard** to monitor and 
 - Integrate yfinance/AlphaVantage for market data
 
 ### Phase 2: AI Integration
+
 - Install MCP Python SDK
 - Connect MCP to FastAPI or Postgres
 - Register base tools
 - Add MCP test scripts for Claude Desktop
 
 ### Phase 3: UI Improvements & Analytics
+
 - Enhance dashboard interactivity (filters, plots)
 - Add portfolio metrics (sharpe, allocation drift)
 - Implement job tracking (task status from Celery)
 - Cache heavy results (Redis or Streamlit cache)
 
 ### Phase 4: Prep for Scaling
+
 - Add auth token to FastAPI endpoints
 - Modularize logic (services, utils)
 - Prepare CI/CD and docker-compose.yml

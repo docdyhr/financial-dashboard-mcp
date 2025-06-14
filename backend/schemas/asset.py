@@ -1,7 +1,8 @@
 """Asset schemas for API requests and responses."""
+
 from decimal import Decimal
 
-from pydantic import Field, validator
+from pydantic import Field, field_validator
 
 from backend.models.asset import AssetCategory, AssetType
 from backend.schemas.base import BaseSchema, TimestampMixin
@@ -35,38 +36,41 @@ class AssetBase(BaseSchema):
         None, max_length=2, description="Country code (ISO 2-letter)"
     )
 
-    @validator("ticker")
-    def validate_ticker(cls, v):
+    @field_validator("ticker")
+    @classmethod
+    def validate_ticker(cls, v: str) -> str:
         """Validate ticker format."""
         if not v or not v.strip():
             raise ValueError("Ticker cannot be empty")
         return v.upper().strip()
 
-    @validator("currency")
-    def validate_currency(cls, v):
+    @field_validator("currency")
+    @classmethod
+    def validate_currency(cls, v: str) -> str:
         """Validate currency format."""
         return v.upper()
 
-    @validator("asset_type", pre=True)
-    def validate_asset_type(cls, v):
+    @field_validator("asset_type", mode="before")
+    @classmethod
+    def validate_asset_type(cls, v: str | AssetType) -> str:
         """Validate asset type, accepting both upper and lower case."""
         if isinstance(v, str):
             # Convert to lowercase to match enum values
             return v.lower()
-        return v
+        return v.value if hasattr(v, "value") else str(v)
 
-    @validator("category", pre=True)
-    def validate_category(cls, v):
+    @field_validator("category", mode="before")
+    @classmethod
+    def validate_category(cls, v: str | AssetCategory) -> str:
         """Validate category, accepting both upper and lower case."""
         if isinstance(v, str):
             # Convert to lowercase to match enum values
             return v.lower()
-        return v
+        return v.value if hasattr(v, "value") else str(v)
 
 
 class AssetCreate(AssetBase):
     """Schema for creating a new asset."""
-
 
 
 class AssetUpdate(BaseSchema):
@@ -81,8 +85,9 @@ class AssetUpdate(BaseSchema):
     country: str | None = Field(None, max_length=2)
     is_active: bool | None = None
 
-    @validator("currency", pre=True)
-    def validate_currency(cls, v):
+    @field_validator("currency", mode="before")
+    @classmethod
+    def validate_currency(cls, v: str | None) -> str | None:
         """Validate currency format."""
         if v is not None:
             return v.upper()
@@ -102,12 +107,8 @@ class AssetMarketData(BaseSchema):
     day_change_percent: Decimal | None = Field(
         None, description="Percentage price change"
     )
-    market_cap: Decimal | None = Field(
-        None, ge=0, description="Market capitalization"
-    )
-    pe_ratio: Decimal | None = Field(
-        None, ge=0, description="Price-to-earnings ratio"
-    )
+    market_cap: Decimal | None = Field(None, ge=0, description="Market capitalization")
+    pe_ratio: Decimal | None = Field(None, ge=0, description="Price-to-earnings ratio")
     dividend_yield: Decimal | None = Field(
         None, ge=0, le=100, description="Dividend yield percentage"
     )
@@ -187,13 +188,14 @@ class AssetPriceUpdate(BaseSchema):
         return None
 
 
+class Update(BaseSchema):
+    ticker: str
+    current_price: Decimal
+    previous_close: Decimal | None = None
+
+
 class BulkAssetPriceUpdate(BaseSchema):
     """Schema for bulk asset price updates."""
 
-    updates: list[dict] = Field(..., description="List of price updates")
+    updates: list[Update] = Field(..., description="List of price updates")
     data_source: str = Field(..., max_length=50, description="Source of price data")
-
-    class Update(BaseSchema):
-        ticker: str
-        current_price: Decimal
-        previous_close: Decimal | None = None

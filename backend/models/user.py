@@ -1,4 +1,5 @@
 """User model for authentication and user management."""
+
 from datetime import datetime
 
 from sqlalchemy import Boolean, String

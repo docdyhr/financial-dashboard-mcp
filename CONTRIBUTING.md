@@ -17,7 +17,7 @@ Thank you for your interest in contributing! This guide will help you get starte
 ### Prerequisites
 
 - Python 3.11 or higher
-- PostgreSQL 13+ 
+- PostgreSQL 13+
 - Redis 6+
 - Docker and Docker Compose (optional)
 - Git
@@ -25,12 +25,14 @@ Thank you for your interest in contributing! This guide will help you get starte
 ### Development Setup
 
 1. **Fork and clone the repository:**
+
    ```bash
    git clone https://github.com/YOUR_USERNAME/financial-dashboard-mcp.git
    cd financial-dashboard-mcp
    ```
 
 2. **Set up the development environment:**
+
    ```bash
    python -m venv .venv
    source .venv/bin/activate  # On Windows: .venv\Scripts\activate
@@ -38,18 +40,21 @@ Thank you for your interest in contributing! This guide will help you get starte
    ```
 
 3. **Install pre-commit hooks:**
+
    ```bash
    pre-commit install
    pre-commit install --hook-type commit-msg
    ```
 
 4. **Set up environment variables:**
+
    ```bash
    cp .env.example .env
    # Edit .env with your local configuration
    ```
 
 5. **Run database migrations:**
+
    ```bash
    alembic upgrade head
    ```
@@ -108,6 +113,7 @@ git push origin feat/your-feature-name
 We follow the [Conventional Commits](https://conventionalcommits.org/) specification for automatic versioning and changelog generation.
 
 ### Format
+
 ```
 <type>[optional scope]: <description>
 
@@ -207,30 +213,30 @@ from typing import Optional, List
 from decimal import Decimal
 
 def calculate_portfolio_value(
-    positions: List[Position], 
+    positions: List[Position],
     include_cash: bool = True
 ) -> Decimal:
     """
     Calculate the total value of a portfolio.
-    
+
     Args:
         positions: List of portfolio positions
         include_cash: Whether to include cash positions
-        
+
     Returns:
         Total portfolio value as Decimal
-        
+
     Raises:
         ValueError: If positions list is empty
     """
     if not positions:
         raise ValueError("Positions list cannot be empty")
-    
+
     total_value = Decimal("0")
     for position in positions:
         if include_cash or position.asset_type != AssetType.CASH:
             total_value += position.current_value
-    
+
     return total_value
 ```
 
@@ -283,10 +289,10 @@ class TestPortfolioService:
             create_test_position("AAPL", Decimal("150.00"), 10),
             create_test_position("GOOGL", Decimal("2500.00"), 5),
         ]
-        
+
         # Act
         total_value = service.calculate_total_value(positions)
-        
+
         # Assert
         expected = Decimal("14000.00")  # (150 * 10) + (2500 * 5)
         assert total_value == expected
@@ -402,6 +408,7 @@ Any other context or screenshots about the feature.
 ## 🏆 Recognition
 
 Contributors will be recognized in:
+
 - **CHANGELOG.md** for significant contributions
 - **README.md** contributors section
 - **GitHub releases** for their contributions

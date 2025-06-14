@@ -1,10 +1,11 @@
 """Initial migration: create all tables
 
 Revision ID: d9115a6b0bc5
-Revises: 
+Revises:
 Create Date: 2025-06-12 23:23:33.883583
 
 """
+
 from typing import Sequence, Union
 
 from alembic import op

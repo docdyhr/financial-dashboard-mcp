@@ -195,7 +195,7 @@ def create_mcp_config():
    ```
 
 3. **Configure Claude Desktop:**
-   
+
    Add the following to your Claude Desktop configuration file:
    - **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
    - **Windows:** `%APPDATA%\\Claude\\claude_desktop_config.json`

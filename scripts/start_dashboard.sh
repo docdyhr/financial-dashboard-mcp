@@ -33,7 +33,7 @@ fi
 check_service() {
     local service_name=$1
     local port=$2
-    
+
     if curl -s "http://localhost:$port/health" >/dev/null 2>&1; then
         echo -e "${GREEN}✅ $service_name is running${NC}"
         return 0
@@ -121,17 +121,17 @@ echo ""
 cleanup() {
     echo ""
     echo -e "${YELLOW}🛑 Shutting down...${NC}"
-    
+
     # Kill Streamlit
     if [ ! -z "$STREAMLIT_PID" ]; then
         kill $STREAMLIT_PID 2>/dev/null
         echo -e "${GREEN}✅ Frontend stopped${NC}"
     fi
-    
+
     # Stop Docker services
     echo -e "${BLUE}🐳 Stopping Docker services...${NC}"
     docker-compose down
-    
+
     echo -e "${GREEN}✅ All services stopped${NC}"
     exit 0
 }

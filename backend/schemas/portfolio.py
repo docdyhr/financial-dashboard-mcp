@@ -1,4 +1,5 @@
 """Portfolio schemas for summary and performance API."""
+
 from datetime import date
 from decimal import Decimal
 from typing import Any
@@ -81,9 +82,7 @@ class PerformanceMetrics(BaseSchema):
 
     # Time-based returns
     daily_return: Decimal | None = Field(None, description="Daily return percentage")
-    weekly_return: Decimal | None = Field(
-        None, description="Weekly return percentage"
-    )
+    weekly_return: Decimal | None = Field(None, description="Weekly return percentage")
     monthly_return: Decimal | None = Field(
         None, description="Monthly return percentage"
     )
@@ -109,9 +108,7 @@ class PerformanceMetrics(BaseSchema):
     )
 
     # Income metrics
-    dividend_yield: Decimal | None = Field(
-        None, description="Portfolio dividend yield"
-    )
+    dividend_yield: Decimal | None = Field(None, description="Portfolio dividend yield")
     annual_dividend_income: Decimal | None = Field(
         None, description="Annual dividend income"
     )
@@ -208,13 +205,11 @@ class RebalancingRecommendation(BaseSchema):
     total_drift: Decimal = Field(..., description="Total allocation drift percentage")
 
     # Specific recommendations
-    recommendations: list[dict] = Field(
+    recommendations: list[dict[str, Any]] = Field(
         default=[], description="Specific rebalancing actions"
     )
     estimated_cost: Decimal = Field(..., description="Estimated cost of rebalancing")
-    tax_implications: str | None = Field(
-        None, description="Tax implications summary"
-    )
+    tax_implications: str | None = Field(None, description="Tax implications summary")
 
 
 class PortfolioOptimizationRequest(BaseSchema):
@@ -270,7 +265,7 @@ class PortfolioComparisonRequest(BaseSchema):
     """Request for comparing multiple portfolios."""
 
     portfolio_ids: list[int] = Field(
-        ..., min_items=2, max_items=10, description="Portfolio IDs to compare"
+        ..., description="Portfolio IDs to compare (2-10 portfolios)"
     )
     start_date: date | None = Field(None, description="Comparison start date")
     end_date: date | None = Field(None, description="Comparison end date")

@@ -1,4 +1,5 @@
 """Task management and monitoring."""
+
 import logging
 from typing import Any
 
@@ -12,14 +13,14 @@ logger = logging.getLogger(__name__)
 class TaskManager:
     """Manages task execution and monitoring."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.celery_app = celery_app
 
     def submit_market_data_update(self, symbols: list[str], period: str = "1d") -> str:
         """Submit market data fetch task."""
         task = self.celery_app.send_task("fetch_market_data", args=[symbols, period])
         logger.info(f"Submitted market data task {task.id} for symbols: {symbols}")
-        return task.id
+        return str(task.id)
 
     def submit_portfolio_price_update(self, user_id: int | None = None) -> str:
         """Submit portfolio price update task."""
@@ -27,13 +28,13 @@ class TaskManager:
         logger.info(
             f"Submitted portfolio price update task {task.id} for user: {user_id}"
         )
-        return task.id
+        return str(task.id)
 
     def submit_asset_info_fetch(self, ticker: str) -> str:
         """Submit asset info fetch task."""
         task = self.celery_app.send_task("fetch_asset_info", args=[ticker])
         logger.info(f"Submitted asset info task {task.id} for ticker: {ticker}")
-        return task.id
+        return str(task.id)
 
     def submit_portfolio_performance_calculation(
         self, user_id: int, days_back: int = 30
@@ -45,20 +46,20 @@ class TaskManager:
         logger.info(
             f"Submitted portfolio performance task {task.id} for user: {user_id}"
         )
-        return task.id
+        return str(task.id)
 
     def submit_portfolio_snapshot_creation(self, user_id: int | None = None) -> str:
         """Submit portfolio snapshot creation task."""
         task = self.celery_app.send_task("create_portfolio_snapshot", args=[user_id])
         logger.info(f"Submitted portfolio snapshot task {task.id} for user: {user_id}")
-        return task.id
+        return str(task.id)
 
     def get_task_status(self, task_id: str) -> dict[str, Any]:
         """Get task status and result."""
         try:
             result = AsyncResult(task_id, app=self.celery_app)
 
-            status_info = {
+            status_info: dict[str, Any] = {
                 "task_id": task_id,
                 "status": result.status,
                 "ready": result.ready(),
@@ -68,7 +69,7 @@ class TaskManager:
 
             if result.ready():
                 if result.successful():
-                    status_info["result"] = result.result
+                    status_info["result"] = str(result.result)
                 elif result.failed():
                     status_info["error"] = str(result.result)
             # Task is still running, check for progress updates
@@ -94,7 +95,7 @@ class TaskManager:
     def get_active_tasks(self) -> list[dict[str, Any]]:
         """Get list of active tasks."""
         try:
-            active_tasks = []
+            active_tasks: list[dict[str, Any]] = []
             inspect = self.celery_app.control.inspect()
 
             # Get active tasks from all workers
@@ -124,7 +125,11 @@ class TaskManager:
         try:
             inspect = self.celery_app.control.inspect()
 
-            stats = {"workers": {}, "total_workers": 0, "total_active_tasks": 0}
+            stats: dict[str, Any] = {
+                "workers": {},
+                "total_workers": 0,
+                "total_active_tasks": 0,
+            }
 
             # Get worker stats
             worker_stats = inspect.stats()

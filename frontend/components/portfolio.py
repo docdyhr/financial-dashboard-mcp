@@ -229,9 +229,7 @@ def holdings_table(backend_url: str):
         }
 
         # Select and rename columns
-        available_columns = [
-            col for col in column_mapping if col in display_df.columns
-        ]
+        available_columns = [col for col in column_mapping if col in display_df.columns]
         display_df = display_df[available_columns].rename(columns=column_mapping)
 
         # Color code P&L columns

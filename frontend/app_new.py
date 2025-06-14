@@ -1,4 +1,5 @@
 """Enhanced Streamlit application for Financial Dashboard with complete UI."""
+
 import os
 from datetime import datetime
 
@@ -280,9 +281,7 @@ def main():
         st.subheader("🔗 Quick Links")
         st.markdown("- [Flower UI](http://localhost:5555)")
         st.markdown("- [API Docs](http://localhost:8000/docs)")
-        st.markdown(
-            "- [GitHub](https://github.com/docdyhr/financial-dashboard-mcp)"
-        )
+        st.markdown("- [GitHub](https://github.com/docdyhr/financial-dashboard-mcp)")
 
         # Last updated
         st.divider()

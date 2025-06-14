@@ -1,0 +1,7 @@
+[bandit]
+target = .
+exclude = venv,.venv,tests/__pycache__
+# Ignore assert_used (B101) in all test files
+per_file_ignores =
+    tests/test_*.py: B101
+    tests/conftest.py: B101,B105

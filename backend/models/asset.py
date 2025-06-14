@@ -1,4 +1,5 @@
 """Asset model for tracking stocks, bonds, ETFs, and other financial instruments."""
+
 from enum import Enum
 
 from sqlalchemy import Enum as SQLEnum

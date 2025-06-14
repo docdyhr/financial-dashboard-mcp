@@ -1,4 +1,5 @@
 """Test script for task queue functionality."""
+
 import sys
 import time
 from pathlib import Path

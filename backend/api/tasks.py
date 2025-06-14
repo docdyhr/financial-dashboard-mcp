@@ -1,4 +1,5 @@
 """Task management API endpoints."""
+
 from typing import Any
 
 from fastapi import APIRouter, BackgroundTasks, HTTPException
@@ -11,7 +12,6 @@ router = APIRouter(prefix="/tasks", tags=["tasks"])
 
 class TaskSubmissionRequest(BaseModel):
     """Request model for task submissions."""
-
 
 
 class MarketDataRequest(TaskSubmissionRequest):
@@ -80,7 +80,7 @@ async def submit_market_data_task(request: MarketDataRequest):
             message=f"Market data fetch task submitted for {len(request.symbols)} symbols",
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.post("/portfolio-prices", response_model=TaskResponse)
@@ -95,7 +95,7 @@ async def submit_portfolio_prices_task(request: PortfolioPricesRequest):
             message=f"Portfolio price update task submitted for {user_msg}",
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.post("/asset-info", response_model=TaskResponse)
@@ -109,7 +109,7 @@ async def submit_asset_info_task(request: AssetInfoRequest):
             message=f"Asset info fetch task submitted for {request.ticker}",
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.post("/portfolio-performance", response_model=TaskResponse)
@@ -125,7 +125,7 @@ async def submit_portfolio_performance_task(request: PortfolioPerformanceRequest
             message=f"Portfolio performance calculation submitted for user {request.user_id}",
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.post("/portfolio-snapshot", response_model=TaskResponse)
@@ -142,7 +142,7 @@ async def submit_portfolio_snapshot_task(request: PortfolioSnapshotRequest):
             message=f"Portfolio snapshot creation submitted for {user_msg}",
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.get("/status/{task_id}", response_model=TaskStatusResponse)
@@ -152,7 +152,7 @@ async def get_task_status(task_id: str):
         status_info = task_manager.get_task_status(task_id)
         return TaskStatusResponse(**status_info)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.delete("/cancel/{task_id}")
@@ -164,7 +164,7 @@ async def cancel_task(task_id: str):
             return {"message": f"Task {task_id} cancelled successfully"}
         raise HTTPException(status_code=400, detail="Failed to cancel task")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.get("/active")
@@ -174,7 +174,7 @@ async def get_active_tasks():
         active_tasks = task_manager.get_active_tasks()
         return {"active_tasks": active_tasks}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.get("/workers")
@@ -184,7 +184,7 @@ async def get_worker_stats():
         stats = task_manager.get_worker_stats()
         return stats
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.post("/bulk/update-all-prices")
@@ -198,7 +198,7 @@ async def bulk_update_all_prices(background_tasks: BackgroundTasks):
             message="Bulk price update task submitted for all users",
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.post("/bulk/create-snapshots")
@@ -212,4 +212,4 @@ async def bulk_create_snapshots(background_tasks: BackgroundTasks):
             message="Bulk snapshot creation task submitted for all users",
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e

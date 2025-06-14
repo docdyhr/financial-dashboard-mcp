@@ -1,10 +1,11 @@
 """Base database model and database setup."""
+
+from collections.abc import Generator
 from datetime import datetime
-from typing import Any
 
 from sqlalchemy import DateTime, Integer, create_engine, func
-from sqlalchemy.ext.declarative import as_declarative, declared_attr
-from sqlalchemy.orm import Mapped, mapped_column, sessionmaker
+from sqlalchemy.ext.declarative import as_declarative
+from sqlalchemy.orm import Mapped, Session, mapped_column, sessionmaker
 
 from backend.config import get_settings
 
@@ -26,13 +27,7 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 class Base:
     """Base class for all database models."""
 
-    id: Any
-    __name__: str
-
-    # Generate __tablename__ automatically
-    @declared_attr
-    def __tablename__(cls) -> str:
-        return cls.__name__.lower()
+    # __tablename__ will be defined in each model individually.
 
     # Common fields for all models
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
@@ -44,7 +39,7 @@ class Base:
     )
 
 
-def get_db():
+def get_db() -> Generator[Session, None, None]:  # Add return type
     """Dependency to get database session."""
     db = SessionLocal()
     try:
@@ -53,11 +48,11 @@ def get_db():
         db.close()
 
 
-def create_tables():
-    """Create all database tables."""
-    Base.metadata.create_all(bind=engine)
+def init_db() -> None:
+    """Initialize the database."""
+    Base.metadata.create_all(bind=engine)  # type: ignore[attr-defined]
 
 
-def drop_tables():
-    """Drop all database tables."""
-    Base.metadata.drop_all(bind=engine)
+def drop_db() -> None:
+    """Drop all tables in the database."""
+    Base.metadata.drop_all(bind=engine)  # type: ignore[attr-defined]

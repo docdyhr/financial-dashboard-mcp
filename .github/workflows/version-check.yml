@@ -29,11 +29,11 @@ jobs:
           # Extract version from pyproject.toml
           PYPROJECT_VERSION=$(grep '^version = ' pyproject.toml | sed 's/version = "\(.*\)"/\1/')
           echo "pyproject_version=$PYPROJECT_VERSION" >> $GITHUB_OUTPUT
-          
+
           # Extract version from backend/__init__.py
           BACKEND_VERSION=$(grep '__version__ = ' backend/__init__.py | sed 's/__version__ = "\(.*\)"/\1/')
           echo "backend_version=$BACKEND_VERSION" >> $GITHUB_OUTPUT
-          
+
           # Extract version from CHANGELOG.md (latest release)
           CHANGELOG_VERSION=$(grep -m 1 '^## \[' CHANGELOG.md | sed 's/## \[\(.*\)\].*/\1/')
           echo "changelog_version=$CHANGELOG_VERSION" >> $GITHUB_OUTPUT
@@ -46,7 +46,7 @@ jobs:
           echo "Backend __init__: ${{ steps.versions.outputs.backend_version }}"
           echo "Changelog (latest): ${{ steps.versions.outputs.changelog_version }}"
           echo ""
-          
+
           # Check if all versions match
           if [ "${{ steps.versions.outputs.pyproject_version }}" = "${{ steps.versions.outputs.backend_version }}" ]; then
             echo "✅ PyProject and Backend versions match"
@@ -54,7 +54,7 @@ jobs:
             echo "❌ Version mismatch between pyproject.toml and backend/__init__.py"
             exit 1
           fi
-          
+
           # Note: Changelog version might be different during development
           echo "ℹ️ Changelog shows latest released version: ${{ steps.versions.outputs.changelog_version }}"
 

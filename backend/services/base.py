@@ -1,5 +1,6 @@
 """Base service class with common database operations."""
-from typing import Any, Generic, TypeVar
+
+from typing import Any, Generic, TypeVar, cast
 
 from pydantic import BaseModel
 from sqlalchemy.exc import IntegrityError
@@ -16,9 +17,9 @@ UpdateSchemaType = TypeVar("UpdateSchemaType", bound=BaseModel)
 class BaseService(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
     """Base service class with common CRUD operations."""
 
-    def __init__(self, model: type[ModelType]):
+    def __init__(self, model: type[ModelType]) -> None:
         """Initialize service with model class."""
-        self.model = model
+        self.model: type[ModelType] = model
 
     def get(self, db: Session, id: Any) -> ModelType | None:
         """Get a single record by ID."""
@@ -74,8 +75,11 @@ class BaseService(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         self, db: Session, *, obj_in: CreateSchemaType | dict[str, Any]
     ) -> ModelType:
         """Create a new record."""
-        obj_in_data = obj_in.dict() if hasattr(obj_in, "dict") else obj_in
-        db_obj = self.model(**obj_in_data)
+        if hasattr(obj_in, "model_dump"):
+            obj_in_data = obj_in.model_dump()  # type: ignore[attr-defined]
+        else:
+            obj_in_data = obj_in  # type: ignore[assignment]
+        db_obj: ModelType = self.model(**obj_in_data)  # type: ignore[call-arg]
         db.add(db_obj)
         db.commit()
         db.refresh(db_obj)
@@ -91,31 +95,31 @@ class BaseService(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         """Update an existing record."""
         obj_data = db_obj.__dict__.copy()
 
-        if hasattr(obj_in, "dict"):
-            update_data = obj_in.dict(exclude_unset=True)
+        if hasattr(obj_in, "model_dump"):
+            update_data: dict[str, Any] = obj_in.model_dump(exclude_unset=True)  # type: ignore[attr-defined]
         else:
-            update_data = obj_in
+            update_data = obj_in  # type: ignore[assignment]
 
-        for field in update_data:
+        for field, value in update_data.items():
             if hasattr(db_obj, field):
-                setattr(db_obj, field, update_data[field])
+                setattr(db_obj, field, value)
 
         db.add(db_obj)
         db.commit()
         db.refresh(db_obj)
         return db_obj
 
-    def delete(self, db: Session, *, id: int) -> ModelType | None:
+    def delete(self, db: Session, *, obj_id: int) -> ModelType | None:
         """Delete a record by ID."""
-        obj = db.query(self.model).get(id)
+        obj = db.query(self.model).get(obj_id)
         if obj:
             db.delete(obj)
             db.commit()
-        return obj
+        return cast("ModelType | None", obj)
 
-    def soft_delete(self, db: Session, *, id: int) -> ModelType | None:
+    def soft_delete(self, db: Session, *, obj_id: int) -> ModelType | None:
         """Soft delete a record by setting is_active to False."""
-        obj = db.query(self.model).get(id)
+        obj = db.query(self.model).get(obj_id)
         if obj and hasattr(obj, "is_active"):
             obj.is_active = False
             db.add(obj)
@@ -127,10 +131,13 @@ class BaseService(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         self, db: Session, *, objs_in: list[CreateSchemaType | dict[str, Any]]
     ) -> list[ModelType]:
         """Create multiple records."""
-        db_objs = []
+        db_objs: list[ModelType] = []
         for obj_in in objs_in:
-            obj_in_data = obj_in.dict() if hasattr(obj_in, "dict") else obj_in
-            db_obj = self.model(**obj_in_data)
+            if hasattr(obj_in, "model_dump"):
+                obj_in_data = obj_in.model_dump()  # type: ignore[attr-defined]
+            else:
+                obj_in_data = obj_in  # type: ignore[assignment]
+            db_obj: ModelType = self.model(**obj_in_data)
             db_objs.append(db_obj)
 
         db.add_all(db_objs)
@@ -153,38 +160,24 @@ class BaseService(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         )
 
     def get_or_create(
-        self, db: Session, *, defaults: dict[str, Any] | None = None, **kwargs
+        self, db: Session, *, defaults: dict[str, Any] | None = None, **kwargs: Any
     ) -> tuple[ModelType, bool]:
-        """Get an existing record or create a new one."""
-        # Try to get existing record
+        """Get or create a record."""
         query = db.query(self.model)
         for field, value in kwargs.items():
             if hasattr(self.model, field):
                 query = query.filter(getattr(self.model, field) == value)
-
         instance = query.first()
-
         if instance:
             return instance, False
-
-        # Create new record
-        params = kwargs.copy()
+        params = dict(kwargs)
         if defaults:
             params.update(defaults)
-
-        try:
-            instance = self.model(**params)
-            db.add(instance)
-            db.commit()
-            db.refresh(instance)
-            return instance, True
-        except IntegrityError:
-            db.rollback()
-            # Try to get the record again in case it was created by another process
-            instance = query.first()
-            if instance:
-                return instance, False
-            raise
+        instance = self.model(**params)
+        db.add(instance)
+        db.commit()
+        db.refresh(instance)
+        return instance, True
 
     def filter_by_ids(self, db: Session, *, ids: list[int]) -> list[ModelType]:
         """Get multiple records by a list of IDs."""
@@ -225,7 +218,7 @@ class BaseService(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
 
         return (
             db.query(self.model)
-            .filter(self.model.is_active == True)
+            .filter(self.model.is_active.is_(True))  # type: ignore[attr-defined]
             .offset(skip)
             .limit(limit)
             .all()

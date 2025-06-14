@@ -11,11 +11,11 @@ from backend.database import get_db_session
 from backend.models.base import Base
 
 __all__ = [
-    "__version__",
-    "__title__",
-    "__description__",
-    "__author__",
-    "__license__",
-    "get_db_session",
     "Base",
+    "__author__",
+    "__description__",
+    "__license__",
+    "__title__",
+    "__version__",
+    "get_db_session",
 ]

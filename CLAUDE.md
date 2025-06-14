@@ -19,6 +19,7 @@ This is a Hybrid Financial Dashboard project designed as a single-user system fo
 ## Architecture
 
 The project follows a hybrid architecture approach:
+
 1. **Streamlit UI Layer**: For rapid prototyping and interactive dashboards
 2. **FastAPI Backend**: For data processing, API endpoints, and complex business logic
 3. **PostgreSQL Database**: For persistent storage of financial data
@@ -30,12 +31,14 @@ The project follows a hybrid architecture approach:
 According to the PRD, the project follows these phases:
 
 ### Phase 1: MVP
+
 - Basic Streamlit dashboard with portfolio overview
 - PostgreSQL database setup
 - Basic data ingestion for manual entries
 - Simple visualizations
 
 ### Phase 2: Enhanced Features
+
 - FastAPI backend integration
 - Celery for async tasks
 - Redis caching
@@ -43,6 +46,7 @@ According to the PRD, the project follows these phases:
 - Historical tracking
 
 ### Phase 3: AI Integration
+
 - MCP server implementation
 - AI-powered insights
 - Natural language queries
@@ -50,7 +54,7 @@ According to the PRD, the project follows these phases:
 
 ## Project Structure (Planned)
 
-```
+```text
 financial-dashboard-mcp/
 ├── frontend/               # Streamlit application
 ├── backend/               # FastAPI application
@@ -112,35 +116,40 @@ make migrate-down    # Rollback last migration
 ## Quick Start
 
 1. **Install dependencies:**
+
    ```bash
    make install-dev
    ```
 
 2. **Set up environment:**
+
    ```bash
    cp .env.example .env
    # Edit .env with your configuration
    ```
 
 3. **Run locally:**
+
    ```bash
    # Terminal 1: Backend
    make run-backend
-   
+
    # Terminal 2: Frontend
    make run-frontend
    ```
 
 4. **Run with Docker:**
+
    ```bash
    make docker-up
    ```
 
 The application will be available at:
-- Frontend: http://localhost:8501
-- Backend API: http://localhost:8000
-- API Docs: http://localhost:8000/docs
-- Celery Flower: http://localhost:5555 (when running)
+
+- Frontend: <http://localhost:8501>
+- Backend API: <http://localhost:8000>
+- API Docs: <http://localhost:8000/docs>
+- Celery Flower: <http://localhost:5555> (when running)
 
 ## Important Notes
 

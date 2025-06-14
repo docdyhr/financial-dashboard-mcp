@@ -1,13 +1,21 @@
 """Transaction model for tracking all portfolio transactions."""
+
 from datetime import date
 from decimal import Decimal
 from enum import Enum
+from typing import TYPE_CHECKING, Any
 
-from sqlalchemy import Date, ForeignKey, Numeric, String, Text
+from sqlalchemy import Date
 from sqlalchemy import Enum as SQLEnum
+from sqlalchemy import ForeignKey, Numeric, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from backend.models.base import Base
+
+if TYPE_CHECKING:
+    from backend.models.asset import Asset
+    from backend.models.position import Position
+    from backend.models.user import User
 
 
 class TransactionType(str, Enum):
@@ -79,9 +87,7 @@ class Transaction(Base):
     # Transaction metadata
     account_name: Mapped[str | None] = mapped_column(String(100), nullable=True)
     order_id: Mapped[str | None] = mapped_column(String(100), nullable=True)
-    confirmation_number: Mapped[str | None] = mapped_column(
-        String(100), nullable=True
-    )
+    confirmation_number: Mapped[str | None] = mapped_column(String(100), nullable=True)
 
     # Additional information
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
@@ -100,9 +106,11 @@ class Transaction(Base):
     )
 
     # Relationships
-    user = relationship("User", back_populates="transactions")
-    asset = relationship("Asset", back_populates="transactions")
-    position = relationship("Position", back_populates="transactions")
+    user: Mapped["User"] = relationship("User", back_populates="transactions")
+    asset: Mapped["Asset"] = relationship("Asset", back_populates="transactions")
+    position: Mapped["Position"] = relationship(
+        "Position", back_populates="transactions"
+    )
 
     def __repr__(self) -> str:
         return (
@@ -114,6 +122,7 @@ class Transaction(Base):
     @property
     def net_amount(self) -> Decimal:
         """Calculate net amount after all fees."""
+        # Attributes are Mapped[Decimal] and non-nullable or have defaults
         total_fees = self.commission + self.regulatory_fees + self.other_fees
         return self.total_amount - total_fees
 
@@ -158,12 +167,12 @@ class Transaction(Base):
         """Calculate realized gain/loss for a sell transaction."""
         if not self.is_sell_transaction:
             return Decimal("0")
-
-        proceeds = self.net_amount
-        return proceeds - cost_basis_sold
+        return (
+            self.total_amount - self.commission - self.regulatory_fees - self.other_fees
+        ) - cost_basis_sold
 
     @classmethod
-    def create_buy_transaction(
+    def create_buy(
         cls,
         user_id: int,
         asset_id: int,
@@ -171,48 +180,66 @@ class Transaction(Base):
         price_per_share: Decimal,
         transaction_date: date,
         commission: Decimal = Decimal("0"),
-        **kwargs,
+        regulatory_fees: Decimal = Decimal("0"),
+        other_fees: Decimal = Decimal("0"),
+        total_amount: Decimal | None = None,
+        **kwargs: Any,  # Changed to Any
     ) -> "Transaction":
         """Factory method to create a buy transaction."""
-        total_amount = quantity * price_per_share
+        final_total_amount: Decimal
+        if total_amount is None:
+            final_total_amount = quantity * price_per_share
+        else:
+            final_total_amount = total_amount
 
-        return cls(
+        return cls(  # type: ignore[call-arg]
             user_id=user_id,
             asset_id=asset_id,
             transaction_type=TransactionType.BUY,
             quantity=quantity,
             price_per_share=price_per_share,
-            total_amount=total_amount,
+            total_amount=final_total_amount,
             transaction_date=transaction_date,
             commission=commission,
+            regulatory_fees=regulatory_fees,
+            other_fees=other_fees,
             **kwargs,
         )
 
     @classmethod
-    def create_sell_transaction(
+    def create_sell(
         cls,
         user_id: int,
         asset_id: int,
-        position_id: int,
         quantity: Decimal,
         price_per_share: Decimal,
         transaction_date: date,
+        position_id: int | None = None,
         commission: Decimal = Decimal("0"),
-        **kwargs,
+        regulatory_fees: Decimal = Decimal("0"),
+        other_fees: Decimal = Decimal("0"),
+        total_amount: Decimal | None = None,
+        **kwargs: Any,  # Changed to Any
     ) -> "Transaction":
         """Factory method to create a sell transaction."""
-        total_amount = quantity * price_per_share
+        final_total_amount: Decimal
+        if total_amount is None:
+            final_total_amount = quantity * price_per_share
+        else:
+            final_total_amount = total_amount
 
-        return cls(
+        return cls(  # type: ignore[call-arg]
             user_id=user_id,
             asset_id=asset_id,
             position_id=position_id,
             transaction_type=TransactionType.SELL,
-            quantity=-quantity,  # Negative for sells
+            quantity=quantity,
             price_per_share=price_per_share,
-            total_amount=total_amount,
+            total_amount=final_total_amount,
             transaction_date=transaction_date,
             commission=commission,
+            regulatory_fees=regulatory_fees,
+            other_fees=other_fees,
             **kwargs,
         )
 
@@ -225,14 +252,14 @@ class Transaction(Base):
         dividend_amount: Decimal,
         transaction_date: date,
         shares_held: Decimal,
-        **kwargs,
+        **kwargs: Any,
     ) -> "Transaction":
         """Factory method to create a dividend transaction."""
         price_per_share = (
             dividend_amount / shares_held if shares_held > 0 else Decimal("0")
         )
 
-        return cls(
+        return cls(  # type: ignore[call-arg]
             user_id=user_id,
             asset_id=asset_id,
             position_id=position_id,

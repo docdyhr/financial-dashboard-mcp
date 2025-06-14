@@ -1,4 +1,5 @@
 """Portfolio service for portfolio operations and calculations."""
+
 from datetime import date, timedelta
 from decimal import Decimal
 
@@ -43,7 +44,7 @@ class PortfolioService:
         positions = (
             db.query(Position)
             .options(joinedload(Position.asset))
-            .filter(Position.user_id == user_id, Position.is_active == True)
+            .filter(Position.user_id == user_id, Position.is_active.is_(True))
             .all()
         )
 
@@ -147,7 +148,7 @@ class PortfolioService:
         positions = (
             db.query(Position)
             .options(joinedload(Position.asset))
-            .filter(Position.user_id == user_id, Position.is_active == True)
+            .filter(Position.user_id == user_id, Position.is_active.is_(True))
             .all()
         )
 
@@ -431,7 +432,7 @@ class PortfolioService:
         positions = (
             db.query(Position)
             .options(joinedload(Position.asset))
-            .filter(Position.user_id == user_id, Position.is_active == True)
+            .filter(Position.user_id == user_id, Position.is_active.is_(True))
             .all()
         )
 
@@ -480,7 +481,7 @@ class PortfolioService:
         positions = (
             db.query(Position)
             .options(joinedload(Position.asset))
-            .filter(Position.user_id == user_id, Position.is_active == True)
+            .filter(Position.user_id == user_id, Position.is_active.is_(True))
             .all()
         )
 
@@ -576,7 +577,7 @@ class PortfolioService:
 
         positions = (
             db.query(Position)
-            .filter(Position.user_id == user_id, Position.is_active == True)
+            .filter(Position.user_id == user_id, Position.is_active.is_(True))
             .all()
         )
 

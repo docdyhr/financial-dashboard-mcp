@@ -1,8 +1,9 @@
-## Automated Testing Setup for Financial Dashboard MCP Project
+# Automated Testing Setup for Financial Dashboard MCP Project
 
 You are a senior DevOps engineer who specializes in automated testing and code quality. I need to set up comprehensive automated testing for a **Financial Dashboard with AI Agent Integration** project to validate all AI-generated code before it goes to production.
 
-### Project Context:
+## Project Context
+
 - **Language**: Python 3.11+
 - **Framework**: FastAPI (backend), Streamlit (frontend), Celery + Redis (task queue), MCP server (AI integration)
 - **Database**: PostgreSQL
@@ -12,8 +13,9 @@ You are a senior DevOps engineer who specializes in automated testing and code q
 - **AI Integration**: MCP server with 13 AI-powered portfolio analysis tools
 - **External Dependencies**: yfinance for market data, Redis for caching, PostgreSQL for persistence
 
-### Project Architecture:
-```
+### Project Architecture
+
+```text
 Streamlit UI → FastAPI Backend → PostgreSQL DB
      ↓
 Celery + Redis Task Queue
@@ -24,6 +26,7 @@ MCP Server (AI Assistant) → Claude Desktop
 Please create a complete automated testing pipeline that includes:
 
 ## 1. **Unit Testing Setup**
+
 - **pytest** configuration with fixtures for FastAPI, database, Redis, and MCP server
 - Test templates for:
   - FastAPI endpoints and business logic
@@ -41,6 +44,7 @@ Please create a complete automated testing pipeline that includes:
 - Specific test cases for financial calculation accuracy and edge cases
 
 ## 2. **Integration Testing**
+
 - **FastAPI TestClient** for full API endpoint testing
 - Database integration tests with test database isolation
 - **Celery** task integration with Redis backend testing
@@ -55,6 +59,7 @@ Please create a complete automated testing pipeline that includes:
   - Task queue processing for background operations
 
 ## 3. **Static Analysis Tools**
+
 - **Black** for code formatting with strict line length (88 chars)
 - **flake8** with financial domain-specific rules and complexity limits
 - **mypy** for strict type checking across all modules
@@ -65,6 +70,7 @@ Please create a complete automated testing pipeline that includes:
 - **pre-commit** hooks integrating all static analysis tools
 
 ## 4. **CI/CD Pipeline**
+
 - **GitHub Actions** workflow with matrix testing for Python versions
 - **Pre-commit hooks** blocking commits with failing lints/tests
 - **Docker-based testing** pipeline matching production environment
@@ -83,6 +89,7 @@ Please create a complete automated testing pipeline that includes:
   - Stage 5: MCP server AI integration validation
 
 ## 5. **Code Quality Monitoring**
+
 - **Performance regression detection** for portfolio calculations and API responses
 - **Technical debt tracking** with SonarQube integration
 - **Security dependency monitoring** with automated PR creation for updates
@@ -92,9 +99,11 @@ Please create a complete automated testing pipeline that includes:
 - **MCP server response time tracking** for AI tool performance
 
 ## 6. **Specialized Financial Testing Requirements**
+
 Include specific test cases for common AI coding mistakes in financial applications:
 
 ### **Financial Calculation Edge Cases:**
+
 - Zero and negative portfolio values
 - Currency precision and rounding errors
 - Market data gaps and missing values
@@ -103,6 +112,7 @@ Include specific test cases for common AI coding mistakes in financial applicati
 - Performance calculation with dividends and splits
 
 ### **Security and Data Validation:**
+
 - SQL injection protection for user inputs
 - Market data validation and sanitization
 - Portfolio position validation (no negative holdings)
@@ -111,6 +121,7 @@ Include specific test cases for common AI coding mistakes in financial applicati
 - Encryption of sensitive financial data
 
 ### **AI Integration Reliability:**
+
 - MCP server connection failure handling
 - AI recommendation validation and bounds checking
 - Fallback mechanisms when AI services are unavailable
@@ -118,6 +129,7 @@ Include specific test cases for common AI coding mistakes in financial applicati
 - Data consistency between AI recommendations and actual portfolio state
 
 ### **Market Data Integrity:**
+
 - Real-time vs delayed data validation
 - Market hours and trading day validation
 - Currency conversion accuracy
@@ -125,6 +137,7 @@ Include specific test cases for common AI coding mistakes in financial applicati
 - Historical data consistency checks
 
 For each tool, provide:
+
 - **Installation commands** with exact versions
 - **Configuration files** with financial-specific settings
 - **Example usage** with portfolio and market data scenarios

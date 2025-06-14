@@ -1,10 +1,17 @@
 """Position model for tracking user portfolio holdings."""
+
 from decimal import Decimal
+from typing import TYPE_CHECKING, Any, List  # Add List, TYPE_CHECKING
 
 from sqlalchemy import ForeignKey, Numeric, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from backend.models.base import Base
+
+if TYPE_CHECKING:
+    from backend.models.asset import Asset  # noqa: F401
+    from backend.models.transaction import Transaction  # noqa: F401
+    from backend.models.user import User  # noqa: F401
 
 
 class Position(Base):
@@ -46,11 +53,16 @@ class Position(Base):
     is_active: Mapped[bool] = mapped_column(default=True, nullable=False)
 
     # Relationships
-    user = relationship("User", back_populates="positions")
-    asset = relationship("Asset", back_populates="positions")
-    transactions = relationship(
-        "Transaction", back_populates="position", cascade="all, delete-orphan"
+    user: Mapped[User] = relationship("User", back_populates="positions")
+    asset: Mapped[Asset] = relationship("Asset", back_populates="positions")
+    transactions: Mapped[List[Transaction]] = relationship(
+        "Transaction",
+        back_populates="position",
+        cascade="all, delete-orphan",
     )
+
+    def __init__(self, **kwargs: Any) -> None:  # Add explicit __init__
+        super().__init__(**kwargs)
 
     def __repr__(self) -> str:
         return f"<Position(id={self.id}, user_id={self.user_id}, asset_id={self.asset_id}, quantity={self.quantity})>"

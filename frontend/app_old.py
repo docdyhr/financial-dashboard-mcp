@@ -1,4 +1,5 @@
 """Main Streamlit application for Financial Dashboard."""
+
 import os
 from datetime import datetime
 

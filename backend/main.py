@@ -1,4 +1,5 @@
 """Main FastAPI application for Financial Dashboard."""
+
 import logging
 from contextlib import asynccontextmanager
 

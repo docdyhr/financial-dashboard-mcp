@@ -166,7 +166,7 @@ def system_status_widget(backend_url: str):
                 st.success("✅ Backend API")
             else:
                 st.error("❌ Backend API")
-        except:
+        except Exception:
             st.error("❌ Backend API")
 
     with col2:
@@ -177,7 +177,7 @@ def system_status_widget(backend_url: str):
                 st.success("✅ Task Queue")
             else:
                 st.error("❌ Task Queue")
-        except:
+        except Exception:
             st.error("❌ Task Queue")
 
     with col3:
@@ -188,7 +188,7 @@ def system_status_widget(backend_url: str):
                 st.success("✅ Database")
             else:
                 st.error("❌ Database")
-        except:
+        except Exception:
             st.error("❌ Database")
 
     # Additional system info

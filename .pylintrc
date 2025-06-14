@@ -1,0 +1,15 @@
+[MASTER]
+ignore=venv,.venv,build,dist,migrations,tests
+max-line-length=88
+
+[MESSAGES CONTROL]
+disable=C0114,C0115,C0116,W0511,R0903,R0801
+
+[FORMAT]
+indent-string='    '
+
+[TYPECHECK]
+ignore-missing-imports=yes
+
+[REPORTS]
+output-format=colorized

@@ -152,13 +152,13 @@ def my_custom_task(self, param1: str, param2: int) -> dict:
     try:
         # Task logic here
         current_task.update_state(
-            state="PROGRESS", 
+            state="PROGRESS",
             meta={"status": "Processing..."}
         )
-        
+
         result = {"status": "completed", "data": "result"}
         return result
-        
+
     except Exception as e:
         current_task.update_state(
             state="FAILURE",

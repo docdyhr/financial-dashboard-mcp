@@ -1,4 +1,5 @@
 """Celery worker entry point."""
+
 import logging
 import sys
 from pathlib import Path

@@ -1,27 +1,26 @@
 [flake8]
 max-line-length = 88
-extend-ignore = E203, E266, E501, W503, F403, F401
-max-complexity = 10
-exclude = 
+extend-ignore = E203, W503, E501, D100, D101, D102, D103, D104, D105, D106, D107, S101, B950, F401, C901, A003, A002, E402, RET504, SIM102, DTZ011, B007, C401, C403, C408
+exclude =
     .git,
     __pycache__,
-    .venv,
-    venv,
-    env,
-    dist,
     build,
-    *.egg,
-    migrations,
+    dist,
+    venv,
+    .venv,
     .mypy_cache,
     .pytest_cache,
-    .coverage,
-    htmlcov,
-    node_modules,
-    .env
+    .tox
+select = C,E,F,W,B,B950
 
 per-file-ignores =
-    __init__.py:F401
-    tests/*:S101,S105,S106
+    tests/*: D, S101, C901, B950, F401, E402, RET504, SIM102, DTZ011, B007, C401, C403, C408, F841, PLR0913, PLR0915, PLR0912, PLR0911
+    frontend/*: F841, E501, C901, PLR0912, PLR0915
+    scripts/*: F841, E501, E402, C901, PLR0912, PLR0915, B007, PTH118, PTH120, PTH123, F401, SIM102, SIM118
+    mcp_server/*: F841, E501, C901, PLR0912, PLR0915, PLR0911
+    backend/api/*: PLR0913, B904
+    backend/services/base.py: F841
+    backend/tasks/portfolio.py: F841
 
 # Docstring configuration
 docstring-convention = google

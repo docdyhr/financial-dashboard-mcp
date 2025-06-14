@@ -5,6 +5,7 @@ This project follows [Semantic Versioning](https://semver.org/) with automated v
 ## 📋 Overview
 
 Our semantic versioning system automatically:
+
 - 🏷️ Generates version numbers based on commit messages
 - 📝 Updates CHANGELOG.md with release notes
 - 🚀 Creates GitHub releases with tags
@@ -57,18 +58,21 @@ Existing tokens will be invalid and users must re-authenticate.
 ## 📦 Version Bumping Examples
 
 ### Patch Release (Bug Fixes)
+
 ```bash
 git commit -m "fix(api): resolve null pointer exception in portfolio endpoint"
 # Result: 1.0.0 → 1.0.1
 ```
 
 ### Minor Release (New Features)
+
 ```bash
 git commit -m "feat(dashboard): add real-time price alerts"
 # Result: 1.0.1 → 1.1.0
 ```
 
 ### Major Release (Breaking Changes)
+
 ```bash
 git commit -m "feat!: migrate to new API v2 structure
 
@@ -108,18 +112,23 @@ bump2version patch  # or minor, major
 ## 🔧 Tools Configuration
 
 ### Commitizen
+
 Configuration in `pyproject.toml`:
+
 - Enforces conventional commit format
 - Generates changelog entries
 - Handles version bumping
 
 ### Semantic Release
+
 Configuration in `pyproject.toml`:
+
 - Automates the entire release process
 - Integrates with GitHub releases
 - Publishes to package registries
 
 ### Pre-commit Hooks
+
 - Validates commit message format
 - Checks version consistency
 - Runs code quality checks
@@ -127,6 +136,7 @@ Configuration in `pyproject.toml`:
 ## 📊 Version Consistency
 
 The following files are automatically kept in sync:
+
 - `pyproject.toml` (primary source)
 - `backend/__init__.py` (Python package version)
 - `CHANGELOG.md` (release history)
@@ -135,6 +145,7 @@ The following files are automatically kept in sync:
 ## 🛠️ Development Workflow
 
 ### Feature Development
+
 ```bash
 # Create feature branch
 git checkout -b feat/add-portfolio-analytics
@@ -148,6 +159,7 @@ git push origin feat/add-portfolio-analytics
 ```
 
 ### Hotfix Process
+
 ```bash
 # Create hotfix branch
 git checkout -b fix/critical-security-issue
@@ -165,6 +177,7 @@ git push origin fix/critical-security-issue
 Release notes are automatically generated from commit messages:
 
 ### Example Release Notes
+
 ```markdown
 ## [1.2.0] - 2024-01-15
 
@@ -172,7 +185,7 @@ Release notes are automatically generated from commit messages:
 - feat(api): add portfolio export functionality (#123)
 - feat(dashboard): implement real-time notifications (#125)
 
-### 🐛 Bug Fixes  
+### 🐛 Bug Fixes
 - fix(frontend): resolve chart rendering on mobile devices (#124)
 - fix(database): handle connection timeouts gracefully (#126)
 
@@ -186,20 +199,23 @@ Release notes are automatically generated from commit messages:
 ## 🏷️ Tagging Strategy
 
 Git tags follow the format: `v<version>`
+
 - `v1.0.0` - Major release
-- `v1.1.0` - Minor release  
+- `v1.1.0` - Minor release
 - `v1.1.1` - Patch release
 - `v2.0.0-rc.1` - Release candidate
 
 ## 🚨 Important Notes
 
-### Do NOT:
+### Do NOT
+
 - ❌ Manually edit version numbers in files
 - ❌ Create tags manually (let automation handle it)
 - ❌ Skip conventional commit format on main branch
 - ❌ Force push to main branch
 
-### DO:
+### DO
+
 - ✅ Use conventional commit format consistently
 - ✅ Include descriptive commit messages
 - ✅ Test changes before merging to main
@@ -209,6 +225,7 @@ Git tags follow the format: `v<version>`
 ## 🔍 Troubleshooting
 
 ### Version Mismatch Errors
+
 ```bash
 # Check current versions
 python scripts/check_version_consistency.py
@@ -218,6 +235,7 @@ sed -i 's/__version__ = ".*"/__version__ = "1.2.3"/' backend/__init__.py
 ```
 
 ### Failed Release
+
 ```bash
 # Check GitHub Actions logs
 # Manually trigger release if needed
@@ -229,6 +247,7 @@ git push --tags
 ```
 
 ### Commit Message Validation
+
 ```bash
 # Test commit message format locally
 echo "feat: add new feature" | cz check

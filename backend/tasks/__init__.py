@@ -1,4 +1,5 @@
 """Celery tasks for Financial Dashboard."""
+
 from celery import Celery
 
 from backend.config import get_settings
@@ -32,10 +33,8 @@ celery_app.conf.update(
 celery_app.autodiscover_tasks(["backend.tasks"])
 
 # Explicitly import task modules to ensure registration
-from backend.tasks import (
-    market_data,  # noqa: F401
-    portfolio,  # noqa: F401
-)
+from backend.tasks import market_data  # noqa: F401
+from backend.tasks import portfolio  # noqa: F401
 
 # Import beat schedule
 try:

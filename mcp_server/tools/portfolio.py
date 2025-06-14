@@ -17,7 +17,7 @@ class PortfolioTools:
         self.backend_url = backend_url
         self.http_client = httpx.AsyncClient(timeout=30.0)
 
-    async def close(self):
+    async def close(self) -> None:
         """Close HTTP client."""
         await self.http_client.aclose()
 
@@ -182,9 +182,7 @@ class PortfolioTools:
                 TextContent(type="text", text=f"Error connecting to backend: {e!s}")
             ]
         except Exception as e:
-            return [
-                TextContent(type="text", text=f"Error retrieving positions: {e!s}")
-            ]
+            return [TextContent(type="text", text=f"Error retrieving positions: {e!s}")]
 
     async def _get_portfolio_summary(
         self, arguments: dict[str, Any]
@@ -248,9 +246,7 @@ class PortfolioTools:
                 TextContent(type="text", text=f"Error connecting to backend: {e!s}")
             ]
         except Exception as e:
-            return [
-                TextContent(type="text", text=f"Error retrieving summary: {e!s}")
-            ]
+            return [TextContent(type="text", text=f"Error retrieving summary: {e!s}")]
 
     async def _get_allocation(self, arguments: dict[str, Any]) -> list[TextContent]:
         """Get portfolio allocation."""
@@ -321,7 +317,12 @@ The position has been added to your portfolio and will be included in future cal
             try:
                 error_data = e.response.json()
                 error_detail = error_data.get("detail", str(e))
-            except Exception:
+            except Exception as ex:
+                import logging
+
+                logging.exception(
+                    "Error parsing error response in add position: %s", ex
+                )
                 error_detail = str(e)
             return [
                 TextContent(type="text", text=f"Error adding position: {error_detail}")
@@ -370,8 +371,12 @@ Position ID {position_id} has been updated with the following changes:
             try:
                 error_data = e.response.json()
                 error_detail = error_data.get("detail", str(e))
-            except Exception:
-                pass
+            except Exception as ex:  # nosec
+                import logging
+
+                logging.exception(
+                    "Error parsing error response in update position: %s", ex
+                )
             return [
                 TextContent(
                     type="text", text=f"Error updating position: {error_detail}"

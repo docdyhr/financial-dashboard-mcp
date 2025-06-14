@@ -18,7 +18,7 @@ jobs:
     name: 🏷️ Semantic Release
     runs-on: ubuntu-latest
     if: github.repository_owner == 'docdyhr'
-    
+
     outputs:
       released: ${{ steps.semantic.outputs.released }}
       version: ${{ steps.semantic.outputs.version }}
@@ -61,21 +61,21 @@ jobs:
           # Configure git
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          
+
           # Run semantic release
           semantic-release version --no-commit --no-tag --no-push
-          
+
           # Check if version was bumped
           NEW_VERSION=$(semantic-release version --print)
           if [ "$NEW_VERSION" != "" ]; then
             echo "released=true" >> $GITHUB_OUTPUT
             echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
             echo "tag=v$NEW_VERSION" >> $GITHUB_OUTPUT
-            
+
             # Create and push tag
             git tag "v$NEW_VERSION"
             git push origin "v$NEW_VERSION"
-            
+
             # Generate changelog and create release
             semantic-release changelog
             semantic-release publish
@@ -88,10 +88,10 @@ jobs:
         run: |
           # Update version in backend/__init__.py
           sed -i "s/__version__ = \".*\"/__version__ = \"${{ steps.semantic.outputs.version }}\"/" backend/__init__.py
-          
+
           # Update version in pyproject.toml
           sed -i "s/version = \".*\"/version = \"${{ steps.semantic.outputs.version }}\"/" pyproject.toml
-          
+
           # Commit version bump
           git add backend/__init__.py pyproject.toml CHANGELOG.md
           git commit -m "chore: bump version to ${{ steps.semantic.outputs.version }} [skip ci]"
@@ -102,7 +102,7 @@ jobs:
     needs: release
     runs-on: ubuntu-latest
     if: needs.release.outputs.released == 'true'
-    
+
     strategy:
       matrix:
         image: [backend, frontend, mcp]

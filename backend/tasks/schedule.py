@@ -1,4 +1,5 @@
 """Celery periodic task scheduler configuration."""
+
 from celery.schedules import crontab
 
 from backend.config import get_settings

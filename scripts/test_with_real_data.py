@@ -1,4 +1,5 @@
 """Test the task queue with simulated market data to demonstrate functionality."""
+
 import sys
 from decimal import Decimal
 from pathlib import Path
@@ -24,7 +25,7 @@ def setup_test_data():
         if not test_user:
             test_user = User(
                 email="test@example.com", full_name="Test User", is_active=True
-            )
+            )  # type: ignore[call-arg]
             db.add(test_user)
             db.flush()
 
@@ -42,7 +43,7 @@ def setup_test_data():
                     category=AssetCategory.EQUITY,
                     current_price=150.00 + len(symbol) * 10,  # Simulate prices
                     currency="USD",
-                )
+                )  # type: ignore[call-arg]
                 db.add(asset)
                 db.flush()
             assets.append(asset)
@@ -64,7 +65,7 @@ def setup_test_data():
                     total_cost_basis=Decimal("1450.00"),
                     account_name="Test Account",
                     is_active=True,
-                )
+                )  # type: ignore[call-arg]
                 db.add(position)
 
         db.commit()
@@ -141,7 +142,9 @@ def test_portfolio_snapshot_task(user_id):
                 print("   ✅ Portfolio snapshot task completed!")
                 result = status.get("result", {})
                 print(f"   📸 Snapshots created: {result.get('snapshots_created', 0)}")
-                print(f"   👥 Users processed: {result.get('total_users_processed', 0)}")
+                print(
+                    f"   👥 Users processed: {result.get('total_users_processed', 0)}"
+                )
                 return True
             print("   ❌ Portfolio snapshot task failed!")
             print(f"   Error: {status.get('error')}")
@@ -187,7 +190,9 @@ def test_concurrent_tasks():
                 if status.get("successful"):
                     print(f"   ✅ {name} completed successfully")
                 else:
-                    print(f"   ❌ {name} failed: {status.get('error', 'Unknown error')}")
+                    print(
+                        f"   ❌ {name} failed: {status.get('error', 'Unknown error')}"
+                    )
 
         if len(completed) == len(tasks):
             break

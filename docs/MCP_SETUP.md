@@ -3,18 +3,20 @@
 ## Installation
 
 1. **Install the Financial Dashboard MCP Server:**
+
    ```bash
    cd /path/to/financial-dashboard-mcp
    pip install -e .
    ```
 
 2. **Start the backend services:**
+
    ```bash
    ./scripts/start_dashboard.sh
    ```
 
 3. **Configure Claude Desktop:**
-   
+
    Add the following to your Claude Desktop configuration file:
    - **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
    - **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
@@ -40,6 +42,7 @@
 ## Available Tools
 
 ### Portfolio Management
+
 - `get_positions` - Retrieve current portfolio positions
 - `get_portfolio_summary` - Get comprehensive portfolio overview
 - `get_allocation` - Get current portfolio allocation breakdown
@@ -47,12 +50,14 @@
 - `update_position` - Update an existing portfolio position
 
 ### Market Data
+
 - `get_asset_price` - Get current price and basic info for an asset
 - `calculate_performance` - Calculate portfolio performance for specific periods
 - `analyze_portfolio_risk` - Analyze portfolio risk metrics and volatility
 - `get_market_trends` - Get current market trends and sector performance
 
 ### AI Analytics
+
 - `recommend_allocation` - Get AI-powered portfolio allocation recommendations
 - `analyze_opportunity` - Find investment opportunities based on criteria
 - `rebalance_portfolio` - Generate portfolio rebalancing recommendations

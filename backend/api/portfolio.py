@@ -1,5 +1,7 @@
 """Portfolio API router for portfolio summary and performance endpoints."""
+
 from datetime import date
+from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
@@ -19,7 +21,9 @@ portfolio_service = PortfolioService()
 
 
 @router.get("/summary/{user_id}", response_model=BaseResponse[PortfolioSummary])
-async def get_portfolio_summary(user_id: int, db: Session = Depends(get_db)):
+async def get_portfolio_summary(
+    user_id: int, db: Session = Depends(get_db)
+) -> BaseResponse[PortfolioSummary]:
     """Get comprehensive portfolio summary for a user."""
     try:
         summary = portfolio_service.get_portfolio_summary(db, user_id)
@@ -31,11 +35,13 @@ async def get_portfolio_summary(user_id: int, db: Session = Depends(get_db)):
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.get("/allocation/{user_id}", response_model=BaseResponse[AllocationBreakdown])
-async def get_allocation_breakdown(user_id: int, db: Session = Depends(get_db)):
+async def get_allocation_breakdown(
+    user_id: int, db: Session = Depends(get_db)
+) -> BaseResponse[AllocationBreakdown]:
     """Get asset allocation breakdown for a portfolio."""
     try:
         allocation = portfolio_service.get_allocation_breakdown(db, user_id)
@@ -47,7 +53,7 @@ async def get_allocation_breakdown(user_id: int, db: Session = Depends(get_db)):
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.get("/performance/{user_id}", response_model=BaseResponse[PerformanceMetrics])
@@ -60,7 +66,7 @@ async def get_performance_metrics(
         None, description="End date for performance calculation"
     ),
     db: Session = Depends(get_db),
-):
+) -> BaseResponse[PerformanceMetrics]:
     """Calculate portfolio performance metrics."""
     try:
         performance = portfolio_service.calculate_performance_metrics(
@@ -74,13 +80,15 @@ async def get_performance_metrics(
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.get(
     "/diversification/{user_id}", response_model=BaseResponse[DiversificationMetrics]
 )
-async def get_diversification_metrics(user_id: int, db: Session = Depends(get_db)):
+async def get_diversification_metrics(
+    user_id: int, db: Session = Depends(get_db)
+) -> BaseResponse[DiversificationMetrics]:
     """Get portfolio diversification metrics."""
     try:
         diversification = portfolio_service.get_diversification_metrics(db, user_id)
@@ -92,13 +100,13 @@ async def get_diversification_metrics(user_id: int, db: Session = Depends(get_db
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.post("/snapshot/{user_id}")
 async def create_portfolio_snapshot(
     user_id: int, snapshot_date: date | None = None, db: Session = Depends(get_db)
-):
+) -> BaseResponse[dict[str, Any]]:
     """Create a portfolio snapshot for a specific date."""
     try:
         snapshot = portfolio_service.create_portfolio_snapshot(
@@ -116,7 +124,7 @@ async def create_portfolio_snapshot(
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.get("/comparison/{user_id}")
@@ -126,7 +134,7 @@ async def get_performance_comparison(
     start_date: date | None = Query(None, description="Start date for comparison"),
     end_date: date | None = Query(None, description="End date for comparison"),
     db: Session = Depends(get_db),
-):
+) -> BaseResponse[Any]:
     """Compare portfolio performance to a benchmark."""
     try:
         comparison = portfolio_service.get_performance_comparison(
@@ -140,11 +148,13 @@ async def get_performance_comparison(
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.get("/weights/{user_id}")
-async def get_position_weights(user_id: int, db: Session = Depends(get_db)):
+async def get_position_weights(
+    user_id: int, db: Session = Depends(get_db)
+) -> BaseResponse[Any]:
     """Get position weights in portfolio."""
     try:
         weights = portfolio_service.calculate_position_weights(db, user_id)
@@ -156,4 +166,4 @@ async def get_position_weights(user_id: int, db: Session = Depends(get_db)):
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e

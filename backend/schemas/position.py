@@ -1,7 +1,9 @@
 """Position schemas for portfolio holdings API."""
-from decimal import Decimal
 
-from pydantic import Field, validator
+from decimal import Decimal
+from typing import Any, ClassVar
+
+from pydantic import ConfigDict, Field, field_validator
 
 from backend.schemas.asset import AssetSummary
 from backend.schemas.base import BaseSchema, TimestampMixin
@@ -17,16 +19,15 @@ class PositionBase(BaseSchema):
     total_cost_basis: Decimal = Field(
         ..., ge=0, description="Total cost basis of position"
     )
-    account_name: str | None = Field(
-        None, max_length=100, description="Account name"
-    )
+    account_name: str | None = Field(None, max_length=100, description="Account name")
     notes: str | None = Field(None, max_length=500, description="Position notes")
     tax_lot_method: str = Field(
         default="FIFO", max_length=20, description="Tax lot method"
     )
 
-    @validator("tax_lot_method")
-    def validate_tax_lot_method(cls, v):
+    @field_validator("tax_lot_method")
+    @classmethod
+    def validate_tax_lot_method(cls, v: str) -> str:
         """Validate tax lot method."""
         allowed_methods = ["FIFO", "LIFO", "SpecificID"]
         if v not in allowed_methods:
@@ -47,17 +48,16 @@ class PositionUpdate(BaseSchema):
     quantity: Decimal | None = Field(
         None, gt=0, description="Number of shares/units held"
     )
-    account_name: str | None = Field(
-        None, max_length=100, description="Account name"
-    )
+    account_name: str | None = Field(None, max_length=100, description="Account name")
     notes: str | None = Field(None, max_length=500, description="Position notes")
     tax_lot_method: str | None = Field(
         None, max_length=20, description="Tax lot method"
     )
     is_active: bool | None = None
 
-    @validator("tax_lot_method")
-    def validate_tax_lot_method(cls, v):
+    @field_validator("tax_lot_method")
+    @classmethod
+    def validate_tax_lot_method(cls, v: str | None) -> str | None:
         """Validate tax lot method."""
         if v is not None:
             allowed_methods = ["FIFO", "LIFO", "SpecificID"]
@@ -99,6 +99,8 @@ class PositionSummary(BaseSchema):
     unrealized_gain_loss_percent: Decimal | None = None
     weight_in_portfolio: Decimal | None = None
 
+    model_config: ClassVar[ConfigDict] = ConfigDict(from_attributes=True)
+
 
 class PositionFilters(BaseSchema):
     """Filters for position queries."""
@@ -108,12 +110,8 @@ class PositionFilters(BaseSchema):
     category: str | None = None
     account_name: str | None = None
     is_active: bool = True
-    min_value: Decimal | None = Field(
-        None, ge=0, description="Minimum position value"
-    )
-    max_value: Decimal | None = Field(
-        None, ge=0, description="Maximum position value"
-    )
+    min_value: Decimal | None = Field(None, ge=0, description="Minimum position value")
+    max_value: Decimal | None = Field(None, ge=0, description="Maximum position value")
 
 
 class PositionAdjustment(BaseSchema):
@@ -134,7 +132,7 @@ class PositionAdjustment(BaseSchema):
 class BulkPositionUpdate(BaseSchema):
     """Schema for bulk position updates."""
 
-    positions: list[dict] = Field(..., description="List of position updates")
+    positions: list[dict[str, Any]] = Field(..., description="List of position updates")
 
     class PositionUpdateItem(BaseSchema):
         position_id: int

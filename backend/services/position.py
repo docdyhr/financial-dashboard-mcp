@@ -1,26 +1,29 @@
 """Position service for position management operations."""
+
+import datetime
 from decimal import Decimal
+from typing import Any, cast
 
 from fastapi import HTTPException
 from sqlalchemy import and_
 from sqlalchemy.orm import Session, joinedload
 
-from backend.models import Asset, Position, Transaction, TransactionType, User
+from backend.models import Asset, Position, Transaction, User
+from backend.models.transaction import TransactionType
 from backend.schemas.asset import AssetSummary
 from backend.schemas.position import (
     PositionAdjustment,
     PositionCreate,
     PositionFilters,
     PositionResponse,
-    PositionUpdate,
 )
 from backend.services.base import BaseService
 
 
-class PositionService(BaseService[Position, PositionCreate, PositionUpdate]):
+class PositionService(BaseService[Position, PositionCreate, PositionAdjustment]):
     """Service for position management operations."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize position service."""
         super().__init__(Position)
 
@@ -75,7 +78,11 @@ class PositionService(BaseService[Position, PositionCreate, PositionUpdate]):
                 name=position.asset.name,
                 asset_type=position.asset.asset_type,
                 category=position.asset.category,
-                current_price=position.asset.current_price,
+                current_price=(
+                    Decimal(str(position.asset.current_price))
+                    if position.asset.current_price is not None
+                    else None
+                ),
                 currency=position.asset.currency,
                 is_active=position.asset.is_active,
             )
@@ -97,6 +104,7 @@ class PositionService(BaseService[Position, PositionCreate, PositionUpdate]):
                 current_value=position.current_value,
                 unrealized_gain_loss=position.unrealized_gain_loss,
                 unrealized_gain_loss_percent=position.unrealized_gain_loss_percent,
+                weight_in_portfolio=None,  # TODO: Calculate if needed
             )
             position_responses.append(position_response)
 
@@ -112,7 +120,7 @@ class PositionService(BaseService[Position, PositionCreate, PositionUpdate]):
                 and_(
                     Position.user_id == user_id,
                     Position.asset_id == asset_id,
-                    Position.is_active == True,
+                    Position.is_active.is_(True),
                 )
             )
             .first()
@@ -140,6 +148,7 @@ class PositionService(BaseService[Position, PositionCreate, PositionUpdate]):
         position = db.query(Position).get(position_id)
         if not position:
             raise ValueError(f"Position {position_id} not found")
+        position = cast("Position", position)
 
         if adjustment.quantity > 0:
             # Adding to position
@@ -167,6 +176,7 @@ class PositionService(BaseService[Position, PositionCreate, PositionUpdate]):
         position = db.query(Position).get(position_id)
         if not position:
             raise ValueError(f"Position {position_id} not found")
+        position = cast("Position", position)
 
         position.quantity = Decimal("0")
         position.is_active = False
@@ -186,7 +196,7 @@ class PositionService(BaseService[Position, PositionCreate, PositionUpdate]):
                 and_(
                     Position.user_id == user_id,
                     Asset.category == category,
-                    Position.is_active == True,
+                    Position.is_active.is_(True),
                 )
             )
             .all()
@@ -203,7 +213,7 @@ class PositionService(BaseService[Position, PositionCreate, PositionUpdate]):
                 and_(
                     Position.user_id == user_id,
                     Asset.sector == sector,
-                    Position.is_active == True,
+                    Position.is_active.is_(True),
                 )
             )
             .all()
@@ -220,7 +230,7 @@ class PositionService(BaseService[Position, PositionCreate, PositionUpdate]):
 
         positions = (
             db.query(Position)
-            .filter(and_(Position.user_id == user_id, Position.is_active == True))
+            .filter(and_(Position.user_id == user_id, Position.is_active.is_(True)))
             .all()
         )
 
@@ -238,6 +248,7 @@ class PositionService(BaseService[Position, PositionCreate, PositionUpdate]):
         position = db.query(Position).get(position_id)
         if not position:
             raise ValueError(f"Position {position_id} not found")
+        position = cast("Position", position)
 
         # Get all transactions for this position
         transactions = (
@@ -284,18 +295,19 @@ class PositionService(BaseService[Position, PositionCreate, PositionUpdate]):
         first_transaction = transactions[0] if transactions else None
         days_held = 0
         if first_transaction:
-            from datetime import date
-
-            days_held = (date.today() - first_transaction.transaction_date).days
+            days_held = (
+                datetime.datetime.now(tz=datetime.UTC).date()
+                - first_transaction.transaction_date
+            ).days
 
         return {
-            "total_invested": total_invested,
-            "current_value": current_value,
-            "total_return": total_return,
-            "total_return_percent": total_return_percent,
-            "unrealized_gain_loss": unrealized_gain_loss,
-            "dividend_income": dividend_income,
-            "days_held": days_held,
+            "total_invested": Decimal(str(total_invested)),
+            "current_value": Decimal(str(current_value)),
+            "total_return": Decimal(str(total_return)),
+            "total_return_percent": Decimal(str(total_return_percent)),
+            "unrealized_gain_loss": Decimal(str(unrealized_gain_loss)),
+            "dividend_income": Decimal(str(dividend_income)),
+            "days_held": Decimal(days_held),
         }
 
     def get_positions_needing_rebalancing(
@@ -304,7 +316,7 @@ class PositionService(BaseService[Position, PositionCreate, PositionUpdate]):
         user_id: int,
         target_allocations: dict[str, Decimal],
         tolerance: Decimal = Decimal("5"),
-    ) -> list[dict]:
+    ) -> list[dict[str, Any]]:
         """Get positions that need rebalancing based on target allocations."""
         positions = self.get_user_positions(db, user_id)
         total_value = self.calculate_total_portfolio_value(db, user_id)
@@ -332,9 +344,9 @@ class PositionService(BaseService[Position, PositionCreate, PositionUpdate]):
                         "current_weight": current_weight,
                         "target_weight": target_weight,
                         "deviation": deviation,
-                        "action_needed": "reduce"
-                        if current_weight > target_weight
-                        else "increase",
+                        "action_needed": (
+                            "reduce" if current_weight > target_weight else "increase"
+                        ),
                     }
                 )
 
@@ -363,9 +375,9 @@ class PositionService(BaseService[Position, PositionCreate, PositionUpdate]):
 
         # Keep the first position and update it
         main_position = positions[0]
-        main_position.quantity = total_quantity
-        main_position.total_cost_basis = total_cost_basis
-        main_position.average_cost_per_share = average_cost
+        main_position.quantity = Decimal(str(total_quantity))
+        main_position.total_cost_basis = Decimal(str(total_cost_basis))
+        main_position.average_cost_per_share = Decimal(str(average_cost))
 
         # Mark other positions as inactive
         for position in positions[1:]:
@@ -387,6 +399,7 @@ class PositionService(BaseService[Position, PositionCreate, PositionUpdate]):
         position = db.query(Position).get(position_id)
         if not position:
             raise ValueError(f"Position {position_id} not found")
+        position = cast("Position", position)
 
         # Update quantity and average cost for split
         position.quantity *= split_ratio
@@ -400,5 +413,4 @@ class PositionService(BaseService[Position, PositionCreate, PositionUpdate]):
 
         db.commit()
         db.refresh(position)
-
         return position

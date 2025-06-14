@@ -216,9 +216,7 @@ class MarketDataTools:
             ]
         except Exception as e:
             return [
-                TextContent(
-                    type="text", text=f"Error calculating performance: {e!s}"
-                )
+                TextContent(type="text", text=f"Error calculating performance: {e!s}")
             ]
 
     async def _analyze_portfolio_risk(
@@ -305,9 +303,7 @@ class MarketDataTools:
             return [TextContent(type="text", text=risk_text)]
         except Exception as e:
             return [
-                TextContent(
-                    type="text", text=f"Error analyzing portfolio risk: {e!s}"
-                )
+                TextContent(type="text", text=f"Error analyzing portfolio risk: {e!s}")
             ]
 
     async def _get_market_trends(self, arguments: dict[str, Any]) -> list[TextContent]:
@@ -353,7 +349,5 @@ class MarketDataTools:
             return [TextContent(type="text", text=trends_text)]
         except Exception as e:
             return [
-                TextContent(
-                    type="text", text=f"Error retrieving market trends: {e!s}"
-                )
+                TextContent(type="text", text=f"Error retrieving market trends: {e!s}")
             ]

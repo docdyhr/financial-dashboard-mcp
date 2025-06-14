@@ -1,5 +1,8 @@
 """Assets API router for asset management and price data."""
 
+from decimal import Decimal
+from typing import Any
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
@@ -16,7 +19,7 @@ from backend.schemas.base import BaseResponse, PaginatedResponse
 from backend.services.base import BaseService
 
 router = APIRouter()
-asset_service = BaseService(Asset)
+asset_service = BaseService[Asset, AssetCreate, AssetUpdate](Asset)
 
 
 @router.get("/", response_model=PaginatedResponse[AssetResponse])
@@ -31,13 +34,13 @@ async def get_assets(
     page: int = Query(1, ge=1, description="Page number"),
     page_size: int = Query(20, ge=1, le=100, description="Items per page"),
     db: Session = Depends(get_db),
-):
+) -> PaginatedResponse[AssetResponse]:
     """Get assets with optional search and filtering."""
     try:
         skip = (page - 1) * page_size
 
         # Build filters
-        filters = {"is_active": is_active}
+        filters: dict[str, Any] = {"is_active": is_active}
         if asset_type:
             filters["asset_type"] = asset_type
         if category:
@@ -91,13 +94,39 @@ async def get_assets(
                 exchange=asset.exchange,
                 currency=asset.currency,
                 country=asset.country,
-                current_price=asset.current_price,
-                previous_close=asset.previous_close,
-                day_change=asset.day_change,
-                day_change_percent=asset.day_change_percent,
-                market_cap=asset.market_cap,
-                pe_ratio=asset.pe_ratio,
-                dividend_yield=asset.dividend_yield,
+                current_price=(
+                    Decimal(str(asset.current_price))
+                    if asset.current_price is not None
+                    else None
+                ),
+                previous_close=(
+                    Decimal(str(asset.previous_close))
+                    if asset.previous_close is not None
+                    else None
+                ),
+                day_change=(
+                    Decimal(str(asset.day_change))
+                    if asset.day_change is not None
+                    else None
+                ),
+                day_change_percent=(
+                    Decimal(str(asset.day_change_percent))
+                    if asset.day_change_percent is not None
+                    else None
+                ),
+                market_cap=(
+                    Decimal(str(asset.market_cap))
+                    if asset.market_cap is not None
+                    else None
+                ),
+                pe_ratio=(
+                    Decimal(str(asset.pe_ratio)) if asset.pe_ratio is not None else None
+                ),
+                dividend_yield=(
+                    Decimal(str(asset.dividend_yield))
+                    if asset.dividend_yield is not None
+                    else None
+                ),
                 is_active=asset.is_active,
                 data_source=asset.data_source,
                 created_at=asset.created_at,
@@ -110,11 +139,13 @@ async def get_assets(
             data=asset_responses, total=total, page=page, page_size=page_size
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.get("/{asset_id}", response_model=BaseResponse[AssetResponse])
-async def get_asset(asset_id: int, db: Session = Depends(get_db)):
+async def get_asset(
+    asset_id: int, db: Session = Depends(get_db)
+) -> BaseResponse[AssetResponse]:
     """Get a specific asset by ID."""
     try:
         asset = asset_service.get(db, asset_id)
@@ -133,13 +164,35 @@ async def get_asset(asset_id: int, db: Session = Depends(get_db)):
             exchange=asset.exchange,
             currency=asset.currency,
             country=asset.country,
-            current_price=asset.current_price,
-            previous_close=asset.previous_close,
-            day_change=asset.day_change,
-            day_change_percent=asset.day_change_percent,
-            market_cap=asset.market_cap,
-            pe_ratio=asset.pe_ratio,
-            dividend_yield=asset.dividend_yield,
+            current_price=(
+                Decimal(str(asset.current_price))
+                if asset.current_price is not None
+                else None
+            ),
+            previous_close=(
+                Decimal(str(asset.previous_close))
+                if asset.previous_close is not None
+                else None
+            ),
+            day_change=(
+                Decimal(str(asset.day_change)) if asset.day_change is not None else None
+            ),
+            day_change_percent=(
+                Decimal(str(asset.day_change_percent))
+                if asset.day_change_percent is not None
+                else None
+            ),
+            market_cap=(
+                Decimal(str(asset.market_cap)) if asset.market_cap is not None else None
+            ),
+            pe_ratio=(
+                Decimal(str(asset.pe_ratio)) if asset.pe_ratio is not None else None
+            ),
+            dividend_yield=(
+                Decimal(str(asset.dividend_yield))
+                if asset.dividend_yield is not None
+                else None
+            ),
             is_active=asset.is_active,
             data_source=asset.data_source,
             created_at=asset.created_at,
@@ -152,11 +205,13 @@ async def get_asset(asset_id: int, db: Session = Depends(get_db)):
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.get("/ticker/{ticker}", response_model=BaseResponse[AssetResponse])
-async def get_asset_by_ticker(ticker: str, db: Session = Depends(get_db)):
+async def get_asset_by_ticker(
+    ticker: str, db: Session = Depends(get_db)
+) -> BaseResponse[AssetResponse]:
     """Get a specific asset by ticker symbol."""
     try:
         asset = asset_service.get_by_field(db, "ticker", ticker.upper())
@@ -177,13 +232,35 @@ async def get_asset_by_ticker(ticker: str, db: Session = Depends(get_db)):
             exchange=asset.exchange,
             currency=asset.currency,
             country=asset.country,
-            current_price=asset.current_price,
-            previous_close=asset.previous_close,
-            day_change=asset.day_change,
-            day_change_percent=asset.day_change_percent,
-            market_cap=asset.market_cap,
-            pe_ratio=asset.pe_ratio,
-            dividend_yield=asset.dividend_yield,
+            current_price=(
+                Decimal(str(asset.current_price))
+                if asset.current_price is not None
+                else None
+            ),
+            previous_close=(
+                Decimal(str(asset.previous_close))
+                if asset.previous_close is not None
+                else None
+            ),
+            day_change=(
+                Decimal(str(asset.day_change)) if asset.day_change is not None else None
+            ),
+            day_change_percent=(
+                Decimal(str(asset.day_change_percent))
+                if asset.day_change_percent is not None
+                else None
+            ),
+            market_cap=(
+                Decimal(str(asset.market_cap)) if asset.market_cap is not None else None
+            ),
+            pe_ratio=(
+                Decimal(str(asset.pe_ratio)) if asset.pe_ratio is not None else None
+            ),
+            dividend_yield=(
+                Decimal(str(asset.dividend_yield))
+                if asset.dividend_yield is not None
+                else None
+            ),
             is_active=asset.is_active,
             data_source=asset.data_source,
             created_at=asset.created_at,
@@ -196,11 +273,13 @@ async def get_asset_by_ticker(ticker: str, db: Session = Depends(get_db)):
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.post("/", response_model=BaseResponse[AssetResponse])
-async def create_asset(asset_create: AssetCreate, db: Session = Depends(get_db)):
+async def create_asset(
+    asset_create: AssetCreate, db: Session = Depends(get_db)
+) -> BaseResponse[AssetResponse]:
     """Create a new asset."""
     try:
         # Check if asset with ticker already exists
@@ -225,13 +304,35 @@ async def create_asset(asset_create: AssetCreate, db: Session = Depends(get_db))
             exchange=asset.exchange,
             currency=asset.currency,
             country=asset.country,
-            current_price=asset.current_price,
-            previous_close=asset.previous_close,
-            day_change=asset.day_change,
-            day_change_percent=asset.day_change_percent,
-            market_cap=asset.market_cap,
-            pe_ratio=asset.pe_ratio,
-            dividend_yield=asset.dividend_yield,
+            current_price=(
+                Decimal(str(asset.current_price))
+                if asset.current_price is not None
+                else None
+            ),
+            previous_close=(
+                Decimal(str(asset.previous_close))
+                if asset.previous_close is not None
+                else None
+            ),
+            day_change=(
+                Decimal(str(asset.day_change)) if asset.day_change is not None else None
+            ),
+            day_change_percent=(
+                Decimal(str(asset.day_change_percent))
+                if asset.day_change_percent is not None
+                else None
+            ),
+            market_cap=(
+                Decimal(str(asset.market_cap)) if asset.market_cap is not None else None
+            ),
+            pe_ratio=(
+                Decimal(str(asset.pe_ratio)) if asset.pe_ratio is not None else None
+            ),
+            dividend_yield=(
+                Decimal(str(asset.dividend_yield))
+                if asset.dividend_yield is not None
+                else None
+            ),
             is_active=asset.is_active,
             data_source=asset.data_source,
             created_at=asset.created_at,
@@ -244,13 +345,13 @@ async def create_asset(asset_create: AssetCreate, db: Session = Depends(get_db))
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.put("/{asset_id}", response_model=BaseResponse[AssetResponse])
 async def update_asset(
     asset_id: int, asset_update: AssetUpdate, db: Session = Depends(get_db)
-):
+) -> BaseResponse[AssetResponse]:
     """Update an existing asset."""
     try:
         asset = asset_service.get(db, asset_id)
@@ -271,13 +372,41 @@ async def update_asset(
             exchange=updated_asset.exchange,
             currency=updated_asset.currency,
             country=updated_asset.country,
-            current_price=updated_asset.current_price,
-            previous_close=updated_asset.previous_close,
-            day_change=updated_asset.day_change,
-            day_change_percent=updated_asset.day_change_percent,
-            market_cap=updated_asset.market_cap,
-            pe_ratio=updated_asset.pe_ratio,
-            dividend_yield=updated_asset.dividend_yield,
+            current_price=(
+                Decimal(str(updated_asset.current_price))
+                if updated_asset.current_price is not None
+                else None
+            ),
+            previous_close=(
+                Decimal(str(updated_asset.previous_close))
+                if updated_asset.previous_close is not None
+                else None
+            ),
+            day_change=(
+                Decimal(str(updated_asset.day_change))
+                if updated_asset.day_change is not None
+                else None
+            ),
+            day_change_percent=(
+                Decimal(str(updated_asset.day_change_percent))
+                if updated_asset.day_change_percent is not None
+                else None
+            ),
+            market_cap=(
+                Decimal(str(updated_asset.market_cap))
+                if updated_asset.market_cap is not None
+                else None
+            ),
+            pe_ratio=(
+                Decimal(str(updated_asset.pe_ratio))
+                if updated_asset.pe_ratio is not None
+                else None
+            ),
+            dividend_yield=(
+                Decimal(str(updated_asset.dividend_yield))
+                if updated_asset.dividend_yield is not None
+                else None
+            ),
             is_active=updated_asset.is_active,
             data_source=updated_asset.data_source,
             created_at=updated_asset.created_at,
@@ -290,23 +419,23 @@ async def update_asset(
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
-@router.delete("/{asset_id}", response_model=BaseResponse)
+@router.delete("/{asset_id}", response_model=BaseResponse[dict[str, Any]])
 async def delete_asset(
     asset_id: int,
     soft_delete: bool = Query(
         True, description="Soft delete (mark inactive) or hard delete"
     ),
     db: Session = Depends(get_db),
-):
+) -> BaseResponse[dict[str, Any]]:
     """Delete an asset."""
     try:
         if soft_delete:
-            asset = asset_service.soft_delete(db, id=asset_id)
+            asset = asset_service.soft_delete(db, obj_id=asset_id)
         else:
-            asset = asset_service.delete(db, id=asset_id)
+            asset = asset_service.delete(db, obj_id=asset_id)
 
         if not asset:
             raise HTTPException(status_code=404, detail="Asset not found")
@@ -319,13 +448,13 @@ async def delete_asset(
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
-@router.put("/{asset_id}/price", response_model=BaseResponse)
+@router.put("/{asset_id}/price", response_model=BaseResponse[dict[str, Any]])
 async def update_asset_price(
     asset_id: int, price_update: AssetPriceUpdate, db: Session = Depends(get_db)
-):
+) -> BaseResponse[dict[str, Any]]:
     """Update asset price data."""
     try:
         asset = asset_service.get(db, asset_id)
@@ -359,13 +488,13 @@ async def update_asset_price(
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
-@router.post("/prices/bulk-update", response_model=BaseResponse)
+@router.post("/prices/bulk-update", response_model=BaseResponse[dict[str, Any]])
 async def bulk_update_asset_prices(
     bulk_update: BulkAssetPriceUpdate, db: Session = Depends(get_db)
-):
+) -> BaseResponse[dict[str, Any]]:
     """Bulk update asset prices."""
     try:
         updated_count = 0
@@ -423,11 +552,13 @@ async def bulk_update_asset_prices(
             },
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
-@router.get("/price/{ticker}", response_model=BaseResponse)
-async def get_asset_price(ticker: str, db: Session = Depends(get_db)):
+@router.get("/price/{ticker}", response_model=BaseResponse[dict[str, Any]])
+async def get_asset_price(
+    ticker: str, db: Session = Depends(get_db)
+) -> BaseResponse[dict[str, Any]]:
     """Get current price for a specific asset."""
     try:
         asset = asset_service.get_by_field(db, "ticker", ticker.upper())
@@ -453,7 +584,7 @@ async def get_asset_price(ticker: str, db: Session = Depends(get_db)):
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.get("/search/tickers", response_model=BaseResponse[list[AssetSummary]])
@@ -461,7 +592,7 @@ async def search_asset_tickers(
     query: str = Query(..., min_length=1, description="Search query"),
     limit: int = Query(10, ge=1, le=50, description="Maximum number of results"),
     db: Session = Depends(get_db),
-):
+) -> BaseResponse[list[AssetSummary]]:
     """Search for assets by ticker or name (for autocomplete)."""
     try:
         assets = asset_service.search(
@@ -490,4 +621,4 @@ async def search_asset_tickers(
             data=asset_summaries,
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
