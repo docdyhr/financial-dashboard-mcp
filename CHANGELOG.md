@@ -4,9 +4,6 @@
 
 ## v1.2.0 (2025-06-14)
 
-<<<<<<< HEAD
-### Chore
-=======
 ### Added
 
 * **Authentication Documentation**: Comprehensive authentication and authorization guide
@@ -21,8 +18,7 @@
   - **Migration Guide**: Step-by-step transition from current single-user to multi-user setup
   - **Deployment Checklist**: Production security configuration and deployment guidelines
 
-### Fixed
->>>>>>> 78c7171 (feat: add comprehensive authentication documentation)
+### Chore
 
 * chore: bump version to 1.1.1 [skip ci] ([`8553d15`](https://github.com/docdyhr/financial-dashboard-mcp/commit/8553d15365085f548e0997380a129322bd773250))
 
