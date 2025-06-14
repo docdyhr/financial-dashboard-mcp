@@ -121,7 +121,7 @@ pytz==2023.3
 quantlib==1.33
 redis==5.0.1
 reportlab==4.0.8
-requests==2.31.0
+requests==2.32.4
 responses==0.24.1
 rich==13.7.0
 ruff==0.1.11
