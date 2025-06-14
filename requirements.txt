@@ -138,7 +138,7 @@ sqlalchemy==2.0.25
 sqlparse==0.4.4
 starlette>=0.37.2
 statsmodels==0.14.1
-streamlit==1.29.0
+streamlit==1.37.0
 
 # Monitoring & Logging
 structlog==24.1.0
