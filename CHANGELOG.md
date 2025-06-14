@@ -2,6 +2,21 @@
 
 
 
+## v1.1.1 (2025-06-14)
+
+### Chore
+
+* chore: bump version to 1.1.0 [skip ci] ([`7df0dc3`](https://github.com/docdyhr/financial-dashboard-mcp/commit/7df0dc3ff464f358f719b9be84ff645c5f6599b2))
+
+### Fix
+
+* fix: update ruff per-file-ignores configuration
+
+- Added comprehensive per-file-ignores for ruff to silence non-critical issues in non-core files
+- Updated .flake8 configuration with additional per-file rules
+- Ensured linting focus remains on production backend code quality while allowing flexibility in demo/test code ([`a041218`](https://github.com/docdyhr/financial-dashboard-mcp/commit/a041218a0b9825f66d5e9ca64f7019520dcf6cd0))
+
+
 ## v1.1.0 (2025-06-14)
 
 ### Chore
