@@ -2,21 +2,51 @@
 
 
 
+## v1.3.0 (2025-06-14)
+
+### Chore
+
+* chore: bump version to 1.2.0 [skip ci] ([`e49c0ba`](https://github.com/docdyhr/financial-dashboard-mcp/commit/e49c0ba901bcab10ab745b22cb2b536690529756))
+
+### Feature
+
+* feat: add comprehensive authentication documentation
+
+- Created docs/AUTHENTICATION.md with complete implementation guide
+- Added JWT/OAuth2 authentication system architecture
+- Documented multi-user support transition from single-user system
+- Included security best practices and password management
+- Detailed API authentication endpoints and middleware patterns
+- Provided Streamlit frontend authentication integration
+- Added MCP server multi-user support with user context
+- Included email verification and password reset workflows
+- Created comprehensive testing framework for authentication
+- Added migration guide for single-user to multi-user transition
+- Provided production deployment security checklist
+
+Updated project documentation:
+- README.md: Added documentation index with authentication guide
+- TODO.md: Marked authentication documentation as completed
+- CHANGELOG.md: Documented authentication documentation features
+- SYSTEM_STATUS.md: Added authentication documentation phase
+
+This provides a complete roadmap for implementing multi-user authentication
+while maintaining the current single-user production system. ([`c1416b5`](https://github.com/docdyhr/financial-dashboard-mcp/commit/c1416b5085717a060ffed3970409d583b1933fb2))
+
+### Fix
+
+* fix: resolve merge conflicts and cleanup repository
+
+- Resolved version conflict in backend/__init__.py (kept v1.2.0)
+- Merged authentication documentation into CHANGELOG.md
+- Removed empty frontend/app_new.py and app_old.py files
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude &lt;noreply@anthropic.com&gt; ([`e9e5e03`](https://github.com/docdyhr/financial-dashboard-mcp/commit/e9e5e03425fcfa89b2068b2d8e798afb56331d22))
+
+
 ## v1.2.0 (2025-06-14)
-
-### Added
-
-* **Authentication Documentation**: Comprehensive authentication and authorization guide
-  - **Implementation Roadmap**: Complete JWT/OAuth2 authentication system design
-  - **Multi-User Support**: Detailed transition plan from single-user to multi-user system
-  - **Security Best Practices**: Password hashing, token management, and session security
-  - **API Integration**: Authentication endpoints, middleware, and permission systems
-  - **Frontend Integration**: Streamlit authentication with protected routes and user sessions
-  - **MCP Server Support**: User context integration for AI tools and multi-tenant support
-  - **Email Services**: Verification and password reset email workflows
-  - **Testing Framework**: Comprehensive authentication testing strategies
-  - **Migration Guide**: Step-by-step transition from current single-user to multi-user setup
-  - **Deployment Checklist**: Production security configuration and deployment guidelines
 
 ### Chore
 
@@ -97,11 +127,6 @@ This represents a significant code quality improvement and technical debt reduct
 - Fixed pyproject.toml version conflicts (Python 3.11, pytest 7.4.4)
 - Maintained all technical debt improvements from previous commit ([`d15d712`](https://github.com/docdyhr/financial-dashboard-mcp/commit/d15d712290980d29a30d8f4a5429f2a50a1af91b))
 
-
-* **Documentation**: Enhanced project documentation structure
-  - **README**: Added comprehensive documentation index with authentication guide
-  - **TODO**: Updated to reflect authentication documentation completion
-  - **Architecture**: Prepared foundation for multi-user authentication system
 
 ## v1.1.1 (2025-06-14)
 
