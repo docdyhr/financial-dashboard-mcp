@@ -47,6 +47,21 @@ This project provides a single-user financial dashboard to track and analyze pos
 - WebSocket real-time updates
 - React/Next.js frontend migration
 
+## Documentation
+
+### Core Documentation
+- **[Authentication Guide](docs/AUTHENTICATION.md)** - Comprehensive authentication and authorization implementation
+- **[MCP Setup Guide](docs/MCP_SETUP.md)** - AI integration with Claude Desktop
+- **[Task Queue Documentation](docs/TASK_QUEUE.md)** - Background processing setup
+- **[Frontend Guide](docs/FRONTEND_GUIDE.md)** - Streamlit dashboard usage
+- **[API Documentation](http://localhost:8000/docs)** - Interactive API documentation
+
+### Technical Documentation
+- **[System Status](SYSTEM_STATUS.md)** - Current project status and capabilities
+- **[Contributing Guide](CONTRIBUTING.md)** - Development workflow and guidelines
+- **[Changelog](CHANGELOG.md)** - Version history and changes
+- **[TODO List](TODO.md)** - Project roadmap and planned features
+
 ## Architecture
 
 ``` text
