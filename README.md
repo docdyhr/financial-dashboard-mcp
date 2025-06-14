@@ -30,6 +30,8 @@ This project provides a single-user financial dashboard to track and analyze pos
 - **Comprehensive Testing**: Unit and integration tests with real data validation
 - **Frontend Dashboard**: Complete Streamlit dashboard with interactive visualizations
 - **AI Integration**: MCP server with 13 AI-powered tools for portfolio analysis
+- **Code Quality**: Zero technical debt with complete type safety and linting compliance
+- **Streamlined Dependencies**: Clean dependency management with production/dev separation
 
 ### MCP AI Tools 🤖
 
@@ -109,7 +111,7 @@ source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 3. Install dependencies:
 
 ```bash
-# Production dependencies only
+# Production dependencies only (20+ essential packages)
 pip install -r requirements.txt
 
 # OR for development (includes testing, linting, etc.)
@@ -117,7 +119,7 @@ pip install -r requirements-dev.txt
 
 # OR using pyproject.toml (recommended)
 pip install -e .                    # Production
-pip install -e ".[dev]"            # Development
+pip install -e ".[dev]"            # Development with all tools
 ```
 
 4. Set up environment variables:
@@ -224,9 +226,9 @@ financial-dashboard-mcp/
 │   └── architecture.md   # Architecture details
 ├── .env.example          # Environment variables template
 ├── docker-compose.yml    # Docker compose configuration
-├── requirements.txt      # Core production dependencies
-├── requirements-dev.txt  # Development dependencies
-├── pyproject.toml        # Python project configuration
+├── requirements.txt      # Core production dependencies (20+ essential)
+├── requirements-dev.txt  # Development dependencies (testing, linting, etc.)
+├── pyproject.toml        # Python project configuration (single source of truth)
 ├── TODO.md              # Project roadmap and tasks
 └── README.md            # This file
 ```

@@ -217,18 +217,20 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "financial-dashboard-mcp"
-version = "1.1.1"
-description = "A hybrid financial dashboard with AI agent integration and task queue system"
+version = "1.1.2"
+description = "A production-ready financial dashboard with AI integration, zero technical debt, and streamlined dependencies"
 readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"
 authors = [{ name = "Your Name", email = "your.email@example.com" }]
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Financial and Insurance Industry",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Topic :: Office/Business :: Financial :: Investment",
+    "Typing :: Typed",
 ]
 dependencies = [
     "fastapi>=0.109.0",

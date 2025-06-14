@@ -36,7 +36,15 @@ Thank you for your interest in contributing! This guide will help you get starte
    ```bash
    python -m venv .venv
    source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+
+   # Install development dependencies (includes testing, linting, etc.)
+   pip install -r requirements-dev.txt
+
+   # OR install production dependencies only
    pip install -r requirements.txt
+
+   # OR use pyproject.toml (recommended)
+   pip install -e ".[dev]"  # Development with all tools
    ```
 
 3. **Install pre-commit hooks:**
@@ -45,6 +53,8 @@ Thank you for your interest in contributing! This guide will help you get starte
    pre-commit install
    pre-commit install --hook-type commit-msg
    ```
+
+   **Note**: Pre-commit hooks are automatically installed when using `pip install -r requirements-dev.txt`
 
 4. **Set up environment variables:**
 
