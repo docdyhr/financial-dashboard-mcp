@@ -54,7 +54,7 @@ class PriceHistory(Base):
     is_adjusted: Mapped[bool] = mapped_column(default=False, nullable=False)
 
     # Relationships
-    asset: Mapped["Asset"] = relationship("Asset", back_populates="price_history")
+    asset: Mapped[Asset] = relationship("Asset", back_populates="price_history")
 
     # Constraints
     __table_args__ = (

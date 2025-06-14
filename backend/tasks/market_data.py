@@ -152,7 +152,7 @@ def update_portfolio_prices(self, user_id: int | None = None) -> dict[str, Any]:
                     # Update asset current price
                     asset = db.query(Asset).filter(Asset.ticker == ticker).first()
                     if asset:
-                        asset.current_price = latest_price
+                        asset.current_price = float(latest_price)
                         asset.updated_at = datetime.now()
 
                         # Update or create price history record
@@ -169,31 +169,28 @@ def update_portfolio_prices(self, user_id: int | None = None) -> dict[str, Any]:
                             price_record.close_price = Decimal(str(latest_price))
                             price_record.updated_at = datetime.now()
                         else:
-                            price_record = PriceHistory(
+                            price_record = PriceHistory(  # type: ignore[call-arg]
                                 asset_id=asset.id,
                                 price_date=latest_date,
-                                open_price=Decimal(str(hist["Open"].iloc[-1])),
-                                high_price=Decimal(str(hist["High"].iloc[-1])),
-                                low_price=Decimal(str(hist["Low"].iloc[-1])),
+                                open_price=Decimal(str(hist["Open"].iloc[-1])),  # type: ignore[index]
+                                high_price=Decimal(str(hist["High"].iloc[-1])),  # type: ignore[index]
+                                low_price=Decimal(str(hist["Low"].iloc[-1])),  # type: ignore[index]
                                 close_price=Decimal(str(latest_price)),
-                                volume=(
-                                    int(hist["Volume"].iloc[-1])
-                                    if "Volume" in hist
-                                    else None
-                                ),
-                            )  # type: ignore[call-arg]
+                                volume=int(hist["Volume"].iloc[-1]) if "Volume" in hist.columns else None,  # type: ignore[index]
+                            )
                             db.add(price_record)
+                    db.commit()
 
-                        updated_count += 1
+                    updated_count += 1
 
-                        current_task.update_state(
-                            state="PROGRESS",
-                            meta={
-                                "current": i + 1,
-                                "total": len(tickers),
-                                "status": f"Updated {ticker}",
-                            },
-                        )
+                    current_task.update_state(
+                        state="PROGRESS",
+                        meta={
+                            "current": i + 1,
+                            "total": len(tickers),
+                            "status": f"Updated {ticker}: ${latest_price:.2f}",
+                        },
+                    )
 
                 except Exception as e:
                     logger.error(f"Error updating price for {ticker}: {e!s}")

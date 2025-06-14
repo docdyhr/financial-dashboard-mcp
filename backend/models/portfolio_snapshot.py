@@ -201,12 +201,10 @@ class PortfolioSnapshot(Base):
         user_id: int,
         snapshot_date: date,
         positions: list["Position"],
-        cash_balance: Decimal | None = None,
+        cash_balance: Decimal = Decimal("0"),
         **kwargs: Any,
     ) -> "PortfolioSnapshot":
         """Factory method to create portfolio snapshot from current positions."""
-        if cash_balance is None:
-            cash_balance = Decimal("0")
         total_value = cash_balance
         total_cost_basis = Decimal("0")
         equity_value = Decimal("0")

@@ -17,10 +17,10 @@ per-file-ignores =
     tests/*: D, S101, C901, B950, F401, E402, RET504, SIM102, DTZ011, B007, C401, C403, C408, F841, PLR0913, PLR0915, PLR0912, PLR0911
     frontend/*: F841, E501, C901, PLR0912, PLR0915, C408
     scripts/*: F841, E501, E402, C901, PLR0912, PLR0915, B007, PTH118, PTH120, PTH123, F401, SIM102, SIM118
-    mcp_server/*: F841, E501, C901, PLR0912, PLR0915, PLR0911, B008
-    backend/api/*: PLR0913, B904, B008
-    backend/services/*: F841, PLR0913, C901, PLR0912, PLR0915, F401, A002, SIM108, DTZ011, C401, C403, B008
-    backend/models/*: PLR0913, B008
+    mcp_server/*: F841, E501, C901, PLR0912, PLR0915, PLR0911
+    backend/api/*: PLR0913, B904
+    backend/services/*: F841, PLR0913, C901, PLR0912, PLR0915, F401, A002, SIM108, DTZ011, C401, C403
+    backend/models/*: PLR0913
     backend/tasks/*: F841, E402, I001, B007, C403, E501
     backend/services/base.py: F841
     backend/tasks/portfolio.py: F841

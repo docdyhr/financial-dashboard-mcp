@@ -1,6 +1,10 @@
 """Financial Dashboard Backend Package."""
 
+<<<<<<< HEAD
 __version__ = "1.2.0"
+=======
+__version__ = "1.1.1"
+>>>>>>> 78c7171 (feat: add comprehensive authentication documentation)
 __title__ = "Financial Dashboard MCP"
 __description__ = "A comprehensive financial dashboard system with AI integration"
 __author__ = "Financial Dashboard Team"

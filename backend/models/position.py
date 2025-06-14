@@ -53,9 +53,9 @@ class Position(Base):
     is_active: Mapped[bool] = mapped_column(default=True, nullable=False)
 
     # Relationships
-    user: Mapped["User"] = relationship("User", back_populates="positions")
-    asset: Mapped["Asset"] = relationship("Asset", back_populates="positions")
-    transactions: Mapped[List["Transaction"]] = relationship(
+    user: Mapped[User] = relationship("User", back_populates="positions")
+    asset: Mapped[Asset] = relationship("Asset", back_populates="positions")
+    transactions: Mapped[List[Transaction]] = relationship(
         "Transaction",
         back_populates="position",
         cascade="all, delete-orphan",
