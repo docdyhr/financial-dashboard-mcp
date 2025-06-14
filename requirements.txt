@@ -125,7 +125,7 @@ requests==2.31.0
 responses==0.24.1
 rich==13.7.0
 ruff==0.1.11
-scikit-learn==1.3.2
+scikit-learn==1.5.0
 
 # Financial Analysis
 scipy==1.11.4
