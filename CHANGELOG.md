@@ -2,59 +2,87 @@
 
 
 
-## v1.1.2 (2025-01-13)
+## v1.2.0 (2025-06-14)
 
-### Added
+### Chore
 
-* **Authentication Documentation**: Comprehensive authentication and authorization guide
-  - **Implementation Roadmap**: Complete JWT/OAuth2 authentication system design
-  - **Multi-User Support**: Detailed transition plan from single-user to multi-user system
-  - **Security Best Practices**: Password hashing, token management, and session security
-  - **API Integration**: Authentication endpoints, middleware, and permission systems
-  - **Frontend Integration**: Streamlit authentication with protected routes and user sessions
-  - **MCP Server Support**: User context integration for AI tools and multi-tenant support
-  - **Email Services**: Verification and password reset email workflows
-  - **Testing Framework**: Comprehensive authentication testing strategies
-  - **Migration Guide**: Step-by-step transition from current single-user to multi-user setup
-  - **Deployment Checklist**: Production security configuration and deployment guidelines
+* chore: bump version to 1.1.1 [skip ci] ([`8553d15`](https://github.com/docdyhr/financial-dashboard-mcp/commit/8553d15365085f548e0997380a129322bd773250))
 
-### Fixed
+* chore: bump version to 1.1.1 [skip ci] ([`89bcdd8`](https://github.com/docdyhr/financial-dashboard-mcp/commit/89bcdd83868b10f0251040d5e0849d676297b28a))
 
-* **Technical Debt Cleanup**: Major technical debt reduction and code quality improvements
-  - **Dependency Management**: Cleaned up bloated requirements.txt (100+ → 20+ essential packages)
-  - **Development Setup**: Created separate requirements-dev.txt for development dependencies
-  - **Code Duplication**: Removed duplicate frontend files (app_new.py, app_old.py)
-  - **Type Safety**: Fixed all mypy type checking errors across codebase (4 errors in market_data.py)
-  - **Service Health**: Implemented proper service health checks with real database/Redis/Celery status
-  - **Portfolio Calculations**: Added position weight calculation with proper Decimal type handling
-  - **Documentation**: Updated hardcoded cash balance comments with proper implementation notes
-  - **Linting Configuration**: Fixed ruff configuration by removing invalid TC004 rule
-  - **Import Structure**: Fixed circular import issues in model type annotations using quoted strings
-  - **FastAPI Patterns**: Updated flake8 configuration to properly ignore FastAPI B008 patterns
-  - **Quality Assurance**: All linting tools now pass cleanly (ruff, flake8, mypy)
-  - **Test Coverage**: 41/43 tests passing (2 integration tests require external services)
+### Documentation
 
-* **Code Quality**: Achieved zero technical debt with comprehensive improvements
-  - **Error Handling**: Market data tasks now handle None asset cases with proper type safety
-  - **Factory Patterns**: Portfolio snapshots use factory methods instead of direct constructors
-  - **Service Monitoring**: Service status endpoint provides real health checks for DB/Redis/Celery
-  - **Type Safety**: Complete type safety with proper Decimal handling and SQLAlchemy text() usage
-  - **Code Standards**: All TODO/FIXME markers resolved with proper implementations
-  - **Performance**: Enhanced error handling and type safety throughout codebase
+* docs: update all project files to reflect technical debt cleanup and production readiness
 
-### Changed
+- Updated README.md to highlight zero technical debt and streamlined dependencies
+- Enhanced CHANGELOG.md with detailed technical debt cleanup accomplishments
+- Updated TODO.md to reflect production-ready status with zero technical debt
+- Updated CONTRIBUTING.md to reflect new dependency structure and development setup
+- Updated SYSTEM_STATUS.md to document code quality improvements and current status
+- Updated pyproject.toml version to 1.1.2 and status to Production/Stable
+- Fixed version consistency across all project files (backend/__init__.py)
+- Added comprehensive documentation of recent improvements across all files
 
-* **Dependencies**: Complete dependency management overhaul
-  - **Installation Guide**: Updated README.md with clear installation instructions for production vs development
-  - **Single Source**: pyproject.toml now serves as single source of truth for project configuration
-  - **Clean Separation**: Clear separation between 20+ production and 30+ development dependencies
-  - **Version Management**: Fixed pyproject.toml version conflicts (Python 3.11, pytest 7.4.4)
-  - **Package Organization**: Alphabetically sorted and categorized dependencies for maintainability
+All project documentation now accurately reflects the current production-ready state with:
+- Zero technical debt and complete code quality compliance
+- Streamlined dependencies (100+ → 20+ essential packages)
+- Complete type safety with all mypy errors resolved
+- Clean architecture with proper error handling
+- 41/43 tests passing (2 require external services)
+- All linting tools passing cleanly (ruff, flake8, mypy) ([`bf96744`](https://github.com/docdyhr/financial-dashboard-mcp/commit/bf96744528c385838ac6e8bb7ba2df91afd44f3d))
 
-* **Documentation**: Enhanced project documentation structure
-  - **README**: Added comprehensive documentation index with authentication guide
-  - **TODO**: Updated to reflect authentication documentation completion
-  - **Architecture**: Prepared foundation for multi-user authentication system
+### Feature
+
+* feat: add comprehensive authentication documentation
+
+- Created docs/AUTHENTICATION.md with complete implementation guide
+- Added JWT/OAuth2 authentication system architecture
+- Documented multi-user support transition from single-user system
+- Included security best practices and password management
+- Detailed API authentication endpoints and middleware patterns
+- Provided Streamlit frontend authentication integration
+- Added MCP server multi-user support with user context
+- Included email verification and password reset workflows
+- Created comprehensive testing framework for authentication
+- Added migration guide for single-user to multi-user transition
+- Provided production deployment security checklist
+
+Updated project documentation:
+- README.md: Added documentation index with authentication guide
+- TODO.md: Marked authentication documentation as completed
+- CHANGELOG.md: Documented authentication documentation features
+- SYSTEM_STATUS.md: Added authentication documentation phase
+
+This provides a complete roadmap for implementing multi-user authentication
+while maintaining the current single-user production system. ([`d469d20`](https://github.com/docdyhr/financial-dashboard-mcp/commit/d469d20dd54c88a077b8d6cc9826c964d1e991b7))
+
+### Refactor
+
+* refactor: major technical debt cleanup and dependency streamlining
+
+- Streamlined requirements.txt from 100+ to 20+ essential dependencies
+- Created requirements-dev.txt for development dependencies
+- Fixed all mypy type checking errors across codebase
+- Resolved all TODO/FIXME markers with proper implementations
+- Removed duplicate frontend files (app_new.py, app_old.py)
+- Fixed circular import issues in model type annotations
+- Implemented proper service health checks in main.py
+- Added position weight calculation in portfolio service
+- Fixed ruff configuration by removing invalid TC004 rule
+- Updated flake8 to properly ignore FastAPI B008 patterns
+- Enhanced error handling in market data tasks
+- All linting, type checking, and tests now pass cleanly
+
+This represents a significant code quality improvement and technical debt reduction, making the codebase more maintainable and production-ready. ([`eaca017`](https://github.com/docdyhr/financial-dashboard-mcp/commit/eaca0177e9359d5bf3eb6b770bb4fd264a8fa65a))
+
+### Unknown
+
+* resolve merge conflicts and complete technical debt cleanup
+
+- Resolved CHANGELOG.md merge conflict by keeping both versions
+- Fixed pyproject.toml version conflicts (Python 3.11, pytest 7.4.4)
+- Maintained all technical debt improvements from previous commit ([`d15d712`](https://github.com/docdyhr/financial-dashboard-mcp/commit/d15d712290980d29a30d8f4a5429f2a50a1af91b))
+
 
 ## v1.1.1 (2025-06-14)
 
