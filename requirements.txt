@@ -4,7 +4,7 @@ aiodns==3.1.1
 
 # Async Support
 aiofiles==23.2.1
-aiohttp==3.9.1
+aiohttp==3.10.11
 aioredis==2.0.1
 aioresponses==0.7.6
 alembic==1.13.1
