@@ -24,7 +24,7 @@ ensure_newline_before_comments = true
 skip_glob = ["*/migrations/*", "*/venv/*"]
 
 [tool.mypy]
-python_version = "1.1.1"
+python_version = "3.11"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
@@ -46,7 +46,7 @@ disallow_untyped_defs = false
 disallow_incomplete_defs = false
 
 [tool.pytest.ini_options]
-minversion = "1.1.1"
+minversion = "7.4.4"
 testpaths = ["tests"]
 python_files = "test_*.py"
 python_classes = "Test*"
