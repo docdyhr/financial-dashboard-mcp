@@ -2,6 +2,38 @@
 
 
 
+## v1.5.0 (2025-06-15)
+
+### Chore
+
+* chore: bump version to 1.4.0 [skip ci] ([`07f3e4d`](https://github.com/docdyhr/financial-dashboard-mcp/commit/07f3e4def600a795d44aeaf9f1c45eb9c42fd4d3))
+
+### Feature
+
+* feat: comprehensive documentation reorganization and diagnostic fixes
+
+- Move STARTUP_GUIDE.md to docs/QUICK_START.md with complete rewrite
+- Add comprehensive Quick Start Guide with 3-minute setup instructions
+- Update README.md to reference new documentation structure
+- Fix critical type safety issues in test scripts:
+  * test_full_stack.py: Fixed database query null checks
+  * manage_services.py: Fixed port checking and database URL validation
+  * test_mcp_standalone.py: Fixed Optional import and argument handling
+- Add extensive documentation files for all major components:
+  * MCP setup, troubleshooting, and Claude Desktop integration
+  * Service management and monitoring guides
+  * Frontend and backend configuration guides
+- Add comprehensive test scripts for full stack validation
+- Add service management scripts with health checking
+- Update .gitignore to exclude .pids directory for process ID files
+- Resolve pyproject.toml version conflicts from upstream changes
+- Fix all linting issues: bare except clauses, unused imports, E402 violations
+- Add proper executable permissions to script files
+- Add security suppressions for justified subprocess usage
+
+All critical diagnostic errors resolved - zero errors remaining in codebase ([`dbfb9fc`](https://github.com/docdyhr/financial-dashboard-mcp/commit/dbfb9fcbecbdd5adf85b65754f4ac114199a708e))
+
+
 ## v1.4.0 (2025-06-15)
 
 ### Chore
