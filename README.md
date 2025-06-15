@@ -50,6 +50,7 @@ This project provides a single-user financial dashboard to track and analyze pos
 ## Documentation
 
 ### Core Documentation
+- **[Quick Start Guide](docs/QUICK_START.md)** - Get running in under 5 minutes
 - **[Authentication Guide](docs/AUTHENTICATION.md)** - Comprehensive authentication and authorization implementation
 - **[MCP Setup Guide](docs/MCP_SETUP.md)** - AI integration with Claude Desktop
 - **[Task Queue Documentation](docs/TASK_QUEUE.md)** - Background processing setup
@@ -100,52 +101,42 @@ This project provides a single-user financial dashboard to track and analyze pos
 
 ## Getting Started
 
-### Prerequisites
+> **📚 For detailed setup instructions, see the [Quick Start Guide](docs/QUICK_START.md)**
 
-- Python 3.11.13
-- PostgreSQL
-- Redis
-- Docker and Docker Compose (for containerized deployment)
-
-### Installation
-
-1. Clone the repository:
+### Fastest Setup (3 minutes)
 
 ```bash
 git clone https://github.com/docdyhr/financial-dashboard-mcp.git
 cd financial-dashboard-mcp
+./scripts/start_dashboard.sh
 ```
 
-1. Create and activate virtual environment:
+Access your dashboard:
+- 🌐 **Frontend**: http://localhost:8501
+- 🔧 **API**: http://localhost:8000/docs
+- 📊 **Tasks**: http://localhost:5555
 
+### Manual Installation
+
+1. **Prerequisites**: Python 3.11.13, PostgreSQL, Redis
+
+2. **Setup**:
 ```bash
-python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+source .venv/bin/activate
+make install-dev
+cp .env.example .env  # Edit with your settings
 ```
 
-3. Install dependencies:
-
+3. **Start Services**:
 ```bash
-# Production dependencies only (20+ essential packages)
-pip install -r requirements.txt
-
-# OR for development (includes testing, linting, etc.)
-pip install -r requirements-dev.txt
-
-# OR using pyproject.toml (recommended)
-pip install -e .                    # Production
-pip install -e ".[dev]"            # Development with all tools
+make run-backend    # Terminal 1: API server
+make run-frontend   # Terminal 2: Dashboard
+make run-celery     # Terminal 3: Background tasks
 ```
 
-4. Set up environment variables:
+### MCP Server Authentication
 
-```bash
-cp .env.example .env
-# Edit .env with your configuration
-
-## Important: MCP Server Authentication
-
-The MCP server requires a token for all API access. Set `MCP_AUTH_TOKEN` in your `.env` file:
+Set `MCP_AUTH_TOKEN` in your `.env` file:
 
 ```
 

@@ -2,6 +2,7 @@
 
 from functools import lru_cache
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -41,9 +42,18 @@ class Settings(BaseSettings):
     # CORS
     cors_origins: list[str] = ["http://localhost:8501", "http://localhost:3000"]
 
+    @field_validator("cors_origins", mode="before")
+    @classmethod
+    def parse_cors_origins(cls, v):
+        """Parse CORS origins from string or list."""
+        if isinstance(v, str):
+            return [origin.strip() for origin in v.split(",")]
+        return v
+
     # Market Data
     alpha_vantage_api_key: str | None = None
     yfinance_start_date: str = "2020-01-01"
+    finnhub_api_key: str | None = None
 
     # Logging
     log_level: str = "INFO"
@@ -57,6 +67,10 @@ class Settings(BaseSettings):
     mcp_server_host: str = "localhost"
     mcp_server_port: int = 8502
     mcp_auth_token: str = "development-token"
+
+    # Flower UI Configuration
+    flower_username: str = "admin"
+    flower_password: str = "admin"
 
     # Celery Beat Schedule (in seconds)
     market_data_update_interval: int = 300

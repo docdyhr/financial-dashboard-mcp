@@ -1,5 +1,7 @@
 """Portfolio overview components for the Financial Dashboard."""
 
+from typing import Dict
+
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
@@ -107,7 +109,7 @@ def performance_metrics_widget(backend_url: str):
             index=2,  # Default to 1M
         )
 
-    performance_data = get_performance_data(backend_url, selected_period)
+    performance_data = get_performance_data(backend_url, selected_period or "1M")
 
     if performance_data:
         col1, col2, col3, col4 = st.columns(4)
@@ -128,9 +130,12 @@ def performance_metrics_widget(backend_url: str):
             max_drawdown = performance_data.get("max_drawdown", 0)
             st.metric(label="Max Drawdown", value=f"{max_drawdown:.2f}%", delta=None)
     else:
-        st.info(
-            f"Performance data for {period_options[selected_period]} is not available yet."
+        period_name = (
+            period_options.get(selected_period, "selected period")
+            if selected_period
+            else "selected period"
         )
+        st.info(f"Performance data for {period_name} is not available yet.")
 
 
 def asset_allocation_chart(backend_url: str):
@@ -230,7 +235,10 @@ def holdings_table(backend_url: str):
 
         # Select and rename columns
         available_columns = [col for col in column_mapping if col in display_df.columns]
-        display_df = display_df[available_columns].rename(columns=column_mapping)
+        rename_dict: Dict[str, str] = {
+            k: v for k, v in column_mapping.items() if k in available_columns
+        }
+        display_df = display_df[available_columns].rename(columns=rename_dict)  # type: ignore
 
         # Color code P&L columns
         st.dataframe(display_df, use_container_width=True, hide_index=True)
@@ -268,36 +276,71 @@ def portfolio_value_chart(backend_url: str):
     """Display portfolio value over time chart."""
     st.subheader("📊 Portfolio Value Over Time")
 
-    # This would need historical data from the backend
-    # For now, show a placeholder
-    st.info(
-        "Historical portfolio value chart will be available once you have portfolio snapshots."
-    )
-
-    # Placeholder chart with sample data
-    dates = pd.date_range(start="2024-01-01", end="2024-12-31", freq="D")
-    values = pd.Series(index=dates, data=range(100000, 100000 + len(dates) * 100))
-
-    fig = go.Figure()
-    fig.add_trace(
-        go.Scatter(
-            x=dates,
-            y=values,
-            mode="lines",
-            name="Portfolio Value",
-            line=dict(color="blue", width=2),
+    try:
+        # This would need historical data from the backend
+        # For now, show a placeholder
+        st.info(
+            "Historical portfolio value chart will be available once you have portfolio snapshots."
         )
-    )
 
-    fig.update_layout(
-        title="Sample Portfolio Growth",
-        xaxis_title="Date",
-        yaxis_title="Portfolio Value ($)",
-        height=400,
-        showlegend=False,
-    )
+        # Placeholder chart with sample data
+        dates = pd.date_range(start="2024-01-01", end="2024-12-31", freq="D")
 
-    st.plotly_chart(fig, use_container_width=True)
+        # Validate date range
+        if len(dates) == 0:
+            st.error("Invalid date range for portfolio chart")
+            return
+
+        # Create values that grow over time with some realistic variation
+        import numpy as np
+
+        base_value = 100000
+        growth_rate = 0.0003  # ~11% annual growth
+        volatility = 0.015  # Daily volatility
+
+        # Generate realistic portfolio growth with random walks
+        np.random.seed(42)  # For reproducible results
+        daily_returns = np.random.normal(growth_rate, volatility, len(dates))
+        cumulative_returns = np.cumprod(1 + daily_returns)
+
+        # Ensure data lengths match
+        if len(cumulative_returns) != len(dates):
+            st.error("Data length mismatch in portfolio chart generation")
+            return
+
+        values = pd.Series(index=dates, data=base_value * cumulative_returns)
+
+        # Validate the series was created successfully
+        if values.empty or values.isna().all():
+            st.error("Failed to generate portfolio data")
+            return
+
+        fig = go.Figure()
+        fig.add_trace(
+            go.Scatter(
+                x=dates,
+                y=values,
+                mode="lines",
+                name="Portfolio Value",
+                line=dict(color="blue", width=2),
+            )
+        )
+
+        fig.update_layout(
+            title="Sample Portfolio Growth",
+            xaxis_title="Date",
+            yaxis_title="Portfolio Value ($)",
+            height=400,
+            showlegend=False,
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
+
+    except ImportError as e:
+        st.error(f"Missing required library: {e}")
+    except Exception as e:
+        st.error(f"Error generating portfolio chart: {e}")
+        st.info("Please check the logs for more details.")
 
 
 def refresh_data_button(backend_url: str):

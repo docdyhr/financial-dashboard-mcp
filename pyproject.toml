@@ -24,7 +24,7 @@ ensure_newline_before_comments = true
 skip_glob = ["*/migrations/*", "*/venv/*"]
 
 [tool.mypy]
-python_version = "1.4.0"
+python_version = "3.11"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
@@ -46,7 +46,7 @@ disallow_untyped_defs = false
 disallow_incomplete_defs = false
 
 [tool.pytest.ini_options]
-minversion = "1.4.0"
+minversion = "7.0"
 testpaths = ["tests"]
 python_files = "test_*.py"
 python_classes = "Test*"
@@ -104,7 +104,7 @@ exclude_lines = [
 
 [tool.ruff]
 line-length = 88
-target-version = "1.4.0"
+target-version = "py311"
 exclude = [
     ".venv",
     "venv",
@@ -143,6 +143,7 @@ dependencies = [
     "uvicorn>=0.25.0",
     "pydantic>=2.5.3",
     "python-multipart>=0.0.6",
+    "mcp>=1.0.0",
 ]
 
 [project.optional-dependencies]
@@ -154,6 +155,9 @@ dev = [
     "mypy>=1.8.0",
     "pre-commit>=3.6.0",
 ]
+
+[project.scripts]
+financial-dashboard-mcp = "mcp_server.run:main_entry"
 
 [tool.setuptools.packages.find]
 include = ["backend*", "frontend*", "mcp_server*"]
@@ -172,16 +176,46 @@ changelog_format = "%(version)s (%(date)s)"
 changelog_pattern = "^(feat|fix|refactor|perf|style|test|build|ci|docs|chore)?(\\(.+\\))?(!)?"
 changelog_start_rev = "v1.0.0"
 style = [
-    ["qmark", "fg:#ff9d00 bold"],
-    ["question", "bold"],
-    ["answer", "fg:#ff9d00 bold"],
-    ["pointer", "fg:#ff9d00 bold"],
-    ["highlighted", "fg:#ff9d00 bold"],
-    ["selected", "fg:#cc5454"],
-    ["separator", "fg:#cc5454"],
-    ["instruction", ""],
-    ["text", ""],
-    ["disabled", "fg:#858585 italic"]
+    [
+        "qmark",
+        "fg:#ff9d00 bold",
+    ],
+    [
+        "question",
+        "bold",
+    ],
+    [
+        "answer",
+        "fg:#ff9d00 bold",
+    ],
+    [
+        "pointer",
+        "fg:#ff9d00 bold",
+    ],
+    [
+        "highlighted",
+        "fg:#ff9d00 bold",
+    ],
+    [
+        "selected",
+        "fg:#cc5454",
+    ],
+    [
+        "separator",
+        "fg:#cc5454",
+    ],
+    [
+        "instruction",
+        "",
+    ],
+    [
+        "text",
+        "",
+    ],
+    [
+        "disabled",
+        "fg:#858585 italic",
+    ],
 ]
 
 # Semantic release configuration
@@ -220,7 +254,18 @@ prerelease_token = "rc"
 prerelease = false
 
 [tool.semantic_release.commit_parser_options]
-allowed_tags = ["build", "chore", "ci", "docs", "feat", "fix", "perf", "style", "refactor", "test"]
+allowed_tags = [
+    "build",
+    "chore",
+    "ci",
+    "docs",
+    "feat",
+    "fix",
+    "perf",
+    "style",
+    "refactor",
+    "test",
+]
 minor_tags = ["feat"]
 patch_tags = ["fix", "perf"]
 
@@ -264,7 +309,10 @@ replace = "## [Unreleased]\n\n## [{new_version}] - {now:%Y-%m-%d}"
 
 [tool.bandit]
 exclude_dirs = ["tests", "migrations", ".venv", "venv"]
-skips = ["B101", "B601"]  # Skip assert_used and shell_injection_subprocess for tests
+skips = [
+    "B101",
+    "B601",
+] # Skip assert_used and shell_injection_subprocess for tests
 
 [tool.bandit.assert_used]
 skips = ["*_test.py", "test_*.py"]
