@@ -417,7 +417,6 @@ Found {len(unique_opportunities)} opportunities matching your criteria:
             for item in allocation_data.get("allocation", []):
                 asset_type = item.get("asset_type", "").lower()
                 percentage = item.get("percentage", 0.0)
-                value = item.get("value", 0.0)
 
                 if "stock" in asset_type or "equity" in asset_type:
                     current_allocation["stocks"] = (

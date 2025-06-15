@@ -294,7 +294,6 @@ class PortfolioTools:
                 f"{self.backend_url}/api/portfolio/positions", json=position_data
             )
             response.raise_for_status()
-            result = response.json()
 
             ticker = position_data["ticker"]
             quantity = position_data["quantity"]

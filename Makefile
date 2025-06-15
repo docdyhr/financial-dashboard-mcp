@@ -36,7 +36,7 @@ lint:
 	mypy .
 
 type-check:
-	mypy backend frontend mcp_server
+	mypy .
 
 test:
 	pytest

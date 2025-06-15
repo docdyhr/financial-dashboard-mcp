@@ -9,6 +9,16 @@ import pytest
 from faker import Faker
 
 
+def pytest_addoption(parser):
+    """Add custom command line options for pytest."""
+    parser.addoption(
+        "--run-integration",
+        action="store_true",
+        default=False,
+        help="run integration tests that require external services",
+    )
+
+
 @pytest.fixture(scope="session", autouse=True)
 def setup_test_environment():
     """Set up the test environment."""

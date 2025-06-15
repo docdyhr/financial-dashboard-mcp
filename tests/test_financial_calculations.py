@@ -68,7 +68,7 @@ class TestFinancialCalculations:
     def test_zero_division_protection(self) -> None:
         """Test protection against division by zero errors."""
         with pytest.raises(ZeroDivisionError):
-            result = Decimal("1000") / Decimal("0")
+            _ = Decimal("1000") / Decimal("0")
 
     def test_negative_values_handling(self) -> None:
         """Test handling of negative financial values."""

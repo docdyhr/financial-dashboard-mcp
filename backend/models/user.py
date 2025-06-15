@@ -1,11 +1,17 @@
 """User model for authentication and user management."""
 
 from datetime import datetime
+from typing import TYPE_CHECKING, List
 
 from sqlalchemy import Boolean, String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from backend.models.base import Base
+
+if TYPE_CHECKING:
+    from backend.models.portfolio_snapshot import PortfolioSnapshot
+    from backend.models.position import Position
+    from backend.models.transaction import Transaction
 
 
 class User(Base):
@@ -37,6 +43,17 @@ class User(Base):
     # Timestamps for auth tracking
     last_login: Mapped[datetime | None] = mapped_column(nullable=True)
     email_verified_at: Mapped[datetime | None] = mapped_column(nullable=True)
+
+    # Relationships
+    positions: Mapped[List["Position"]] = relationship(
+        "Position", back_populates="user", cascade="all, delete-orphan"
+    )
+    transactions: Mapped[List["Transaction"]] = relationship(
+        "Transaction", back_populates="user", cascade="all, delete-orphan"
+    )
+    portfolio_snapshots: Mapped[List["PortfolioSnapshot"]] = relationship(
+        "PortfolioSnapshot", back_populates="user", cascade="all, delete-orphan"
+    )
 
     def __repr__(self) -> str:
         return f"<User(id={self.id}, username={self.username}, email={self.email})>"

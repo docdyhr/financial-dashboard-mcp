@@ -8,11 +8,11 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from backend.database import get_db_session
-from backend.models.asset import Asset, AssetCategory, AssetType
-from backend.models.position import Position
-from backend.models.user import User
-from backend.tasks.manager import task_manager
+from backend.database import get_db_session  # noqa: E402
+from backend.models.asset import Asset, AssetCategory, AssetType  # noqa: E402
+from backend.models.position import Position  # noqa: E402
+from backend.models.user import User  # noqa: E402
+from backend.tasks.manager import task_manager  # noqa: E402
 
 
 def setup_test_data():

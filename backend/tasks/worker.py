@@ -8,7 +8,7 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from backend.tasks import celery_app  # Import task modules
+from backend.tasks import celery_app  # noqa: E402  # Import task modules
 
 # Configure logging
 logging.basicConfig(

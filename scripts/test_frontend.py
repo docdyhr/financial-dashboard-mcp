@@ -31,8 +31,11 @@ def test_backend_connection():
 def test_frontend_components():
     """Test that frontend components can be imported."""
     try:
-        from frontend.components.portfolio import portfolio_overview_widget
-        from frontend.components.tasks import task_monitoring_widget
+        # Testing import availability - unused imports are expected
+        from frontend.components.portfolio import (  # noqa: F401
+            portfolio_overview_widget,
+        )
+        from frontend.components.tasks import task_monitoring_widget  # noqa: F401
 
         print("✅ Frontend components imported successfully")
         return True
@@ -56,8 +59,9 @@ def test_streamlit_import():
 def test_plotly_import():
     """Test that Plotly can be imported."""
     try:
-        import plotly.express as px
-        import plotly.graph_objects as go
+        # Testing import availability - unused imports are expected
+        import plotly.express as px  # noqa: F401
+        import plotly.graph_objects as go  # noqa: F401
 
         print("✅ Plotly is available for charts")
         return True

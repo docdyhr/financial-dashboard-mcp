@@ -134,7 +134,7 @@ def test_mcp_configuration():
         logger.info("✅ HTTP client available")
 
         # Test tool creation
-        test_tool = Tool(
+        _ = Tool(
             name="test_tool",
             description="A test tool",
             inputSchema={
@@ -147,7 +147,7 @@ def test_mcp_configuration():
         logger.info("✅ Tool creation successful")
 
         # Test text content creation
-        test_content = TextContent(type="text", text="Test content")
+        _ = TextContent(type="text", text="Test content")
         logger.info("✅ TextContent creation successful")
 
         logger.info("✅ MCP configuration test passed!")

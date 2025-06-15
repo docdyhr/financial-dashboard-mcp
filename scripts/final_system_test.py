@@ -88,7 +88,7 @@ class SystemTester:
 
             # Test analytics tools (these work without backend)
             analytics_tools = AnalyticsTools(self.backend_url)
-            result = await analytics_tools.execute_tool(
+            _ = await analytics_tools.execute_tool(
                 "recommend_allocation", {"risk_tolerance": "moderate"}
             )
             logger.info("✅ Analytics tools working")

@@ -1,12 +1,18 @@
 """Asset model for tracking stocks, bonds, ETFs, and other financial instruments."""
 
 from enum import Enum
+from typing import TYPE_CHECKING, List
 
 from sqlalchemy import Enum as SQLEnum
 from sqlalchemy import Numeric, String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from backend.models.base import Base
+
+if TYPE_CHECKING:
+    from backend.models.position import Position
+    from backend.models.price_history import PriceHistory
+    from backend.models.transaction import Transaction
 
 
 class AssetType(str, Enum):
@@ -91,6 +97,17 @@ class Asset(Base):
     data_source: Mapped[str | None] = mapped_column(
         String(50), nullable=True
     )  # e.g., "yfinance", "alpha_vantage"
+
+    # Relationships
+    positions: Mapped[List["Position"]] = relationship(
+        "Position", back_populates="asset", cascade="all, delete-orphan"
+    )
+    transactions: Mapped[List["Transaction"]] = relationship(
+        "Transaction", back_populates="asset", cascade="all, delete-orphan"
+    )
+    price_history: Mapped[List["PriceHistory"]] = relationship(
+        "PriceHistory", back_populates="asset", cascade="all, delete-orphan"
+    )
 
     def __repr__(self) -> str:
         return f"<Asset(id={self.id}, ticker={self.ticker}, name={self.name}, type={self.asset_type})>"

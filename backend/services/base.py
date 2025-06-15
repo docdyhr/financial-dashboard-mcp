@@ -3,7 +3,6 @@
 from typing import Any, Generic, TypeVar, cast
 
 from pydantic import BaseModel
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from backend.models.base import Base
@@ -93,8 +92,6 @@ class BaseService(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         obj_in: UpdateSchemaType | dict[str, Any],
     ) -> ModelType:
         """Update an existing record."""
-        obj_data = db_obj.__dict__.copy()
-
         if hasattr(obj_in, "model_dump"):
             update_data: dict[str, Any] = obj_in.model_dump(exclude_unset=True)  # type: ignore[attr-defined]
         else:

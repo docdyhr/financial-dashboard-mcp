@@ -6,13 +6,11 @@ from decimal import Decimal
 from typing import Any
 
 from celery import current_task
-from sqlalchemy import func
 
 from backend.database import get_db_session
 from backend.models.asset import Asset
 from backend.models.portfolio_snapshot import PortfolioSnapshot
 from backend.models.position import Position
-from backend.models.price_history import PriceHistory
 from backend.models.user import User
 from backend.tasks import celery_app
 
@@ -357,78 +355,58 @@ def generate_portfolio_report(
 
         days_back = lookback_days.get(report_type, 30)
 
-        with get_db_session() as db:
-            # Get current portfolio performance
-            performance_result = calculate_portfolio_performance(user_id, days_back)
+        # Get current portfolio performance
+        performance_result = calculate_portfolio_performance(user_id, days_back)
 
-            if performance_result["status"] != "completed":
-                return performance_result
+        if performance_result["status"] != "completed":
+            return performance_result
 
-            metrics = performance_result["metrics"]
+        metrics = performance_result["metrics"]
 
-            # Get top performers and worst performers
-            positions = metrics.get("positions", [])
-            top_performers = sorted(
-                positions, key=lambda x: x["unrealized_gain_loss_percent"], reverse=True
-            )[:5]
-            worst_performers = sorted(
-                positions, key=lambda x: x["unrealized_gain_loss_percent"]
-            )[:5]
+        # Get top performers and worst performers
+        positions = metrics.get("positions", [])
+        top_performers = sorted(
+            positions, key=lambda x: x["unrealized_gain_loss_percent"], reverse=True
+        )[:5]
+        worst_performers = sorted(
+            positions, key=lambda x: x["unrealized_gain_loss_percent"]
+        )[:5]
 
-            # Calculate additional metrics
-            start_date = datetime.now() - timedelta(days=days_back)
+        # Calculate additional metrics
+        start_date = datetime.now() - timedelta(days=days_back)
 
-            # Get price changes for assets in portfolio
-            asset_tickers = [pos["ticker"] for pos in positions]
-            if asset_tickers:
-                price_changes = (
-                    db.query(
-                        Asset.ticker,
-                        func.avg(PriceHistory.close_price).label("avg_price"),
-                    )
-                    .join(PriceHistory)
-                    .filter(
-                        Asset.ticker.in_(asset_tickers),
-                        PriceHistory.price_date >= start_date.date(),
-                    )
-                    .group_by(Asset.ticker)
-                    .all()
-                )
-            else:
-                price_changes = []
+        report = {
+            "report_info": {
+                "user_id": user_id,
+                "report_type": report_type,
+                "period_days": days_back,
+                "generated_at": datetime.now().isoformat(),
+                "start_date": start_date.date().isoformat(),
+                "end_date": datetime.now().date().isoformat(),
+            },
+            "portfolio_summary": metrics["portfolio_summary"],
+            "performance_highlights": {
+                "top_performers": top_performers,
+                "worst_performers": worst_performers,
+                "most_valuable_positions": sorted(
+                    positions, key=lambda x: x["current_value"], reverse=True
+                )[:5],
+            },
+            "allocation_analysis": metrics["allocation"],
+            "historical_performance": metrics["performance_trend"],
+            "risk_metrics": {
+                "concentration_risk": (
+                    max([pos["weight"] for pos in positions]) if positions else 0
+                ),
+                "diversification_score": (
+                    len(set([pos["ticker"][:2] for pos in positions]))
+                    if positions
+                    else 0
+                ),  # Simple sector diversity
+            },
+        }
 
-            report = {
-                "report_info": {
-                    "user_id": user_id,
-                    "report_type": report_type,
-                    "period_days": days_back,
-                    "generated_at": datetime.now().isoformat(),
-                    "start_date": start_date.date().isoformat(),
-                    "end_date": datetime.now().date().isoformat(),
-                },
-                "portfolio_summary": metrics["portfolio_summary"],
-                "performance_highlights": {
-                    "top_performers": top_performers,
-                    "worst_performers": worst_performers,
-                    "most_valuable_positions": sorted(
-                        positions, key=lambda x: x["current_value"], reverse=True
-                    )[:5],
-                },
-                "allocation_analysis": metrics["allocation"],
-                "historical_performance": metrics["performance_trend"],
-                "risk_metrics": {
-                    "concentration_risk": (
-                        max([pos["weight"] for pos in positions]) if positions else 0
-                    ),
-                    "diversification_score": (
-                        len(set([pos["ticker"][:2] for pos in positions]))
-                        if positions
-                        else 0
-                    ),  # Simple sector diversity
-                },
-            }
-
-            return {"status": "completed", "report": report}
+        return {"status": "completed", "report": report}
 
     except Exception as e:
         logger.error(f"Error generating portfolio report: {e!s}")
