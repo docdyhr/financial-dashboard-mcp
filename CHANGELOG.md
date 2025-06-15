@@ -1,45 +1,45 @@
 # CHANGELOG
 
-## v1.3.0 (2025-06-15)
+
+
+## v1.4.0 (2025-06-15)
+
+### Chore
+
+* chore: bump version to 1.3.0 [skip ci] ([`b5062c2`](https://github.com/docdyhr/financial-dashboard-mcp/commit/b5062c277c3f9fe83198a8c7590a22a2e0065a06))
+
+### Feature
+
+* feat: comprehensive system verification and quality improvements v1.3.0
 
 ### Added
-
-* **Startup Guide**: Comprehensive quick start guide for developers
-  - Prerequisites and setup instructions
-  - Local and Docker deployment options
-  - Essential development commands and troubleshooting
-  - First-time usage guidelines
+- STARTUP_GUIDE.md with complete setup and troubleshooting instructions
+- Integration test configuration with pytest skip markers
+- Comprehensive development workflow documentation
 
 ### Fixed
+- All linting and type checking issues resolved (41 tests passing)
+- SQLAlchemy relationship type annotations with proper quoted strings
+- Circular import dependencies in backend models
+- Makefile type-check command configuration
+- Integration test reliability with proper service dependency handling
 
-* **Code Quality**: Resolved all linting and type checking issues
-  - Fixed SQLAlchemy type annotations with proper quoted strings
-  - Removed unused imports and variables across codebase
-  - Added proper TYPE_CHECKING imports for circular dependencies
-  - Updated flake8 config to ignore FastAPI dependency injection patterns
+### Improved
+- Code quality: removed unused imports/variables across codebase
+- Test infrastructure: 33% coverage with reliable test suite
+- Development experience: all make commands verified and functional
+- Type safety: complete mypy compliance with zero errors
 
-* **Testing Infrastructure**: Improved test suite reliability
-  - Fixed integration test dependencies with skip markers
-  - Added pytest command line options for integration tests
-  - All 41 unit tests now pass consistently
-  - Coverage reporting functional at 33%
+### Technical Debt Cleanup
+- Updated flake8 config to ignore FastAPI dependency injection patterns
+- Organized imports following Python best practices
+- Applied consistent code formatting throughout project
+- Removed placeholder files and cleaned project structure
 
-* **Development Tools**: Enhanced development experience
-  - Fixed Makefile type-check command to use proper mypy configuration
-  - Verified all make commands work correctly
-  - Updated development dependencies and configurations
+🤖 Generated with [Claude Code](https://claude.ai/code)
 
-### Technical Debt
+Co-Authored-By: Claude &lt;noreply@anthropic.com&gt; ([`181d5d2`](https://github.com/docdyhr/financial-dashboard-mcp/commit/181d5d225a2974a50deeb76946ff25f7131f2848))
 
-* **Type Safety**: Complete type annotation coverage
-  - All SQLAlchemy relationship types properly quoted
-  - Resolved circular import issues in models
-  - mypy passes with no errors across entire codebase
-
-* **Code Organization**: Cleaned up project structure
-  - Removed empty placeholder files (app_new.py, app_old.py)
-  - Organized imports following best practices
-  - Applied consistent code formatting
 
 ## v1.3.0 (2025-06-14)
 
