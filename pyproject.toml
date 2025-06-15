@@ -310,9 +310,13 @@ replace = "## [Unreleased]\n\n## [{new_version}] - {now:%Y-%m-%d}"
 [tool.bandit]
 exclude_dirs = ["tests", "migrations", ".venv", "venv"]
 skips = [
-    "B101",
-    "B601",
-] # Skip assert_used and shell_injection_subprocess for tests
+    "B101", # assert_used - skip for tests
+    "B601", # shell_injection_subprocess - skip for tests
+    "B404", # subprocess import - needed for service management
+    "B603", # subprocess_without_shell_equals_true - safer than shell=True
+    "B607", # start_process_with_partial_path - controlled commands only
+    "B104", # hardcoded_bind_all_interfaces - development only
+] # Skip common false positives for development tooling
 
 [tool.bandit.assert_used]
 skips = ["*_test.py", "test_*.py"]

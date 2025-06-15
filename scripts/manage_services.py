@@ -18,7 +18,7 @@ import argparse
 import logging
 import os
 import signal
-import subprocess  # nosec B404 - subprocess needed for service management
+import subprocess
 import sys
 import time
 from dataclasses import dataclass
@@ -123,7 +123,7 @@ class ServiceManager:
                     "backend.main:app",
                     "--reload",
                     "--host",
-                    "0.0.0.0",  # nosec B104 - binding to all interfaces for development
+                    "0.0.0.0",
                     "--port",
                     "8000",
                 ],
@@ -233,7 +233,7 @@ class ServiceManager:
                 data_dir.mkdir(parents=True, exist_ok=True)
 
                 # Initialize database
-                result = subprocess.run(  # nosec B603,B607 - controlled PostgreSQL initialization
+                result = subprocess.run(
                     [
                         "initdb",
                         "-D",
@@ -250,7 +250,7 @@ class ServiceManager:
                 if result.returncode != 0:
                     # Try with different method if initdb fails
                     try:
-                        result = subprocess.run(  # nosec B603,B607 - controlled PostgreSQL initialization
+                        result = subprocess.run(
                             ["pg_ctl", "initdb", "-D", str(data_dir)],
                             capture_output=True,
                             text=True,
@@ -279,7 +279,7 @@ class ServiceManager:
         missing = []
         for cmd, desc in required_commands.items():
             try:
-                subprocess.run(  # nosec B603 - version checking for dependency validation
+                subprocess.run(
                     [cmd, "--version"], capture_output=True, check=True, timeout=5
                 )
             except (
@@ -290,7 +290,7 @@ class ServiceManager:
                 # Special handling for postgres
                 if cmd == "postgres":
                     try:
-                        subprocess.run(  # nosec B603,B607 - version checking for dependency validation
+                        subprocess.run(
                             ["pg_ctl", "--version"],
                             capture_output=True,
                             check=True,
@@ -346,7 +346,7 @@ class ServiceManager:
                         pass
                 elif config.health_check_command:
                     try:
-                        result = subprocess.run(  # nosec B603 - controlled health check commands
+                        result = subprocess.run(
                             config.health_check_command, capture_output=True, timeout=5
                         )
                         if result.returncode == 0:
@@ -416,7 +416,7 @@ class ServiceManager:
                 env.update(config.environment)
 
             # Start the process
-            proc = subprocess.Popen(  # nosec B603 - controlled service startup
+            proc = subprocess.Popen(
                 config.command,
                 cwd=config.working_directory or self.project_root,
                 env=env,
