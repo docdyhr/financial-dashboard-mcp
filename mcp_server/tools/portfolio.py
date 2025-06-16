@@ -156,13 +156,36 @@ class PortfolioTools:
                 ]
 
             for position in positions:
-                ticker = position.get("ticker", "N/A")
-                name = position.get("name", "Unknown")
-                quantity = position.get("quantity", 0)
-                current_price = position.get("current_price", 0.0)
-                total_pos_value = position.get("total_value", 0.0)
-                daily_change = position.get("daily_change", 0.0)
-                daily_change_pct = position.get("daily_change_percent", 0.0)
+                # Get asset info from nested asset object
+                asset = position.get("asset", {})
+                ticker = asset.get("ticker", "N/A")
+                name = asset.get("name", "Unknown")
+
+                # Convert string values to numbers with safe fallbacks
+                try:
+                    quantity = float(position.get("quantity", 0))
+                except (ValueError, TypeError):
+                    quantity = 0.0
+
+                try:
+                    current_price = float(position.get("current_price") or 0)
+                except (ValueError, TypeError):
+                    current_price = 0.0
+
+                try:
+                    total_pos_value = float(position.get("current_value") or 0)
+                except (ValueError, TypeError):
+                    total_pos_value = 0.0
+
+                try:
+                    daily_change = float(position.get("daily_change") or 0)
+                except (ValueError, TypeError):
+                    daily_change = 0.0
+
+                try:
+                    daily_change_pct = float(position.get("daily_change_percent") or 0)
+                except (ValueError, TypeError):
+                    daily_change_pct = 0.0
 
                 change_symbol = "+" if daily_change >= 0 else ""
                 positions_text += f"**{ticker}** ({name})\n"
@@ -293,34 +316,61 @@ class PortfolioTools:
     async def _add_position(self, arguments: dict[str, Any]) -> list[TextContent]:
         """Add a new position."""
         try:
-            # Prepare position data
+            ticker = arguments["ticker"].upper()
+            quantity = float(arguments["quantity"])
+            purchase_price = float(arguments["purchase_price"])
+
+            # First, check if asset exists or create it
+            asset_response = await self.http_client.get(
+                f"{self.backend_url}/api/v1/assets/?query={ticker}"
+            )
+            asset_response.raise_for_status()
+            asset_data = asset_response.json()
+
+            asset_id = None
+            if asset_data.get("data") and len(asset_data["data"]) > 0:
+                asset_id = asset_data["data"][0]["id"]
+            else:
+                # Create new asset
+                asset_create_data = {
+                    "ticker": ticker,
+                    "name": f"{ticker} Stock",
+                    "asset_type": "stock",
+                    "category": "equity",
+                    "currency": "USD",
+                }
+
+                create_response = await self.http_client.post(
+                    f"{self.backend_url}/api/v1/assets/", json=asset_create_data
+                )
+                create_response.raise_for_status()
+                created_asset = create_response.json()
+                asset_id = created_asset["data"]["id"]
+
+            # Prepare position data with correct schema
             position_data = {
-                "ticker": arguments["ticker"].upper(),
-                "quantity": float(arguments["quantity"]),
-                "purchase_price": float(arguments["purchase_price"]),
+                "user_id": 5,
+                "asset_id": asset_id,
+                "quantity": str(quantity),
+                "average_cost_per_share": str(purchase_price),
+                "total_cost_basis": str(quantity * purchase_price),
             }
 
             if "purchase_date" in arguments:
                 position_data["purchase_date"] = arguments["purchase_date"]
-
-            # Add user_id to position data and use correct API v1 path
-            position_data["user_id"] = 5
 
             response = await self.http_client.post(
                 f"{self.backend_url}/api/v1/positions/", json=position_data
             )
             response.raise_for_status()
 
-            ticker = position_data["ticker"]
-            quantity = position_data["quantity"]
-            price = position_data["purchase_price"]
-            total_cost = quantity * price
+            total_cost = quantity * purchase_price
 
             success_text = f"""**Position Added Successfully!**
 
 **Asset:** {ticker}
 **Quantity:** {quantity:,.0f} shares
-**Purchase Price:** ${price:.2f}
+**Purchase Price:** ${purchase_price:.2f}
 **Total Cost:** ${total_cost:,.2f}
 
 The position has been added to your portfolio and will be included in future calculations.
