@@ -106,9 +106,7 @@ class DeutscheBorseProvider:
 
         return None
 
-    def _parse_search_response(
-        self, html: str, isin: str
-    ) -> GermanSecurityInfo | None:
+    def _parse_search_response(self, html: str, isin: str) -> GermanSecurityInfo | None:
         """Parse search response HTML."""
         try:
             soup = BeautifulSoup(html, "html.parser")

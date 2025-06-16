@@ -178,7 +178,7 @@ def sync_isin_mappings(self, isins: list[str], source: str = "auto") -> dict[str
                         db.query(ISINTickerMapping)
                         .filter(
                             ISINTickerMapping.isin == isin,
-                            ISINTickerMapping.is_active == True,
+                            ISINTickerMapping.is_active.is_(True),
                         )
                         .order_by(ISINTickerMapping.confidence.desc())
                         .first()
@@ -395,7 +395,7 @@ def enrich_asset_data(self, asset_ids: list[int]) -> dict[str, Any]:
                                 db.query(ISINTickerMapping)
                                 .filter(
                                     ISINTickerMapping.isin == asset.isin,
-                                    ISINTickerMapping.is_active == True,
+                                    ISINTickerMapping.is_active.is_(True),
                                 )
                                 .order_by(ISINTickerMapping.confidence.desc())
                                 .first()
@@ -444,7 +444,7 @@ def enrich_asset_data(self, asset_ids: list[int]) -> dict[str, Any]:
                                 db.query(ISINTickerMapping)
                                 .filter(
                                     ISINTickerMapping.ticker == asset.ticker,
-                                    ISINTickerMapping.is_active == True,
+                                    ISINTickerMapping.is_active.is_(True),
                                 )
                                 .order_by(ISINTickerMapping.confidence.desc())
                                 .first()
@@ -628,14 +628,14 @@ def generate_isin_report() -> dict[str, Any]:
 
             total_mappings = (
                 db.query(ISINTickerMapping)
-                .filter(ISINTickerMapping.is_active == True)
+                .filter(ISINTickerMapping.is_active.is_(True))
                 .count()
             )
 
             high_confidence_mappings = (
                 db.query(ISINTickerMapping)
                 .filter(
-                    ISINTickerMapping.is_active == True,
+                    ISINTickerMapping.is_active.is_(True),
                     ISINTickerMapping.confidence >= 0.8,
                 )
                 .count()
@@ -647,7 +647,7 @@ def generate_isin_report() -> dict[str, Any]:
                     func.substr(ISINTickerMapping.isin, 1, 2).label("country"),
                     func.count().label("count"),
                 )
-                .filter(ISINTickerMapping.is_active == True)
+                .filter(ISINTickerMapping.is_active.is_(True))
                 .group_by(func.substr(ISINTickerMapping.isin, 1, 2))
                 .all()
             )
@@ -656,7 +656,7 @@ def generate_isin_report() -> dict[str, Any]:
             exchange_dist = (
                 db.query(ISINTickerMapping.exchange_code, func.count().label("count"))
                 .filter(
-                    ISINTickerMapping.is_active == True,
+                    ISINTickerMapping.is_active.is_(True),
                     ISINTickerMapping.exchange_code.isnot(None),
                 )
                 .group_by(ISINTickerMapping.exchange_code)
@@ -666,7 +666,7 @@ def generate_isin_report() -> dict[str, Any]:
             # Get source distribution
             source_dist = (
                 db.query(ISINTickerMapping.source, func.count().label("count"))
-                .filter(ISINTickerMapping.is_active == True)
+                .filter(ISINTickerMapping.is_active.is_(True))
                 .group_by(ISINTickerMapping.source)
                 .all()
             )
@@ -675,7 +675,7 @@ def generate_isin_report() -> dict[str, Any]:
             recent_mappings = (
                 db.query(ISINTickerMapping)
                 .filter(
-                    ISINTickerMapping.is_active == True,
+                    ISINTickerMapping.is_active.is_(True),
                     ISINTickerMapping.last_updated
                     >= datetime.now() - timedelta(days=7),
                 )
@@ -710,12 +710,12 @@ def generate_isin_report() -> dict[str, Any]:
                     "average_confidence": db.query(
                         func.avg(ISINTickerMapping.confidence)
                     )
-                    .filter(ISINTickerMapping.is_active == True)
+                    .filter(ISINTickerMapping.is_active.is_(True))
                     .scalar()
                     or 0,
                     "mappings_needing_review": db.query(ISINTickerMapping)
                     .filter(
-                        ISINTickerMapping.is_active == True,
+                        ISINTickerMapping.is_active.is_(True),
                         ISINTickerMapping.confidence < 0.5,
                     )
                     .count(),
@@ -733,8 +733,7 @@ def generate_isin_report() -> dict[str, Any]:
 # Periodic task setup
 @shared_task
 def daily_isin_maintenance():
-    """Daily maintenance tasks for ISIN system.
-    """
+    """Daily maintenance tasks for ISIN system."""
     try:
         logger.info("Starting daily ISIN maintenance")
 
@@ -749,7 +748,7 @@ def daily_isin_maintenance():
             stale_mappings = (
                 db.query(ISINTickerMapping.isin)
                 .filter(
-                    ISINTickerMapping.is_active == True,
+                    ISINTickerMapping.is_active.is_(True),
                     or_(
                         ISINTickerMapping.last_updated
                         < datetime.now() - timedelta(days=30),

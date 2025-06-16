@@ -53,15 +53,9 @@ class ISINMappingBase(BaseSchema):
 
     isin: str = Field(..., min_length=12, max_length=12, description="ISIN code")
     ticker: str = Field(..., min_length=1, max_length=20, description="Ticker symbol")
-    exchange_code: str | None = Field(
-        None, max_length=10, description="Exchange code"
-    )
-    exchange_name: str | None = Field(
-        None, max_length=100, description="Exchange name"
-    )
-    security_name: str | None = Field(
-        None, max_length=200, description="Security name"
-    )
+    exchange_code: str | None = Field(None, max_length=10, description="Exchange code")
+    exchange_name: str | None = Field(None, max_length=100, description="Exchange name")
+    security_name: str | None = Field(None, max_length=200, description="Security name")
     currency: str | None = Field(
         None, min_length=3, max_length=3, description="Currency code"
     )
@@ -137,9 +131,7 @@ class ISINResolutionRequest(BaseSchema):
     """Schema for ISIN to ticker resolution requests."""
 
     identifier: str = Field(..., description="ISIN code or ticker symbol to resolve")
-    preferred_exchange: str | None = Field(
-        None, description="Preferred exchange code"
-    )
+    preferred_exchange: str | None = Field(None, description="Preferred exchange code")
     preferred_country: str | None = Field(None, description="Preferred country code")
 
     @field_validator("identifier")

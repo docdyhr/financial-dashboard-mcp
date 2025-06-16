@@ -55,7 +55,8 @@ def check_dependencies():
             [str(PYTHON_PATH), "-c", "import uvicorn, streamlit, fastapi"],
             capture_output=True,
             text=True,
-            cwd=PROJECT_ROOT, check=False,
+            cwd=PROJECT_ROOT,
+            check=False,
         )
         return result.returncode == 0
     except Exception as e:
@@ -174,7 +175,7 @@ def wait_for_backend():
             )
             if response.status_code == 200:
                 return True
-        except:
+        except Exception:
             pass
 
         if shutdown_requested:

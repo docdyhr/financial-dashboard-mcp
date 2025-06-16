@@ -242,7 +242,8 @@ class ServiceManager:
                     ],
                     input="dev_password\n",
                     text=True,
-                    capture_output=True, check=False,
+                    capture_output=True,
+                    check=False,
                 )
 
                 if result.returncode != 0:
@@ -251,7 +252,8 @@ class ServiceManager:
                         result = subprocess.run(
                             ["pg_ctl", "initdb", "-D", str(data_dir)],
                             capture_output=True,
-                            text=True, check=False,
+                            text=True,
+                            check=False,
                         )
                     except FileNotFoundError:
                         logger.error(
@@ -345,7 +347,10 @@ class ServiceManager:
                 elif config.health_check_command:
                     try:
                         result = subprocess.run(
-                            config.health_check_command, capture_output=True, timeout=5, check=False
+                            config.health_check_command,
+                            capture_output=True,
+                            timeout=5,
+                            check=False,
                         )
                         if result.returncode == 0:
                             return ServiceStatus.RUNNING

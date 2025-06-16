@@ -18,9 +18,7 @@ logger = logging.getLogger(__name__)
 BACKEND_URL = "http://localhost:8000"
 
 
-def call_sync_api(
-    endpoint: str, method: str = "GET", data: dict = None
-) -> dict | None:
+def call_sync_api(endpoint: str, method: str = "GET", data: dict = None) -> dict | None:
     """Call ISIN sync API endpoint with error handling.
 
     Args:
@@ -61,7 +59,7 @@ def format_datetime(dt_string: str) -> str:
     try:
         dt = datetime.fromisoformat(dt_string.replace("Z", "+00:00"))
         return dt.strftime("%Y-%m-%d %H:%M:%S")
-    except:
+    except (ValueError, TypeError):
         return dt_string
 
 

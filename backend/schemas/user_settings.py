@@ -84,9 +84,7 @@ class UserSettingsBase(BaseSchema):
     custom_dashboard_layout: str | None = Field(
         None, description="Custom dashboard layout JSON"
     )
-    watchlist_settings: str | None = Field(
-        None, description="Watchlist settings JSON"
-    )
+    watchlist_settings: str | None = Field(None, description="Watchlist settings JSON")
     alert_preferences: str | None = Field(None, description="Alert preferences JSON")
 
     @field_validator("theme")

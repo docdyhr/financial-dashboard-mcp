@@ -36,9 +36,7 @@ class ConflictResolutionRequest(BaseModel):
 class BulkSyncRequest(BaseModel):
     """Request model for bulk sync operations."""
 
-    country_codes: list[str] | None = Field(
-        None, description="Country codes to sync"
-    )
+    country_codes: list[str] | None = Field(None, description="Country codes to sync")
     exchanges: list[str] | None = Field(None, description="Exchange codes to sync")
     max_isins: int = Field(default=1000, description="Maximum ISINs to sync")
     source: str = Field(default="bulk_sync", description="Source identifier")
@@ -146,9 +144,7 @@ async def get_job_status(job_id: str) -> dict[str, Any]:
 
 
 @router.get("/jobs")
-async def list_sync_jobs(
-    status: str | None = None, limit: int = 50
-) -> dict[str, Any]:
+async def list_sync_jobs(status: str | None = None, limit: int = 50) -> dict[str, Any]:
     """List sync jobs with optional filtering.
 
     Args:

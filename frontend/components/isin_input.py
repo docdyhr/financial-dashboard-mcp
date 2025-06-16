@@ -211,9 +211,7 @@ def isin_input_widget(
                                 if suggestion_result and suggestion_result.get(
                                     "suggestions"
                                 ):
-                                    for suggestion in suggestion_result[
-                                        "suggestions"
-                                    ]:
+                                    for suggestion in suggestion_result["suggestions"]:
                                         st.info(
                                             f"💡 Try: {suggestion.get('ticker')} ({suggestion.get('explanation', 'No explanation')})"
                                         )
@@ -221,12 +219,8 @@ def isin_input_widget(
                             return {
                                 "isin": isin,
                                 "is_valid": True,
-                                "country_code": validation_result.get(
-                                    "country_code"
-                                ),
-                                "country_name": validation_result.get(
-                                    "country_name"
-                                ),
+                                "country_code": validation_result.get("country_code"),
+                                "country_name": validation_result.get("country_name"),
                                 "mappings": [],
                                 "primary_ticker": None,
                                 "primary_exchange": None,
@@ -427,8 +421,7 @@ def bulk_isin_lookup(key: str = "bulk_lookup") -> None:
 
 
 def isin_management_page():
-    """Complete ISIN management page combining all widgets.
-    """
+    """Complete ISIN management page combining all widgets."""
     st.title("🔢 ISIN Management")
     st.markdown("*International Securities Identification Number tools*")
 

@@ -245,9 +245,7 @@ class UserSettingsService:
         """Get user's price change alert threshold."""
         return self.get_setting_value(db, user_id, "price_change_threshold", 5.0)
 
-    def get_portfolio_change_threshold(
-        self, db: Session, user_id: int
-    ) -> float | None:
+    def get_portfolio_change_threshold(self, db: Session, user_id: int) -> float | None:
         """Get user's portfolio change alert threshold."""
         return self.get_setting_value(db, user_id, "portfolio_change_threshold", 2.0)
 

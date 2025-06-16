@@ -4,9 +4,11 @@ This module provides factory classes and utility functions for creating
 test data for the ISIN system and financial dashboard components.
 """
 
+# ruff: noqa: S311, B007, RUF009
+
 import random
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import UTC, datetime
 from decimal import Decimal
 from typing import Any
 
@@ -149,9 +151,7 @@ class ExchangeFactory:
     }
 
     @classmethod
-    def create_exchange_data(
-        cls, exchange_code: str | None = None
-    ) -> dict[str, str]:
+    def create_exchange_data(cls, exchange_code: str | None = None) -> dict[str, str]:
         """Create exchange data for testing."""
         if exchange_code is None:
             exchange_code = random.choice(list(cls.EXCHANGES.keys()))
@@ -574,7 +574,7 @@ class SyncJobFactory:
         """Create sync job test data."""
 
         if job_id is None:
-            timestamp = int(datetime.now().timestamp())
+            timestamp = int(datetime.now(tz=UTC).timestamp())
             job_id = f"sync_{timestamp}_{random.randint(100, 999)}"
 
         if isins is None:

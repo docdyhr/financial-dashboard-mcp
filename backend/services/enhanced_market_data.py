@@ -331,9 +331,7 @@ class EnhancedMarketDataService:
                 return await self._fetch_yahoo_historical(
                     ticker, isin, period, interval
                 )
-            logger.warning(
-                f"Historical data not supported for source {source.value}"
-            )
+            logger.warning(f"Historical data not supported for source {source.value}")
             return None
         except Exception as e:
             logger.error(f"Error fetching historical data for {isin}: {e}")

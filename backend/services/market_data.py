@@ -119,6 +119,7 @@ class YFinanceProvider(MarketDataProvider):
                             success=True,
                         )
                 except Exception:
+                    # Silently continue to try alternative data sources
                     pass
 
                 error_msg = "No historical data available"
@@ -468,9 +469,7 @@ class MultiProviderMarketDataService:
 
         logger.info(f"Initialized {len(self.providers)} market data providers")
 
-    def fetch_quote(
-        self, ticker: str, db: Session | None = None
-    ) -> MarketDataResult:
+    def fetch_quote(self, ticker: str, db: Session | None = None) -> MarketDataResult:
         """Fetch quote with fallback across providers and ISIN support."""
         # First, try to resolve ISIN to ticker if needed
         resolved_ticker = ticker
