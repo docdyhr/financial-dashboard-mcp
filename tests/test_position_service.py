@@ -5,33 +5,47 @@ from decimal import Decimal
 import pytest
 from sqlalchemy.orm import Session
 
-from backend.models import Asset, AssetType, Position, Transaction, TransactionType, User
+from backend.models import (
+    Asset,
+    AssetCategory,
+    AssetType,
+    Position,
+    Transaction,
+    TransactionType,
+    User,
+)
 from backend.schemas.position import PositionCreate
 from backend.services.position import PositionService
 
 
-@pytest.fixture
+@pytest.fixture()
 def position_service():
     """Create position service instance."""
     return PositionService()
 
 
-@pytest.fixture
+@pytest.fixture()
 def test_user(db_session: Session):
     """Create a test user."""
-    user = User(email="test@example.com", name="Test User")
+    user = User(
+        email="test@example.com",
+        username="testuser",
+        full_name="Test User",
+        hashed_password="hashed_password_here",
+    )
     db_session.add(user)
     db_session.commit()
     return user
 
 
-@pytest.fixture
+@pytest.fixture()
 def test_asset(db_session: Session):
     """Create a test asset."""
     asset = Asset(
         ticker="AAPL",
         name="Apple Inc.",
         asset_type=AssetType.STOCK,
+        category=AssetCategory.EQUITY,
         sector="Technology",
     )
     db_session.add(asset)
@@ -88,9 +102,7 @@ class TestPositionService:
         db_session.commit()
 
         # Get position
-        retrieved = position_service.get_position(
-            db_session, test_user.id, position.id
-        )
+        retrieved = position_service.get_position(db_session, test_user.id, position.id)
 
         assert retrieved.id == position.id
         assert retrieved.quantity == position.quantity

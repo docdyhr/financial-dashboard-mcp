@@ -142,9 +142,7 @@ def test_portfolio_snapshot_task(user_id):
                 print("   ✅ Portfolio snapshot task completed!")
                 result = status.get("result", {})
                 print(f"   📸 Snapshots created: {result.get('snapshots_created', 0)}")
-                print(
-                    f"   👥 Users processed: {result.get('total_users_processed', 0)}"
-                )
+                print(f"   👥 Users processed: {result.get('total_users_processed', 0)}")
                 return True
             print("   ❌ Portfolio snapshot task failed!")
             print(f"   Error: {status.get('error')}")
@@ -190,9 +188,7 @@ def test_concurrent_tasks():
                 if status.get("successful"):
                     print(f"   ✅ {name} completed successfully")
                 else:
-                    print(
-                        f"   ❌ {name} failed: {status.get('error', 'Unknown error')}"
-                    )
+                    print(f"   ❌ {name} failed: {status.get('error', 'Unknown error')}")
 
         if len(completed) == len(tasks):
             break

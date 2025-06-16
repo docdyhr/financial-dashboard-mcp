@@ -58,10 +58,9 @@ def handle_database_error(error: Exception) -> None:
     """Handle database errors and convert to appropriate exceptions."""
     if isinstance(error, IntegrityError):
         raise ConflictError("Database integrity violation")
-    elif isinstance(error, OperationalError):
+    if isinstance(error, OperationalError):
         raise ServiceException("Database operation failed", status_code=503)
-    else:
-        raise ServiceException(f"Database error: {str(error)}")
+    raise ServiceException(f"Database error: {error!s}")
 
 
 def to_http_exception(error: ServiceException) -> HTTPException:

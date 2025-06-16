@@ -59,12 +59,10 @@ async def get_allocation_breakdown(
 @router.get("/performance/{user_id}", response_model=BaseResponse[PerformanceMetrics])
 async def get_performance_metrics(
     user_id: int,
-    start_date: date | None = Query(
-        None, description="Start date for performance calculation"
-    ),
-    end_date: date | None = Query(
-        None, description="End date for performance calculation"
-    ),
+    start_date: date
+    | None = Query(None, description="Start date for performance calculation"),
+    end_date: date
+    | None = Query(None, description="End date for performance calculation"),
     db: Session = Depends(get_db),
 ) -> BaseResponse[PerformanceMetrics]:
     """Calculate portfolio performance metrics."""

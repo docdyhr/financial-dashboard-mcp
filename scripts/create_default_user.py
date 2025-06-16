@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Create Default User for MCP Integration
+"""Create Default User for MCP Integration
 
 This script creates a default user (ID=1) for single-user MCP integration.
 The Financial Dashboard MCP expects a user_id=1 to exist for API calls.

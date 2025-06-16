@@ -477,9 +477,11 @@ class MultiProviderMarketDataService:
 
         if db and ISINUtils.is_isin_format(ticker):
             try:
-                resolved_ticker, identifier_type, isin_info = (
-                    isin_service.resolve_identifier(db, ticker)
-                )
+                (
+                    resolved_ticker,
+                    identifier_type,
+                    isin_info,
+                ) = isin_service.resolve_identifier(db, ticker)
                 logger.info(f"Resolved ISIN {ticker} to ticker {resolved_ticker}")
             except Exception as e:
                 logger.warning(f"Failed to resolve ISIN {ticker}: {e}")

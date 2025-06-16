@@ -9,6 +9,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from backend.models.base import Base
 
 if TYPE_CHECKING:
+    from backend.models.cash_account import CashAccount
     from backend.models.portfolio_snapshot import PortfolioSnapshot
     from backend.models.position import Position
     from backend.models.transaction import Transaction
@@ -53,6 +54,9 @@ class User(Base):
     )
     portfolio_snapshots: Mapped[list["PortfolioSnapshot"]] = relationship(
         "PortfolioSnapshot", back_populates="user", cascade="all, delete-orphan"
+    )
+    cash_accounts: Mapped[list["CashAccount"]] = relationship(
+        "CashAccount", back_populates="user", cascade="all, delete-orphan"
     )
 
     def __repr__(self) -> str:

@@ -6,8 +6,8 @@ from typing import Any
 import pytest
 
 
-@pytest.mark.financial
-@pytest.mark.unit
+@pytest.mark.financial()
+@pytest.mark.unit()
 class TestFinancialCalculations:
     """Test suite for financial calculation functions."""
 
@@ -204,8 +204,8 @@ class TestFinancialCalculations:
             raise ValueError("Quantity cannot be negative")
 
 
-@pytest.mark.financial
-@pytest.mark.integration
+@pytest.mark.financial()
+@pytest.mark.integration()
 class TestFinancialIntegration:
     """Integration tests for financial calculations."""
 
@@ -251,8 +251,8 @@ class TestFinancialIntegration:
         )  # nosec
 
 
-@pytest.mark.financial
-@pytest.mark.security
+@pytest.mark.financial()
+@pytest.mark.security()
 class TestFinancialSecurity:
     """Security tests for financial calculations."""
 
@@ -278,8 +278,8 @@ class TestFinancialSecurity:
         assert isinstance(precise_number, Decimal)  # nosec
 
 
-@pytest.mark.financial
-@pytest.mark.external
+@pytest.mark.financial()
+@pytest.mark.external()
 class TestMarketDataCalculations:
     """Tests for market data calculation accuracy."""
 
@@ -321,7 +321,7 @@ class TestMarketDataCalculations:
                 < 0.1
             )  # nosec
 
-    @pytest.mark.slow
+    @pytest.mark.slow()
     def test_performance_large_portfolio(self) -> None:
         """Test calculation performance with large portfolios."""
         import time

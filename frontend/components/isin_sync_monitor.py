@@ -558,9 +558,7 @@ def isin_sync_monitor_page():
         st.rerun()
 
     # Main content tabs
-    tab1, tab2, tab3, tab4 = st.tabs(
-        ["📊 Status", "🔄 Jobs", "⚠️ Conflicts", "🏥 Health"]
-    )
+    tab1, tab2, tab3, tab4 = st.tabs(["📊 Status", "🔄 Jobs", "⚠️ Conflicts", "🏥 Health"])
 
     with tab1:
         sync_service_status_widget()

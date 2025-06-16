@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-MCP Server __main__.py module for Financial Dashboard
+"""MCP Server __main__.py module for Financial Dashboard
 
 This module allows the MCP server to be executed with:
 python -m mcp_server

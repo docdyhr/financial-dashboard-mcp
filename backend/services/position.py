@@ -37,7 +37,6 @@ class PositionService(BaseService[Position, PositionCreate, PositionUpdate]):
         limit: int = 100,
     ) -> list[PositionResponse]:
         """Get positions for a user with optional filters."""
-
         # Check if user exists
         user = db.query(User).filter(User.id == user_id).first()
         if not user:

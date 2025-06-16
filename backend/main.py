@@ -9,6 +9,7 @@ from fastapi.responses import JSONResponse
 
 from backend.api import (
     assets,
+    cash_accounts,
     isin,
     portfolio,
     positions,
@@ -127,6 +128,7 @@ async def api_status():
 # Include API routers
 app.include_router(portfolio.router, prefix="/api/v1/portfolio", tags=["portfolio"])
 app.include_router(assets.router, prefix="/api/v1/assets", tags=["assets"])
+app.include_router(cash_accounts.router, prefix="/api/v1", tags=["cash-accounts"])
 app.include_router(isin.router, prefix="/api/v1", tags=["isin"])
 app.include_router(positions.router, prefix="/api/v1/positions", tags=["positions"])
 app.include_router(

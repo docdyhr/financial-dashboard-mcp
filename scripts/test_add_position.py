@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Test script for the add_position MCP tool
+"""Test script for the add_position MCP tool
 
 This script tests the add_position functionality end-to-end:
 1. Creates a test asset (AAPL)

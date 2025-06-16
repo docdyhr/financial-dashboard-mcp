@@ -21,8 +21,8 @@ from backend.services.isin_utils import ISINService, ISINUtils
 from tests.factories import ISINFactory, TestDataGenerator
 
 
-@pytest.mark.benchmark
-@pytest.mark.performance
+@pytest.mark.benchmark()
+@pytest.mark.performance()
 class TestISINValidationPerformance:
     """Performance tests for ISIN validation."""
 
@@ -46,7 +46,7 @@ class TestISINValidationPerformance:
         results = benchmark(validate_batch, isins)
         assert len(results) == len(isins)
 
-    @pytest.mark.slow
+    @pytest.mark.slow()
     def test_large_batch_validation_performance(self, performance_test_data):
         """Test validation performance with large batches."""
         large_batch = performance_test_data["large_batch"]
@@ -147,8 +147,8 @@ class TestISINValidationPerformance:
         assert speedup > 1.5, "Concurrent processing should provide speedup"
 
 
-@pytest.mark.benchmark
-@pytest.mark.performance
+@pytest.mark.benchmark()
+@pytest.mark.performance()
 class TestISINMappingPerformance:
     """Performance tests for ISIN mapping operations."""
 
@@ -170,7 +170,7 @@ class TestISINMappingPerformance:
             result = benchmark(service.get_ticker_for_isin, isin)
             assert result == "AAPL"
 
-    @pytest.mark.slow
+    @pytest.mark.slow()
     def test_bulk_mapping_lookup_performance(self, performance_test_data):
         """Test bulk mapping lookup performance."""
         large_batch = performance_test_data["large_batch"][:500]  # Limit for test
@@ -208,12 +208,12 @@ class TestISINMappingPerformance:
             assert len(results) == len(large_batch)
 
 
-@pytest.mark.benchmark
-@pytest.mark.performance
+@pytest.mark.benchmark()
+@pytest.mark.performance()
 class TestISINSyncServicePerformance:
     """Performance tests for ISIN sync service."""
 
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_sync_job_creation_performance(self, benchmark):
         """Benchmark sync job creation performance."""
         sync_service = ISINSyncService()
@@ -225,8 +225,8 @@ class TestISINSyncServicePerformance:
         job_id = await benchmark(create_job)
         assert job_id in sync_service.active_jobs
 
-    @pytest.mark.asyncio
-    @pytest.mark.slow
+    @pytest.mark.asyncio()
+    @pytest.mark.slow()
     async def test_concurrent_sync_jobs_performance(self):
         """Test performance under concurrent sync job load."""
         sync_service = ISINSyncService()
@@ -275,12 +275,12 @@ class TestISINSyncServicePerformance:
         assert result["total_jobs"] == 100
 
 
-@pytest.mark.benchmark
-@pytest.mark.performance
+@pytest.mark.benchmark()
+@pytest.mark.performance()
 class TestMarketDataPerformance:
     """Performance tests for market data services."""
 
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_quote_retrieval_performance(self, benchmark):
         """Benchmark market quote retrieval performance."""
         market_service = EnhancedMarketDataService()
@@ -309,8 +309,8 @@ class TestMarketDataPerformance:
                 assert result is not None
                 assert result.symbol == "AAPL"
 
-    @pytest.mark.asyncio
-    @pytest.mark.slow
+    @pytest.mark.asyncio()
+    @pytest.mark.slow()
     async def test_batch_quote_retrieval_performance(self):
         """Test batch quote retrieval performance."""
         market_service = EnhancedMarketDataService()
@@ -355,8 +355,8 @@ class TestMarketDataPerformance:
                 assert elapsed < 30.0, "Batch processing should complete within 30s"
 
 
-@pytest.mark.performance
-@pytest.mark.slow
+@pytest.mark.performance()
+@pytest.mark.slow()
 class TestSystemLoadTests:
     """System-wide load tests."""
 
@@ -430,7 +430,7 @@ class TestSystemLoadTests:
         # Memory growth should be minimal
         assert memory_growth < 100, f"Memory growth {memory_growth:.1f}MB too high"
 
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_async_operations_load(self):
         """Test async operations under load."""
         sync_service = ISINSyncService()
@@ -462,7 +462,7 @@ class TestSystemLoadTests:
         sync_service.active_jobs.clear()
 
 
-@pytest.mark.performance
+@pytest.mark.performance()
 class TestPerformanceRegression:
     """Regression tests for performance."""
 

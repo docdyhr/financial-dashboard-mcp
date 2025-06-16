@@ -152,12 +152,12 @@ class TestISINParsing:
 class TestISINMappingService:
     """Test ISIN mapping service functionality."""
 
-    @pytest.fixture
+    @pytest.fixture()
     def mapping_service(self):
         """Create ISIN mapping service instance."""
         return ISINMappingService()
 
-    @pytest.fixture
+    @pytest.fixture()
     def mock_db_session(self):
         """Mock database session."""
         mock_session = Mock()
@@ -275,7 +275,7 @@ class TestISINMappingService:
 class TestISINService:
     """Test main ISIN service functionality."""
 
-    @pytest.fixture
+    @pytest.fixture()
     def isin_service(self):
         """Create ISIN service instance."""
         return ISINService()
@@ -483,7 +483,7 @@ class TestISINErrorHandling:
 class TestISINUtilsIntegration:
     """Integration tests for ISIN utilities."""
 
-    @pytest.mark.integration
+    @pytest.mark.integration()
     def test_end_to_end_isin_processing(self, sample_isin_data):
         """Test complete ISIN processing workflow."""
         isin = "US0378331005"
@@ -513,7 +513,7 @@ class TestISINUtilsIntegration:
         assert mapping.isin == isin
         assert mapping.ticker == "AAPL"
 
-    @pytest.mark.integration
+    @pytest.mark.integration()
     def test_bulk_processing(self, sample_isin_data):
         """Test bulk ISIN processing."""
         valid_isins = sample_isin_data["valid_isins"]
@@ -529,7 +529,7 @@ class TestISINUtilsIntegration:
 
 
 # Performance benchmarks (optional, run with specific markers)
-@pytest.mark.benchmark
+@pytest.mark.benchmark()
 class TestISINBenchmarks:
     """Benchmark tests for ISIN operations."""
 

@@ -6,27 +6,31 @@ from decimal import Decimal
 import pytest
 from sqlalchemy.orm import Session
 
-from backend.constants import DEFAULT_CASH_BALANCE
-from backend.models import Asset, AssetType, Position, User
+from backend.models import Asset, AssetCategory, AssetType, CashAccount, Position, User
 from backend.services.portfolio import PortfolioService
 
 
-@pytest.fixture
+@pytest.fixture()
 def portfolio_service():
     """Create portfolio service instance."""
     return PortfolioService()
 
 
-@pytest.fixture
+@pytest.fixture()
 def test_user(db_session: Session):
     """Create a test user."""
-    user = User(email="test@example.com", name="Test User")
+    user = User(
+        email="test@example.com",
+        username="testuser",
+        full_name="Test User",
+        hashed_password="hashed_password_here",
+    )
     db_session.add(user)
     db_session.commit()
     return user
 
 
-@pytest.fixture
+@pytest.fixture()
 def test_assets(db_session: Session):
     """Create test assets."""
     assets = [
@@ -34,31 +38,41 @@ def test_assets(db_session: Session):
             ticker="AAPL",
             name="Apple Inc.",
             asset_type=AssetType.STOCK,
+            category=AssetCategory.EQUITY,
             sector="Technology",
+            current_price=Decimal("180"),
         ),
         Asset(
             ticker="GOOGL",
             name="Alphabet Inc.",
             asset_type=AssetType.STOCK,
+            category=AssetCategory.EQUITY,
             sector="Technology",
+            current_price=Decimal("3000"),
         ),
         Asset(
             ticker="MSFT",
             name="Microsoft Corp.",
             asset_type=AssetType.STOCK,
+            category=AssetCategory.EQUITY,
             sector="Technology",
+            current_price=Decimal("400"),
         ),
         Asset(
             ticker="JPM",
             name="JPMorgan Chase",
             asset_type=AssetType.STOCK,
+            category=AssetCategory.EQUITY,
             sector="Financial",
+            current_price=Decimal("150"),
         ),
         Asset(
             ticker="AGG",
             name="iShares Core US Aggregate Bond ETF",
             asset_type=AssetType.ETF,
+            category=AssetCategory.FIXED_INCOME,
             sector="Bonds",
+            current_price=Decimal("95"),
         ),
     ]
     db_session.add_all(assets)
@@ -66,7 +80,22 @@ def test_assets(db_session: Session):
     return assets
 
 
-@pytest.fixture
+@pytest.fixture()
+def test_cash_account(db_session: Session, test_user: User):
+    """Create a test cash account."""
+    cash_account = CashAccount(
+        user_id=test_user.id,
+        currency="USD",
+        account_name="Main USD Account",
+        balance=Decimal("5000"),
+        is_primary=True,
+    )
+    db_session.add(cash_account)
+    db_session.commit()
+    return cash_account
+
+
+@pytest.fixture()
 def test_positions(db_session: Session, test_user: User, test_assets: list[Asset]):
     """Create test positions."""
     positions = [
@@ -74,50 +103,40 @@ def test_positions(db_session: Session, test_user: User, test_assets: list[Asset
             user_id=test_user.id,
             asset_id=test_assets[0].id,
             quantity=Decimal("10"),
-            average_cost_basis=Decimal("150"),
+            average_cost_per_share=Decimal("150"),
             total_cost_basis=Decimal("1500"),
-            current_price=Decimal("180"),
-            current_value=Decimal("1800"),
             is_active=True,
         ),
         Position(
             user_id=test_user.id,
             asset_id=test_assets[1].id,
             quantity=Decimal("5"),
-            average_cost_basis=Decimal("2800"),
+            average_cost_per_share=Decimal("2800"),
             total_cost_basis=Decimal("14000"),
-            current_price=Decimal("3000"),
-            current_value=Decimal("15000"),
             is_active=True,
         ),
         Position(
             user_id=test_user.id,
             asset_id=test_assets[2].id,
             quantity=Decimal("8"),
-            average_cost_basis=Decimal("350"),
+            average_cost_per_share=Decimal("350"),
             total_cost_basis=Decimal("2800"),
-            current_price=Decimal("400"),
-            current_value=Decimal("3200"),
             is_active=True,
         ),
         Position(
             user_id=test_user.id,
             asset_id=test_assets[3].id,
             quantity=Decimal("20"),
-            average_cost_basis=Decimal("140"),
+            average_cost_per_share=Decimal("140"),
             total_cost_basis=Decimal("2800"),
-            current_price=Decimal("150"),
-            current_value=Decimal("3000"),
             is_active=True,
         ),
         Position(
             user_id=test_user.id,
             asset_id=test_assets[4].id,
             quantity=Decimal("50"),
-            average_cost_basis=Decimal("100"),
+            average_cost_per_share=Decimal("100"),
             total_cost_basis=Decimal("5000"),
-            current_price=Decimal("95"),
-            current_value=Decimal("4750"),
             is_active=True,
         ),
     ]
@@ -135,23 +154,28 @@ class TestPortfolioService:
         db_session: Session,
         test_user: User,
         test_positions: list[Position],
+        test_cash_account: CashAccount,
     ):
         """Test getting portfolio summary."""
         summary = portfolio_service.get_portfolio_summary(db_session, test_user.id)
 
         # Check totals
-        expected_total_value = sum(p.current_value for p in test_positions) + DEFAULT_CASH_BALANCE
+        expected_total_value = (
+            sum(p.current_value for p in test_positions) + test_cash_account.balance
+        )
         assert summary.total_value == expected_total_value
-        assert summary.total_cost_basis == sum(p.total_cost_basis for p in test_positions)
-        assert summary.cash_balance == DEFAULT_CASH_BALANCE
-        assert len(summary.positions) == len(test_positions)
+        assert summary.total_cost_basis == sum(
+            p.total_cost_basis for p in test_positions
+        )
+        assert summary.cash_balance == test_cash_account.balance
+        assert len(summary.top_positions) <= 5  # Top 5 positions limit
 
         # Check performance calculations
         expected_total_gain_loss = sum(
             p.current_value - p.total_cost_basis for p in test_positions
         )
         assert summary.total_gain_loss == expected_total_gain_loss
-        
+
         expected_percent = (
             (expected_total_gain_loss / summary.total_cost_basis * 100)
             if summary.total_cost_basis > 0
@@ -175,6 +199,7 @@ class TestPortfolioService:
         db_session: Session,
         test_user: User,
         test_positions: list[Position],
+        test_cash_account: CashAccount,
     ):
         """Test diversification metrics calculation."""
         metrics = portfolio_service.calculate_diversification_metrics(
@@ -218,6 +243,7 @@ class TestPortfolioService:
         db_session: Session,
         test_user: User,
         test_positions: list[Position],
+        test_cash_account: CashAccount,
     ):
         """Test allocation breakdown calculation."""
         allocation = portfolio_service.calculate_allocation_breakdown(
@@ -225,9 +251,7 @@ class TestPortfolioService:
         )
 
         # Check that allocations sum to 100%
-        total_asset_allocation = sum(
-            allocation.asset_allocation.values(), Decimal("0")
-        )
+        total_asset_allocation = sum(allocation.asset_allocation.values(), Decimal("0"))
         assert abs(total_asset_allocation - Decimal("100")) < Decimal("0.01")
 
         # Check sector allocation
@@ -245,6 +269,7 @@ class TestPortfolioService:
         db_session: Session,
         test_user: User,
         test_positions: list[Position],
+        test_cash_account: CashAccount,
     ):
         """Test creating portfolio snapshot."""
         snapshot_date = date.today()
@@ -255,7 +280,7 @@ class TestPortfolioService:
         assert snapshot.user_id == test_user.id
         assert snapshot.snapshot_date == snapshot_date
         assert snapshot.total_value == sum(p.current_value for p in test_positions)
-        assert snapshot.cash_balance == DEFAULT_CASH_BALANCE
+        assert snapshot.cash_balance == test_cash_account.balance
         assert snapshot.number_of_positions == len(test_positions)
 
     def test_calculate_position_weights(
@@ -264,6 +289,7 @@ class TestPortfolioService:
         db_session: Session,
         test_user: User,
         test_positions: list[Position],
+        test_cash_account: CashAccount,
     ):
         """Test position weight calculation."""
         weights = portfolio_service.calculate_position_weights(db_session, test_user.id)

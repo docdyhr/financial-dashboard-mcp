@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-MCP Server Entry Point for Financial Dashboard
+"""MCP Server Entry Point for Financial Dashboard
 
 This script serves as the main entry point for the Financial Dashboard MCP server.
 It ensures proper environment setup and handles graceful startup/shutdown.

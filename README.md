@@ -19,20 +19,21 @@ This project provides a single-user financial dashboard to track and analyze pos
 ### Current (Production Ready) ✅
 
 - **Portfolio Management**: Track stocks, bonds, cash, and other assets
+- **Cash Account System**: Multi-currency cash tracking with deposit/withdrawal functionality
 - **Real-time Market Data**: Live market data integration via yfinance
 - **Task Queue System**: Celery + Redis for background processing
 - **Performance Analytics**: Portfolio performance tracking and calculations
-- **Asset Allocation**: Portfolio composition analysis
+- **Asset Allocation**: Portfolio composition analysis with real cash balances
 - **Automated Scheduling**: Periodic market data updates and portfolio snapshots
 - **CLI Management**: Command-line tools for task monitoring and management
-- **API Management**: RESTful endpoints for all operations
+- **API Management**: RESTful endpoints for all operations including cash management
 - **Docker Deployment**: Complete containerized deployment setup
 - **Comprehensive Testing**: Unit and integration tests with real data validation
 - **Frontend Dashboard**: Complete Streamlit dashboard with interactive visualizations
 - **AI Integration**: MCP server with 13 AI-powered tools for portfolio analysis
 - **Code Quality**: Reduced technical debt with improved configuration and error handling
 - **Streamlined Dependencies**: Clean dependency management with unused packages removed
-- **Comprehensive Testing**: Added test suites for core services (portfolio, position)
+- **Comprehensive Testing**: Added test suites for core services (portfolio, position, cash)
 - **Constants Management**: Centralized configuration values and magic numbers
 
 ### MCP AI Tools 🤖

@@ -48,7 +48,7 @@ EUROPEAN_MARKET_SUFFIXES = {
     "PT": ".LS",  # Portugal (Lisbon)
     "AT": ".VI",  # Austria (Vienna)
     "CH": ".SW",  # Switzerland (SIX)
-    "GB": ".L",   # United Kingdom (London)
+    "GB": ".L",  # United Kingdom (London)
     "IE": ".IR",  # Ireland (Dublin)
     "NO": ".OL",  # Norway (Oslo)
     "SE": ".ST",  # Sweden (Stockholm)
@@ -56,9 +56,11 @@ EUROPEAN_MARKET_SUFFIXES = {
     "FI": ".HE",  # Finland (Helsinki)
 }
 
+
 # Asset Types
 class AssetType:
     """Asset type constants."""
+
     STOCK = "stock"
     BOND = "bond"
     ETF = "etf"
@@ -68,9 +70,11 @@ class AssetType:
     CASH = "cash"
     OTHER = "other"
 
+
 # Transaction Types
 class TransactionType:
     """Transaction type constants."""
+
     BUY = "buy"
     SELL = "sell"
     DIVIDEND = "dividend"
@@ -80,9 +84,11 @@ class TransactionType:
     WITHDRAWAL = "withdrawal"
     TRANSFER = "transfer"
 
+
 # Task States
 class TaskState:
     """Celery task state constants."""
+
     PENDING = "PENDING"
     STARTED = "STARTED"
     SUCCESS = "SUCCESS"

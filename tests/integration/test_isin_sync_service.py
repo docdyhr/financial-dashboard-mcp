@@ -20,7 +20,7 @@ from backend.services.isin_sync_service import (
 )
 
 
-@pytest.fixture
+@pytest.fixture()
 def sync_service():
     """Create ISIN sync service instance for testing."""
     service = ISINSyncService()
@@ -30,7 +30,7 @@ def sync_service():
     return service
 
 
-@pytest.fixture
+@pytest.fixture()
 def test_client():
     """Create FastAPI test client."""
     from fastapi import FastAPI
@@ -40,7 +40,7 @@ def test_client():
     return TestClient(app)
 
 
-@pytest.fixture
+@pytest.fixture()
 def mock_db_with_mappings():
     """Mock database with sample ISIN mappings."""
     mock_db = Mock()
@@ -72,7 +72,7 @@ def mock_db_with_mappings():
 class TestISINSyncService:
     """Test ISIN sync service core functionality."""
 
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_start_stop_background_sync(self, sync_service):
         """Test starting and stopping the background sync service."""
         # Initially not running
@@ -87,7 +87,7 @@ class TestISINSyncService:
         await sync_service.stop_background_sync()
         assert not sync_service._running
 
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_queue_sync_job(self, sync_service):
         """Test queuing sync jobs."""
         isins = ["US0378331005", "DE0007164600", "GB0002162385"]
@@ -123,7 +123,7 @@ class TestISINSyncService:
         status = sync_service.get_job_status("nonexistent_job")
         assert status is None
 
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_sync_single_isin_create_new(
         self, sync_service, mock_db_with_mappings
     ):
@@ -153,7 +153,7 @@ class TestISINSyncService:
             mock_db_with_mappings.add.assert_called_once()
             mock_db_with_mappings.commit.assert_called_once()
 
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_sync_single_isin_update_existing(
         self, sync_service, mock_db_with_mappings
     ):
@@ -255,7 +255,7 @@ class TestISINSyncService:
         assert pending[0]["isin"] == sample_conflict_data["isin"]
         assert pending[0]["conflict_type"] == sample_conflict_data["conflict_type"]
 
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_resolve_conflict_manually(self, sync_service, mock_db_with_mappings):
         """Test manual conflict resolution."""
         # Add test conflict
@@ -575,7 +575,7 @@ class TestISINSyncAPI:
 class TestISINSyncServicePerformance:
     """Test performance aspects of ISIN sync service."""
 
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_concurrent_job_processing(self, sync_service):
         """Test concurrent processing of multiple sync jobs."""
         # Queue multiple jobs
@@ -592,7 +592,7 @@ class TestISINSyncServicePerformance:
             job = sync_service.active_jobs[job_id]
             assert job.status == SyncStatus.PENDING
 
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_large_batch_sync(self, sync_service):
         """Test syncing large batch of ISINs."""
         # Create large batch
@@ -626,7 +626,7 @@ class TestISINSyncServicePerformance:
 class TestISINSyncServiceErrorHandling:
     """Test error handling in ISIN sync service."""
 
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_database_error_handling(self, sync_service):
         """Test handling of database errors during sync."""
         job = SyncJob("test_job", "test", ["US0378331005"])
@@ -640,7 +640,7 @@ class TestISINSyncServiceErrorHandling:
             except Exception:
                 pytest.fail("Database error should be handled gracefully")
 
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_external_api_error_handling(self, sync_service):
         """Test handling of external API errors."""
         job = SyncJob("test_job", "test", ["US0378331005"])
@@ -668,7 +668,7 @@ class TestISINSyncServiceErrorHandling:
         job = SyncJob("test_job", "test", ["INVALID_ISIN"])
         assert job.isins == ["INVALID_ISIN"]  # Should accept, validation happens later
 
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_conflict_resolution_error_handling(self, sync_service):
         """Test error handling in conflict resolution."""
         conflict = MappingConflict(
@@ -687,22 +687,22 @@ class TestISINSyncServiceErrorHandling:
             assert conflict.resolution is None
 
 
-@pytest.mark.integration
+@pytest.mark.integration()
 class TestISINSyncServiceIntegration:
     """Integration tests for ISIN sync service."""
 
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_full_sync_workflow(self, sync_service):
         """Test complete sync workflow from start to finish."""
         # This would be a full integration test with real database
         # and external API calls (when --run-integration flag is used)
 
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_conflict_resolution_workflow(self, sync_service):
         """Test complete conflict resolution workflow."""
         # This would test the full conflict detection and resolution process
 
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_api_endpoint_integration(self, test_client):
         """Test API endpoints with real sync service."""
         # This would test the API endpoints with actual sync service

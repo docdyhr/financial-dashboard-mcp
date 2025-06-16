@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Script to check version consistency across project files.
+"""Script to check version consistency across project files.
 
 This script ensures that version numbers are consistent between:
 - pyproject.toml

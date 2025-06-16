@@ -28,9 +28,8 @@ async def get_transactions(
     user_id: int = Query(..., description="User ID to get transactions for"),
     asset_id: int | None = Query(None, description="Filter by asset ID"),
     position_id: int | None = Query(None, description="Filter by position ID"),
-    transaction_type: str | None = Query(
-        None, description="Filter by transaction type"
-    ),
+    transaction_type: str
+    | None = Query(None, description="Filter by transaction type"),
     account_name: str | None = Query(None, description="Filter by account name"),
     start_date: date | None = Query(None, description="Filter from date"),
     end_date: date | None = Query(None, description="Filter to date"),
@@ -309,9 +308,8 @@ async def get_transactions_by_date_range(
     user_id: int,
     start_date: date = Query(..., description="Start date"),
     end_date: date = Query(..., description="End date"),
-    transaction_type: str | None = Query(
-        None, description="Filter by transaction type"
-    ),
+    transaction_type: str
+    | None = Query(None, description="Filter by transaction type"),
     db: Session = Depends(get_db),
 ) -> BaseResponse[list[TransactionResponse]]:
     """Get transactions within a specific date range."""

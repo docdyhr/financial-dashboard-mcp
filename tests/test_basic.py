@@ -18,7 +18,7 @@ def test_string_operations() -> None:
     assert test_string.lower() == "financial dashboard"  # nosec
 
 
-@pytest.mark.unit
+@pytest.mark.unit()
 def test_list_operations() -> None:
     """Test list operations with unit marker."""
     test_list = [1, 2, 3, 4, 5]
@@ -27,7 +27,7 @@ def test_list_operations() -> None:
     assert max(test_list) == 5  # nosec
 
 
-@pytest.mark.financial
+@pytest.mark.financial()
 def test_financial_calculations() -> None:
     """Test basic financial calculations."""
     principal = 1000.0
@@ -43,7 +43,7 @@ def test_financial_calculations() -> None:
     assert abs(compound_amount - 1102.5) < 0.01  # nosec
 
 
-@pytest.mark.slow
+@pytest.mark.slow()
 def test_slow_operation() -> None:
     """Test marked as slow."""
     import time

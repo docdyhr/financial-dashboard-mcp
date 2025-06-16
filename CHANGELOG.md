@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+### Major Features
+
+#### Cash Account System Implementation
+- **NEW**: Complete cash account tracking system replacing hardcoded cash balances
+- **NEW**: Multi-currency cash account support (USD, EUR, GBP)
+- **NEW**: Cash deposit/withdrawal transaction processing
+- **NEW**: Account-to-account transfer functionality
+- **NEW**: Primary account designation per currency
+- **NEW**: REST API endpoints for cash account management
+- **NEW**: Database migration for cash accounts table
+- **BREAKING**: Portfolio calculations now use real cash balances instead of hardcoded DEFAULT_CASH_BALANCE
+
 ### Technical Debt Fixes
 
 - Fixed version inconsistencies in pyproject.toml (corrected python_version, minversion, target-version)
@@ -13,7 +25,9 @@
 - Cleaned up empty frontend files (app_new.py, app_old.py)
 - Enhanced .gitignore to exclude generated build artifacts
 - Added comprehensive test suite for portfolio and position services
+- Added comprehensive test suite for cash account service (13 test cases)
 - Improved code maintainability by extracting hardcoded values to constants
+- Fixed pytest configuration syntax errors
 
 ## v1.9.0 (2025-06-16)
 

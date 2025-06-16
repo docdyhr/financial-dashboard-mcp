@@ -6,12 +6,7 @@ from decimal import Decimal
 from fastapi import HTTPException
 from sqlalchemy.orm import Session, joinedload
 
-from backend.constants import (
-    CONCENTRATION_CRITICAL_THRESHOLD,
-    CONCENTRATION_WARNING_THRESHOLD,
-    DEFAULT_CASH_BALANCE,
-    MIN_DIVERSIFICATION_ASSETS,
-)
+from backend.constants import MIN_DIVERSIFICATION_ASSETS
 from backend.models import (
     AssetCategory,
     AssetType,
@@ -29,6 +24,7 @@ from backend.schemas.portfolio import (
     PortfolioSummary,
 )
 from backend.schemas.position import PositionSummary
+from backend.services.cash_account import CashAccountService
 
 
 class PortfolioService:
@@ -36,10 +32,10 @@ class PortfolioService:
 
     def __init__(self) -> None:
         """Initialize portfolio service."""
+        self.cash_service = CashAccountService()
 
     def get_portfolio_summary(self, db: Session, user_id: int) -> PortfolioSummary:
         """Get comprehensive portfolio summary for a user."""
-
         # Check if user exists
         user = db.query(User).filter(User.id == user_id).first()
         if not user:
@@ -58,7 +54,7 @@ class PortfolioService:
         # Calculate portfolio totals
         total_value = Decimal("0")
         total_cost_basis = Decimal("0")
-        cash_balance = DEFAULT_CASH_BALANCE  # TODO: Get from user cash account
+        cash_balance = self.cash_service.get_cash_balance(db, user_id)
 
         position_summaries = []
 
@@ -148,7 +144,6 @@ class PortfolioService:
         self, db: Session, user_id: int
     ) -> AllocationBreakdown:
         """Calculate asset allocation breakdown for a portfolio."""
-
         # Check if user exists
         user = db.query(User).filter(User.id == user_id).first()
         if not user:
@@ -164,7 +159,8 @@ class PortfolioService:
         )
 
         # Calculate total portfolio value
-        total_value = Decimal("5000")  # Cash balance
+        cash_balance = self.cash_service.get_cash_balance(db, user_id)
+        total_value = cash_balance
         for position in positions:
             if position.current_value:
                 total_value += position.current_value
@@ -220,7 +216,7 @@ class PortfolioService:
                 )
 
         # Convert to percentages
-        cash_value = Decimal("5000")  # TODO: Get actual cash balance
+        cash_value = cash_balance
 
         return AllocationBreakdown(
             equity_percent=(category_values[AssetCategory.EQUITY] / total_value * 100),
@@ -256,7 +252,6 @@ class PortfolioService:
         end_date: date | None = None,
     ) -> PerformanceMetrics:
         """Calculate portfolio performance metrics."""
-
         # Check if user exists
         user = db.query(User).filter(User.id == user_id).first()
         if not user:
@@ -429,7 +424,6 @@ class PortfolioService:
         self, db: Session, user_id: int, snapshot_date: date | None = None
     ) -> PortfolioSnapshot:
         """Create a portfolio snapshot for a specific date."""
-
         # Check if user exists
         user = db.query(User).filter(User.id == user_id).first()
         if not user:
@@ -449,7 +443,7 @@ class PortfolioService:
         )
 
         # Create snapshot using the model's factory method
-        cash_balance = Decimal("5000")  # TODO: Get actual cash balance
+        cash_balance = self.cash_service.get_cash_balance(db, user_id)
         snapshot = PortfolioSnapshot.create_from_positions(
             user_id=user_id,
             snapshot_date=snapshot_date,
@@ -482,7 +476,6 @@ class PortfolioService:
         self, db: Session, user_id: int
     ) -> DiversificationMetrics:
         """Calculate portfolio diversification metrics."""
-
         # Check if user exists
         user = db.query(User).filter(User.id == user_id).first()
         if not user:
@@ -556,7 +549,9 @@ class PortfolioService:
 
         # Sector diversification score based on number of sectors
         unique_sectors = len(set(p.asset.sector for p in positions if p.asset.sector))
-        sector_score = min(100, unique_sectors * (100 // MIN_DIVERSIFICATION_ASSETS))  # Max score at MIN_DIVERSIFICATION_ASSETS+ sectors
+        sector_score = min(
+            100, unique_sectors * (100 // MIN_DIVERSIFICATION_ASSETS)
+        )  # Max score at MIN_DIVERSIFICATION_ASSETS+ sectors
 
         # Asset type diversification score
         unique_asset_types = len(set(p.asset.asset_type for p in positions))
@@ -579,7 +574,6 @@ class PortfolioService:
         self, db: Session, user_id: int
     ) -> dict[int, Decimal]:
         """Calculate position weights in portfolio."""
-
         # Check if user exists
         user = db.query(User).filter(User.id == user_id).first()
         if not user:
@@ -612,7 +606,6 @@ class PortfolioService:
         end_date: date | None = None,
     ) -> dict[str, Decimal]:
         """Compare portfolio performance to a benchmark."""
-
         # Check if user exists
         user = db.query(User).filter(User.id == user_id).first()
         if not user:
