@@ -46,7 +46,7 @@ disallow_untyped_defs = false
 disallow_incomplete_defs = false
 
 [tool.pytest.ini_options]
-minversion = "1.5.1"
+minversion = "6.0"
 testpaths = ["tests"]
 python_files = "test_*.py"
 python_classes = "Test*"
