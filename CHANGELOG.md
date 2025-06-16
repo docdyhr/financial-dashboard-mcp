@@ -1,33 +1,66 @@
 # CHANGELOG
 
-## [Unreleased]
 
-### Major Features
 
-#### Cash Account System Implementation
-- **NEW**: Complete cash account tracking system replacing hardcoded cash balances
-- **NEW**: Multi-currency cash account support (USD, EUR, GBP)
-- **NEW**: Cash deposit/withdrawal transaction processing
-- **NEW**: Account-to-account transfer functionality
-- **NEW**: Primary account designation per currency
-- **NEW**: REST API endpoints for cash account management
-- **NEW**: Database migration for cash accounts table
-- **BREAKING**: Portfolio calculations now use real cash balances instead of hardcoded DEFAULT_CASH_BALANCE
+## v2.0.0 (2025-06-16)
 
-### Technical Debt Fixes
+### Breaking
 
-- Fixed version inconsistencies in pyproject.toml (corrected python_version, minversion, target-version)
-- Removed unused dependencies: aiofiles, aioredis, environs, python-dotenv
-- Added constants.py to centralize magic numbers and configuration values
-- Improved configuration security by removing hardcoded credentials
-- Added centralized exception handling with services/exceptions.py
-- Removed duplicate Makefile targets for database migrations
-- Cleaned up empty frontend files (app_new.py, app_old.py)
-- Enhanced .gitignore to exclude generated build artifacts
-- Added comprehensive test suite for portfolio and position services
-- Added comprehensive test suite for cash account service (13 test cases)
-- Improved code maintainability by extracting hardcoded values to constants
-- Fixed pytest configuration syntax errors
+* feat: implement comprehensive cash account system
+
+- Add multi-currency cash account tracking (USD, EUR, GBP)
+- Implement deposit/withdrawal transaction processing
+- Add account-to-account transfer functionality
+- Create REST API endpoints for cash management
+- Replace hardcoded DEFAULT_CASH_BALANCE with real cash balances
+- Add database migration for cash accounts table
+- Integrate cash accounts with portfolio calculations
+- Add comprehensive test suite (13 test cases)
+- Update project documentation and changelog
+
+BREAKING CHANGE: Portfolio calculations now use real cash balances instead of hardcoded values
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude &lt;noreply@anthropic.com&gt; ([`564fae6`](https://github.com/docdyhr/financial-dashboard-mcp/commit/564fae6bc7dfc80c04e9c3e2992e16f7c2a04100))
+
+### Chore
+
+* chore: re-enable linting hooks with improved configuration
+
+- Re-enable ruff with auto-fix capability
+- Configure flake8 with extended ignore list for modernized code
+- Add exclusions for acceptable test-related security warnings
+- Improve line length and code style tolerance
+
+This restores comprehensive linting while accommodating the modernized codebase. ([`22cdede`](https://github.com/docdyhr/financial-dashboard-mcp/commit/22cdedee1863727a88222c6e13c609aab20de244))
+
+* chore: bump version to 1.9.0 [skip ci] ([`ddcc347`](https://github.com/docdyhr/financial-dashboard-mcp/commit/ddcc347d4b41827f5458007167489b6792ff829a))
+
+### Refactor
+
+* refactor: address technical debt and improve code quality
+
+- Fix version inconsistencies in pyproject.toml configuration
+- Remove unused dependencies (aiofiles, aioredis, environs, python-dotenv)
+- Add constants.py to centralize magic numbers and configuration values
+- Improve configuration security by removing hardcoded credentials
+- Add centralized exception handling with services/exceptions.py
+- Remove duplicate Makefile targets for database migrations
+- Clean up empty frontend files (app_new.py, app_old.py)
+- Enhance .gitignore to exclude generated build artifacts
+- Add comprehensive test suite for portfolio and position services
+- Update documentation with technical debt status and improvements
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude &lt;noreply@anthropic.com&gt; ([`0804560`](https://github.com/docdyhr/financial-dashboard-mcp/commit/08045603dc48c8329b19cd68dc4991d84c68277f))
+
+### Unknown
+
+* Merge branch &#39;main&#39; of https://github.com/docdyhr/financial-dashboard-mcp
+Resolve merge conflict ([`b529ea9`](https://github.com/docdyhr/financial-dashboard-mcp/commit/b529ea963ab0354c9a2f4af811eccec077766895))
+
 
 ## v1.9.0 (2025-06-16)
 
