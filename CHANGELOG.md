@@ -2,6 +2,53 @@
 
 
 
+## v1.9.0 (2025-06-16)
+
+### Chore
+
+* chore: bump version to 1.8.0 [skip ci] ([`4204818`](https://github.com/docdyhr/financial-dashboard-mcp/commit/42048181c6c7931fd471c73dc3854edf9004935c))
+
+### Feature
+
+* feat: modernize Python codebase and improve code quality
+
+- Replace legacy typing imports (List, Dict, Tuple) with built-in equivalents
+- Update type annotations to Python 3.11+ syntax
+- Add comprehensive Ruff linting configuration in pyproject.toml
+- Configure mypy, black, isort, and pytest settings
+- Improve string formatting and add TYPE_CHECKING guards
+- Clean up imports and remove unnecessary code
+- Remove temporary test files (test_ruff.py, test_ruff_config.py)
+- Fix critical linting issues: boolean comparisons, bare except clauses
+- Add timezone awareness to datetime usage
+- Temporarily disable strict linting hooks for modernization commit
+- Apply black code formatting to ensure consistency
+- Enhance code readability and maintainability
+
+This modernization brings the codebase up to current Python standards
+and establishes a robust linting and formatting foundation. ([`844043f`](https://github.com/docdyhr/financial-dashboard-mcp/commit/844043f8a6c53d1be3d908ebdc568b14b842e90e))
+
+### Refactor
+
+* refactor: modernize Python type hints and improve code quality
+
+- Replace legacy typing imports (List, Dict, Tuple) with built-in equivalents
+- Update type annotations to use modern Python 3.11+ syntax
+- Add comprehensive Ruff configuration with extensive rule coverage
+- Fix string formatting issues and improve error handling
+- Clean up imports and remove unused variables
+- Add proper TYPE_CHECKING guards for forward references
+- Configure linting tools (mypy, black, isort, pytest) in pyproject.toml
+- Improve code maintainability across backend, frontend, and MCP modules
+
+This modernization follows current Python best practices while maintaining
+backward compatibility and improves overall code quality and type safety. ([`64bf7ca`](https://github.com/docdyhr/financial-dashboard-mcp/commit/64bf7cad149b436100663417118c000a2047d560))
+
+### Unknown
+
+* Merge remote changes and resolve conflicts in pyproject.toml ([`b5f41f5`](https://github.com/docdyhr/financial-dashboard-mcp/commit/b5f41f5fc0fa8fe3ed30c91711982dc90c72d330))
+
+
 ## v1.8.0 (2025-06-16)
 
 ### Chore
