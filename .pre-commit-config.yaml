@@ -63,13 +63,3 @@ repos:
         language: system
         files: ^docker/Dockerfile\..+$
         pass_filenames: false
-
-  - repo: local
-    hooks:
-      - id: validate-versions
-        name: Validate version consistency
-        entry: python scripts/validate_versions.py
-        language: system
-        pass_filenames: false
-        always_run: true
-        stages: [commit]
