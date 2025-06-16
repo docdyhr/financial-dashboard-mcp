@@ -6,6 +6,12 @@ from decimal import Decimal
 from fastapi import HTTPException
 from sqlalchemy.orm import Session, joinedload
 
+from backend.constants import (
+    CONCENTRATION_CRITICAL_THRESHOLD,
+    CONCENTRATION_WARNING_THRESHOLD,
+    DEFAULT_CASH_BALANCE,
+    MIN_DIVERSIFICATION_ASSETS,
+)
 from backend.models import (
     AssetCategory,
     AssetType,
@@ -52,7 +58,7 @@ class PortfolioService:
         # Calculate portfolio totals
         total_value = Decimal("0")
         total_cost_basis = Decimal("0")
-        cash_balance = Decimal("5000")  # TODO: Get from user cash account
+        cash_balance = DEFAULT_CASH_BALANCE  # TODO: Get from user cash account
 
         position_summaries = []
 
@@ -550,7 +556,7 @@ class PortfolioService:
 
         # Sector diversification score based on number of sectors
         unique_sectors = len(set(p.asset.sector for p in positions if p.asset.sector))
-        sector_score = min(100, unique_sectors * 20)  # Max score at 5+ sectors
+        sector_score = min(100, unique_sectors * (100 // MIN_DIVERSIFICATION_ASSETS))  # Max score at MIN_DIVERSIFICATION_ASSETS+ sectors
 
         # Asset type diversification score
         unique_asset_types = len(set(p.asset.asset_type for p in positions))

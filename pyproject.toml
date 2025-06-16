@@ -24,7 +24,7 @@ ensure_newline_before_comments = true
 skip_glob = ["*/migrations/*", "*/venv/*"]
 
 [tool.mypy]
-python_version = "1.9.0"
+python_version = "3.11"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
@@ -46,7 +46,7 @@ disallow_untyped_defs = false
 disallow_incomplete_defs = false
 
 [tool.pytest.ini_options]
-minversion = "1.9.0"
+minversion = "6.0"
 testpaths = ["tests"]
 python_files = "test_*.py"
 python_classes = "Test*"
@@ -107,7 +107,7 @@ exclude_lines = [
 line-length = 88
 
 # Python 3.11
-target-version = "1.9.0"
+target-version = "py311"
 
 # Exclude directories
 exclude = [
@@ -458,8 +458,8 @@ commit_args = ""
 
 [[tool.bumpversion.files]]
 filename = "pyproject.toml"
-search = 'version = "1.9.0"'
-replace = 'version = "1.9.0"'
+search = 'version = "{current_version}"'
+replace = 'version = "{new_version}"'
 
 [[tool.bumpversion.files]]
 filename = "backend/__init__.py"

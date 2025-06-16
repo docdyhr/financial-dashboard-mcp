@@ -2,7 +2,7 @@
 
 from functools import lru_cache
 
-from pydantic import field_validator
+from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -27,7 +27,7 @@ class Settings(BaseSettings):
     api_reload: bool = True
 
     # Database
-    database_url: str = "postgresql://user:password@localhost:5432/financial_dashboard"
+    database_url: str = "postgresql://localhost:5432/financial_dashboard"  # Set DB credentials via DATABASE_URL env var
     database_echo: bool = False
 
     # Redis
@@ -36,7 +36,7 @@ class Settings(BaseSettings):
     celery_result_backend: str = "redis://localhost:6379/0"
 
     # Security
-    secret_key: str = "your-secret-key-here-change-in-production"
+    secret_key: str  # Required - must be set via SECRET_KEY env var
     access_token_expire_minutes: int = 43200  # 30 days
 
     # CORS
@@ -66,15 +66,27 @@ class Settings(BaseSettings):
     # MCP Server Configuration
     mcp_server_host: str = "localhost"
     mcp_server_port: int = 8502
-    mcp_auth_token: str = "development-token"
+    mcp_auth_token: str | None = None  # Set via MCP_AUTH_TOKEN env var
 
     # Flower UI Configuration
-    flower_username: str = "admin"
-    flower_password: str = "admin"
+    flower_username: str = "flower"  # Set via FLOWER_USERNAME env var
+    flower_password: str | None = None  # Required - set via FLOWER_PASSWORD env var
 
     # Celery Beat Schedule (in seconds)
     market_data_update_interval: int = 300
     portfolio_snapshot_interval: int = 3600
+
+    @model_validator(mode="after")
+    def validate_production_settings(self):
+        """Validate critical settings for production environment."""
+        if self.environment == "production":
+            if self.secret_key == "":
+                raise ValueError("SECRET_KEY must be set in production")
+            if self.flower_password is None:
+                raise ValueError("FLOWER_PASSWORD must be set in production")
+            if self.debug:
+                raise ValueError("Debug mode must be disabled in production")
+        return self
 
 
 @lru_cache

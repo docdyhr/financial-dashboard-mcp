@@ -1,6 +1,19 @@
 # CHANGELOG
 
+## [Unreleased]
 
+### Technical Debt Fixes
+
+- Fixed version inconsistencies in pyproject.toml (corrected python_version, minversion, target-version)
+- Removed unused dependencies: aiofiles, aioredis, environs, python-dotenv
+- Added constants.py to centralize magic numbers and configuration values
+- Improved configuration security by removing hardcoded credentials
+- Added centralized exception handling with services/exceptions.py
+- Removed duplicate Makefile targets for database migrations
+- Cleaned up empty frontend files (app_new.py, app_old.py)
+- Enhanced .gitignore to exclude generated build artifacts
+- Added comprehensive test suite for portfolio and position services
+- Improved code maintainability by extracting hardcoded values to constants
 
 ## v1.9.0 (2025-06-16)
 

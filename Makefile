@@ -167,15 +167,6 @@ docker-down:
 docker-logs:
 	docker-compose logs -f
 
-migrate-create:
-	alembic revision --autogenerate -m "$(message)"
-
-migrate-up:
-	alembic upgrade head
-
-migrate-down:
-	alembic downgrade -1
-
 db-reset:
 	alembic downgrade base
 	alembic upgrade head

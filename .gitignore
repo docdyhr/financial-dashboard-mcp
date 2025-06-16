@@ -25,6 +25,7 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+financial_dashboard_mcp.egg-info/
 
 # PyInstaller
 *.manifest
