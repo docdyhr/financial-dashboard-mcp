@@ -2,6 +2,37 @@
 
 
 
+## v1.6.0 (2025-06-15)
+
+### Chore
+
+* chore: bump version to 1.5.1 [skip ci] ([`05f6caf`](https://github.com/docdyhr/financial-dashboard-mcp/commit/05f6caf1ca8da7ea128ea42367b51e5b40dfde3a))
+
+### Feature
+
+* feat: complete MCP server portfolio integration
+
+- Update add_position tool to automatically create assets when needed
+- Fix API schema compatibility (use asset_id, average_cost_per_share, total_cost_basis)
+- Fix type conversion issues in get_positions display
+- Add proper error handling for string/number conversions
+- Create comprehensive test script for add_position functionality
+- Tested successfully adding AAPL, MSFT, GOOGL positions via MCP
+
+The MCP server can now successfully:
+- Create assets automatically when adding positions
+- Add positions with proper cost basis calculations
+- Display positions with correct formatting
+- Handle API responses with proper type safety
+
+Users can now add positions through Claude Desktop using natural language:
+&#39;Add 100 shares of AAPL at 80.50&#39; ([`2fb86b2`](https://github.com/docdyhr/financial-dashboard-mcp/commit/2fb86b290bfa4f8bf5b82ed8c876b1718ffcbf73))
+
+### Unknown
+
+* Merge branch &#39;main&#39; of https://github.com/docdyhr/financial-dashboard-mcp ([`2e0ead6`](https://github.com/docdyhr/financial-dashboard-mcp/commit/2e0ead60507b48d4b7fdaf1c36d290a76e2bd3f4))
+
+
 ## v1.5.1 (2025-06-15)
 
 ### Chore
