@@ -7,7 +7,15 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from backend.api import assets, portfolio, positions, tasks, transactions, user_settings
+from backend.api import (
+    assets,
+    isin,
+    portfolio,
+    positions,
+    tasks,
+    transactions,
+    user_settings,
+)
 from backend.config import get_settings
 from backend.database import get_db_session
 
@@ -119,6 +127,7 @@ async def api_status():
 # Include API routers
 app.include_router(portfolio.router, prefix="/api/v1/portfolio", tags=["portfolio"])
 app.include_router(assets.router, prefix="/api/v1/assets", tags=["assets"])
+app.include_router(isin.router, prefix="/api/v1", tags=["isin"])
 app.include_router(positions.router, prefix="/api/v1/positions", tags=["positions"])
 app.include_router(
     transactions.router, prefix="/api/v1/transactions", tags=["transactions"]

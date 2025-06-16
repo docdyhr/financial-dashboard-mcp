@@ -2,8 +2,7 @@
 
 import logging
 from datetime import datetime
-from decimal import Decimal
-from typing import Any
+from typing import Any, Dict, List, Optional
 
 from celery import current_task
 
@@ -17,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 @celery_app.task(bind=True, name="fetch_market_data")  # type: ignore[misc]
-def fetch_market_data(self, symbols: list[str], period: str = "1d") -> dict[str, Any]:
+def fetch_market_data(self, symbols: List[str], period: str = "1d") -> Dict[str, Any]:
     """
     Fetch market data for given symbols using multi-provider service.
 
@@ -97,7 +96,7 @@ def fetch_market_data(self, symbols: list[str], period: str = "1d") -> dict[str,
 
 
 @celery_app.task(bind=True, name="update_portfolio_prices")  # type: ignore[misc]
-def update_portfolio_prices(self, user_id: int | None = None) -> dict[str, Any]:
+def update_portfolio_prices(self, user_id: Optional[int] = None) -> Dict[str, Any]:
     """
     Update prices for all assets in user portfolio(s) using multi-provider service.
 
@@ -167,7 +166,7 @@ def update_portfolio_prices(self, user_id: int | None = None) -> dict[str, Any]:
 
 
 @celery_app.task(bind=True, name="fetch_asset_info")  # type: ignore[misc]
-def fetch_asset_info(self, ticker: str) -> dict[str, Any]:
+def fetch_asset_info(self, ticker: str) -> Dict[str, Any]:
     """
     Fetch detailed information for a single asset using multi-provider service.
 

@@ -110,7 +110,7 @@ class TransactionService(
                 and_(
                     Position.user_id == user_id,
                     Position.asset_id == buy_request.asset_id,
-                    Position.is_active == True,
+                    Position.is_active,
                 )
             )
             .first()
@@ -165,7 +165,7 @@ class TransactionService(
                 and_(
                     Position.id == sell_request.position_id,
                     Position.user_id == user_id,
-                    Position.is_active == True,
+                    Position.is_active,
                 )
             )
             .first()

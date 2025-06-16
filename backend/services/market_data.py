@@ -14,6 +14,8 @@ from sqlalchemy.orm import Session
 from backend.config import get_settings
 from backend.models.asset import Asset
 from backend.models.price_history import PriceHistory
+from backend.services.isin_utils import ISINUtils, isin_service
+from backend.services.ticker_utils import TickerUtils
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -21,7 +23,7 @@ settings = get_settings()
 
 @dataclass
 class MarketDataResult:
-    """Result from market data fetch."""
+    """Result from market data fetch operation."""
 
     ticker: str
     current_price: Optional[float] = None
@@ -35,6 +37,7 @@ class MarketDataResult:
     data_source: Optional[str] = None
     success: bool = False
     error: Optional[str] = None
+    suggestions: Optional[List[str]] = None
 
 
 class MarketDataProvider:
@@ -59,24 +62,73 @@ class MarketDataProvider:
 
 
 class YFinanceProvider(MarketDataProvider):
-    """Yahoo Finance provider using yfinance library."""
+    """Yahoo Finance provider with international ticker support."""
 
     def __init__(self):
         super().__init__("yfinance")
+        self.rate_limit_delay = 1.0  # 1 second between calls
+        self.last_call_time = 0
+
+    def _respect_rate_limit(self):
+        """Ensure we don't exceed rate limits."""
+        current_time = time.time()
+        time_since_last_call = current_time - self.last_call_time
+        if time_since_last_call < self.rate_limit_delay:
+            sleep_time = self.rate_limit_delay - time_since_last_call
+            logger.debug(f"YFinance rate limit: sleeping {sleep_time:.1f}s")
+            time.sleep(sleep_time)
+        self.last_call_time = time.time()
 
     def fetch_quote(self, ticker: str) -> MarketDataResult:
         """Fetch quote using yfinance."""
         try:
-            stock = yf.Ticker(ticker)
+            self._respect_rate_limit()
+            # Format ticker for Yahoo Finance (handles European and international formats)
+            yf_ticker = TickerUtils.format_for_yfinance(ticker)
+            ticker_info = TickerUtils.parse_ticker(ticker)
 
-            # Get historical data
-            hist = stock.history(period="2d")
+            logger.debug(
+                f"Fetching {ticker} (formatted as {yf_ticker}) from Yahoo Finance"
+            )
 
-            if hist.empty:
+            stock = yf.Ticker(yf_ticker)
+
+            # Get historical data - try different periods for better reliability
+            hist = None
+            for period in ["2d", "5d", "1mo"]:
+                try:
+                    hist = stock.history(period=period)
+                    if not hist.empty:
+                        break
+                except Exception as period_error:
+                    logger.debug(
+                        f"Failed to get {period} data for {yf_ticker}: {period_error}"
+                    )
+                    continue
+
+            if hist is None or hist.empty:
+                # Try to get basic info from Yahoo Finance
+                try:
+                    info = stock.info
+                    if info and "regularMarketPrice" in info:
+                        current_price = float(info["regularMarketPrice"])
+                        return MarketDataResult(
+                            ticker=ticker,
+                            current_price=current_price,
+                            data_source=self.name,
+                            success=True,
+                        )
+                except Exception:
+                    pass
+
+                error_msg = "No historical data available"
+                if ticker_info.is_international:
+                    error_msg += f" for international ticker {ticker} (exchange: {ticker_info.exchange_name})"
+
                 return MarketDataResult(
                     ticker=ticker,
                     success=False,
-                    error="No historical data available",
+                    error=error_msg,
                     data_source=self.name,
                 )
 
@@ -85,7 +137,11 @@ class YFinanceProvider(MarketDataProvider):
             open_price = float(hist["Open"].iloc[-1])
             high_price = float(hist["High"].iloc[-1])
             low_price = float(hist["Low"].iloc[-1])
-            volume = int(hist["Volume"].iloc[-1]) if "Volume" in hist.columns else None
+            volume = (
+                int(hist["Volume"].iloc[-1])
+                if "Volume" in hist.columns and hist["Volume"].iloc[-1] > 0
+                else None
+            )
 
             # Calculate previous close and changes
             previous_close = None
@@ -98,6 +154,11 @@ class YFinanceProvider(MarketDataProvider):
                 day_change_percent = (
                     (day_change / previous_close) * 100 if previous_close != 0 else 0
                 )
+
+            success_msg = f"Successfully fetched {ticker}"
+            if ticker_info.is_international:
+                success_msg += f" from {ticker_info.exchange_name} ({ticker_info.default_currency})"
+            logger.debug(success_msg)
 
             return MarketDataResult(
                 ticker=ticker,
@@ -114,9 +175,29 @@ class YFinanceProvider(MarketDataProvider):
             )
 
         except Exception as e:
-            logger.warning(f"yFinance failed for {ticker}: {e}")
+            error_msg = f"yFinance failed for {ticker}: {e}"
+            ticker_info = TickerUtils.parse_ticker(ticker)
+            suggestions = []
+
+            if ticker_info.is_international:
+                error_msg += f" (Exchange: {ticker_info.exchange_name}, try format: {TickerUtils.format_for_yfinance(ticker)})"
+                # Add suggestions for European tickers
+                base_ticker = ticker_info.base_ticker
+                if ticker_info.exchange_suffix:
+                    alternative_exchanges = [".L", ".PA", ".DE", ".MI", ".AS"]
+                    for alt_ex in alternative_exchanges:
+                        if alt_ex != f".{ticker_info.exchange_suffix}":
+                            suggestions.append(f"{base_ticker}{alt_ex}")
+                # Also suggest US version
+                suggestions.append(base_ticker)
+
+            logger.warning(error_msg)
             return MarketDataResult(
-                ticker=ticker, success=False, error=str(e), data_source=self.name
+                ticker=ticker,
+                success=False,
+                error=str(e),
+                data_source=self.name,
+                suggestions=suggestions,
             )
 
 
@@ -145,9 +226,17 @@ class AlphaVantageProvider(MarketDataProvider):
         try:
             self._respect_rate_limit()
 
+            # Format ticker for Alpha Vantage
+            av_ticker = TickerUtils.format_for_alpha_vantage(ticker)
+            ticker_info = TickerUtils.parse_ticker(ticker)
+
+            logger.debug(
+                f"Fetching {ticker} (formatted as {av_ticker}) from Alpha Vantage"
+            )
+
             params = {
                 "function": "GLOBAL_QUOTE",
-                "symbol": ticker,
+                "symbol": av_ticker,
                 "apikey": self.api_key,
             }
 
@@ -158,10 +247,13 @@ class AlphaVantageProvider(MarketDataProvider):
 
             # Check for API error messages
             if "Error Message" in data:
+                error_msg = data["Error Message"]
+                if ticker_info.is_international:
+                    error_msg += f" (International ticker: {ticker}, Exchange: {ticker_info.exchange_name})"
                 return MarketDataResult(
                     ticker=ticker,
                     success=False,
-                    error=data["Error Message"],
+                    error=error_msg,
                     data_source=self.name,
                 )
 
@@ -175,10 +267,13 @@ class AlphaVantageProvider(MarketDataProvider):
 
             quote = data.get("Global Quote", {})
             if not quote:
+                error_msg = "No quote data in response"
+                if ticker_info.is_international:
+                    error_msg += f" for {ticker} ({ticker_info.exchange_name})"
                 return MarketDataResult(
                     ticker=ticker,
                     success=False,
-                    error="No quote data in response",
+                    error=error_msg,
                     data_source=self.name,
                 )
 
@@ -195,6 +290,13 @@ class AlphaVantageProvider(MarketDataProvider):
             change_percent = quote.get("10. change percent", "0%").replace("%", "")
             change_percent = float(change_percent) if change_percent else 0
 
+            success_msg = f"Successfully fetched {ticker} from Alpha Vantage"
+            if ticker_info.is_international:
+                success_msg += (
+                    f" ({ticker_info.exchange_name}, {ticker_info.default_currency})"
+                )
+            logger.debug(success_msg)
+
             return MarketDataResult(
                 ticker=ticker,
                 current_price=current_price if current_price > 0 else None,
@@ -210,9 +312,23 @@ class AlphaVantageProvider(MarketDataProvider):
             )
 
         except Exception as e:
-            logger.warning(f"Alpha Vantage failed for {ticker}: {e}")
+            error_msg = f"Alpha Vantage failed for {ticker}: {e}"
+            ticker_info = TickerUtils.parse_ticker(ticker)
+            suggestions = []
+
+            if ticker_info.is_international:
+                error_msg += f" (Exchange: {ticker_info.exchange_name})"
+                # Add suggestions for European tickers
+                base_ticker = ticker_info.base_ticker
+                suggestions.append(base_ticker)  # Try US version
+
+            logger.warning(error_msg)
             return MarketDataResult(
-                ticker=ticker, success=False, error=str(e), data_source=self.name
+                ticker=ticker,
+                success=False,
+                error=str(e),
+                data_source=self.name,
+                suggestions=suggestions,
             )
 
 
@@ -240,9 +356,15 @@ class FinnhubProvider(MarketDataProvider):
         try:
             self._respect_rate_limit()
 
+            # For European tickers, try the base symbol first (Finnhub often has US listings)
+            ticker_info = TickerUtils.parse_ticker(ticker)
+            finnhub_ticker = (
+                ticker_info.base_ticker if ticker_info.is_international else ticker
+            )
+
             # Get current quote
             quote_url = f"{self.base_url}/quote"
-            params = {"symbol": ticker, "token": self.api_key}
+            params = {"symbol": finnhub_ticker, "token": self.api_key}
 
             response = requests.get(quote_url, params=params, timeout=10)
             response.raise_for_status()
@@ -251,11 +373,15 @@ class FinnhubProvider(MarketDataProvider):
 
             # Check for errors
             if "error" in quote_data:
+                suggestions = []
+                if ticker_info.is_international:
+                    suggestions.append(ticker_info.base_ticker)
                 return MarketDataResult(
                     ticker=ticker,
                     success=False,
                     error=quote_data["error"],
                     data_source=self.name,
+                    suggestions=suggestions,
                 )
 
             # Parse Finnhub response
@@ -276,11 +402,17 @@ class FinnhubProvider(MarketDataProvider):
 
             # Validate that we got meaningful data
             if not current_price or current_price <= 0:
+                suggestions = []
+                if ticker_info.is_international:
+                    suggestions.append(
+                        f"Try searching for '{ticker_info.base_ticker}' or check if ticker exists"
+                    )
                 return MarketDataResult(
                     ticker=ticker,
                     success=False,
-                    error="No valid price data",
+                    error="No valid price data - ticker may not exist or be delisted",
                     data_source=self.name,
+                    suggestions=suggestions,
                 )
 
             return MarketDataResult(
@@ -299,8 +431,18 @@ class FinnhubProvider(MarketDataProvider):
 
         except Exception as e:
             logger.warning(f"Finnhub failed for {ticker}: {e}")
+            ticker_info = TickerUtils.parse_ticker(ticker)
+            suggestions = []
+
+            if ticker_info.is_international:
+                suggestions.append(ticker_info.base_ticker)
+
             return MarketDataResult(
-                ticker=ticker, success=False, error=str(e), data_source=self.name
+                ticker=ticker,
+                success=False,
+                error=str(e),
+                data_source=self.name,
+                suggestions=suggestions,
             )
 
 
@@ -326,22 +468,43 @@ class MultiProviderMarketDataService:
 
         logger.info(f"Initialized {len(self.providers)} market data providers")
 
-    def fetch_quote(self, ticker: str) -> MarketDataResult:
-        """Fetch quote with fallback across providers."""
+    def fetch_quote(
+        self, ticker: str, db: Optional[Session] = None
+    ) -> MarketDataResult:
+        """Fetch quote with fallback across providers and ISIN support."""
+        # First, try to resolve ISIN to ticker if needed
+        resolved_ticker = ticker
+        identifier_type = "ticker"
+
+        if db and ISINUtils.is_isin_format(ticker):
+            try:
+                resolved_ticker, identifier_type, isin_info = (
+                    isin_service.resolve_identifier(db, ticker)
+                )
+                logger.info(f"Resolved ISIN {ticker} to ticker {resolved_ticker}")
+            except Exception as e:
+                logger.warning(f"Failed to resolve ISIN {ticker}: {e}")
+                # Continue with original identifier
+
         last_error = None
 
         for provider in self.providers:
-            logger.debug(f"Trying {provider.name} for {ticker}")
+            logger.debug(f"Trying {provider.name} for {resolved_ticker}")
 
-            result = provider.fetch_quote(ticker)
+            result = provider.fetch_quote(resolved_ticker)
 
             if result.success:
+                # Update result with original identifier if it was an ISIN
+                if identifier_type == "isin":
+                    result.ticker = ticker  # Keep original ISIN in result
                 logger.info(
                     f"Successfully fetched {ticker} from {provider.name}: ${result.current_price}"
                 )
                 return result
             else:
-                logger.warning(f"{provider.name} failed for {ticker}: {result.error}")
+                logger.warning(
+                    f"{provider.name} failed for {resolved_ticker}: {result.error}"
+                )
                 last_error = result.error
 
         # All providers failed
@@ -353,15 +516,60 @@ class MultiProviderMarketDataService:
             data_source="multi_provider",
         )
 
-    def fetch_multiple_quotes(self, tickers: List[str]) -> List[MarketDataResult]:
-        """Fetch quotes for multiple tickers with intelligent provider selection."""
+    def fetch_quote_by_isin(self, db: Session, isin: str) -> MarketDataResult:
+        """Fetch quote specifically by ISIN with ticker resolution."""
+        try:
+            # Validate ISIN
+            is_valid, error = ISINUtils.validate_isin(isin)
+            if not is_valid:
+                return MarketDataResult(
+                    ticker=isin,
+                    success=False,
+                    error=f"Invalid ISIN: {error}",
+                    data_source="isin_validation",
+                )
+
+            # Try to resolve ISIN to ticker
+            resolved_ticker, _, isin_info = isin_service.resolve_identifier(db, isin)
+
+            if resolved_ticker == isin:
+                # No ticker mapping found
+                return MarketDataResult(
+                    ticker=isin,
+                    success=False,
+                    error=f"No ticker mapping found for ISIN {isin}",
+                    data_source="isin_mapping",
+                )
+
+            # Fetch quote using resolved ticker
+            result = self.fetch_quote(resolved_ticker)
+
+            # Update result to show original ISIN
+            if result.success:
+                result.ticker = isin
+
+            return result
+
+        except Exception as e:
+            logger.error(f"Error fetching quote by ISIN {isin}: {e}")
+            return MarketDataResult(
+                ticker=isin,
+                success=False,
+                error=str(e),
+                data_source="isin_service",
+            )
+
+    def fetch_multiple_quotes(
+        self, tickers: List[str], db: Optional[Session] = None
+    ) -> List[MarketDataResult]:
+        """Fetch quotes for multiple tickers with intelligent provider selection and ISIN support."""
         results = []
         provider_stats = {
             provider.name: {"success": 0, "total": 0} for provider in self.providers
         }
 
         for ticker in tickers:
-            result = self.fetch_quote(ticker)
+            result = self.fetch_quote(ticker, db)
             results.append(result)
 
             # Update provider statistics
@@ -381,10 +589,11 @@ class MultiProviderMarketDataService:
         return results
 
     def update_asset_prices(self, db: Session, tickers: List[str]) -> Dict[str, Any]:
-        """Update asset prices in the database."""
-        logger.info(f"Updating prices for {len(tickers)} tickers")
+        """Update asset prices in the database with ISIN support."""
+        logger.info(f"Updating prices for {len(tickers)} assets")
 
-        results = self.fetch_multiple_quotes(tickers)
+        # Fetch all quotes with ISIN support
+        results = self.fetch_multiple_quotes(tickers, db)
 
         updated_count = 0
         failed_count = 0
@@ -436,25 +645,21 @@ class MultiProviderMarketDataService:
                     price_record.updated_at = datetime.now()
                 else:
                     # Create new record
-                    price_record = PriceHistory(
-                        asset_id=asset.id,
-                        price_date=today,
-                        open_price=(
-                            Decimal(str(result.open_price))
-                            if result.open_price
-                            else None
-                        ),
-                        high_price=(
-                            Decimal(str(result.high_price))
-                            if result.high_price
-                            else None
-                        ),
-                        low_price=(
-                            Decimal(str(result.low_price)) if result.low_price else None
-                        ),
-                        close_price=Decimal(str(result.current_price)),
-                        volume=result.volume,
+                    price_record = PriceHistory()
+                    price_record.asset_id = asset.id
+                    price_record.price_date = today
+                    price_record.open_price = (
+                        Decimal(str(result.open_price)) if result.open_price else None
                     )
+                    price_record.high_price = (
+                        Decimal(str(result.high_price)) if result.high_price else None
+                    )
+                    price_record.low_price = (
+                        Decimal(str(result.low_price)) if result.low_price else None
+                    )
+                    price_record.close_price = Decimal(str(result.current_price))
+                    price_record.volume = result.volume
+                    price_record.data_source = result.data_source
                     db.add(price_record)
 
                 updated_count += 1

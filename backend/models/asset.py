@@ -1,11 +1,11 @@
 """Asset model for tracking stocks, bonds, ETFs, and other financial instruments."""
 
 from enum import Enum
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Optional
 
 from sqlalchemy import Enum as SQLEnum
 from sqlalchemy import Numeric, String
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
 from backend.models.base import Base
 
@@ -51,6 +51,9 @@ class Asset(Base):
     )
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str | None] = mapped_column(String(1000), nullable=True)
+
+    # International Securities Identification Number (ISIN)
+    isin: Mapped[str | None] = mapped_column(String(12), nullable=True, index=True)
 
     # Asset classification
     asset_type: Mapped[AssetType] = mapped_column(SQLEnum(AssetType), nullable=False)
@@ -126,3 +129,40 @@ class Asset(Base):
     def is_fixed_income(self) -> bool:
         """Check if asset is a fixed income instrument."""
         return self.category == AssetCategory.FIXED_INCOME
+
+    @validates("isin")
+    def validate_isin(self, key: str, isin: Optional[str]) -> Optional[str]:
+        """Validate ISIN format and checksum."""
+        if isin is None or isin == "":
+            return None
+
+        # Import here to avoid circular imports
+        try:
+            from backend.services.isin_utils import ISINUtils
+
+            is_valid, error = ISINUtils.validate_isin(isin)
+            if not is_valid:
+                raise ValueError(f"Invalid ISIN: {error}")
+            return isin.upper().strip()
+        except ImportError:
+            # Fallback validation if ISIN utils not available
+            import re
+
+            isin = isin.upper().strip()
+            if len(isin) != 12 or not re.match(r"^[A-Z]{2}[A-Z0-9]{9}[0-9]$", isin):
+                raise ValueError(
+                    "ISIN must be 12 characters: 2 letters + 9 alphanumeric + 1 digit"
+                )
+            return isin
+
+    @property
+    def has_isin(self) -> bool:
+        """Check if asset has a valid ISIN."""
+        return self.isin is not None and len(self.isin) == 12
+
+    def get_identifiers(self) -> dict:
+        """Get all available identifiers for this asset."""
+        identifiers = {"ticker": self.ticker}
+        if self.has_isin:
+            identifiers["isin"] = self.isin
+        return identifiers

@@ -97,53 +97,53 @@ class PriceHistory(Base):
         data_source: str = "yfinance",
     ) -> "PriceHistory":
         """Factory method to create price history from Yahoo Finance data."""
-        return cls(  # type: ignore[call-arg]
-            asset_id=asset_id,
-            price_date=price_date,
-            open_price=(
-                Decimal(str(yahoo_data.get("Open", 0)))
-                if yahoo_data.get("Open") is not None
-                else None
-            ),
-            high_price=(
-                Decimal(str(yahoo_data.get("High", 0)))
-                if yahoo_data.get("High") is not None
-                else None
-            ),
-            low_price=(
-                Decimal(str(yahoo_data.get("Low", 0)))
-                if yahoo_data.get("Low") is not None
-                else None
-            ),
-            close_price=Decimal(
-                str(yahoo_data.get("Close", 0))
-            ),  # Assuming Close is always present and non-null
-            adjusted_close=(
-                Decimal(str(yahoo_data.get("Adj Close", 0)))
-                if yahoo_data.get("Adj Close") is not None
-                else None
-            ),
-            volume=(
-                int(yahoo_data.get("Volume", 0))
-                if yahoo_data.get("Volume") is not None
-                else None
-            ),
-            data_source=data_source,
-            is_adjusted=True,  # Assuming Yahoo data is typically adjusted
+        instance = cls()
+        instance.asset_id = asset_id
+        instance.price_date = price_date
+        instance.open_price = (
+            Decimal(str(yahoo_data.get("Open", 0)))
+            if yahoo_data.get("Open") is not None
+            else None
         )
+        instance.high_price = (
+            Decimal(str(yahoo_data.get("High", 0)))
+            if yahoo_data.get("High") is not None
+            else None
+        )
+        instance.low_price = (
+            Decimal(str(yahoo_data.get("Low", 0)))
+            if yahoo_data.get("Low") is not None
+            else None
+        )
+        instance.close_price = Decimal(
+            str(yahoo_data.get("Close", 0))
+        )  # Assuming Close is always present and non-null
+        instance.adjusted_close = (
+            Decimal(str(yahoo_data.get("Adj Close", 0)))
+            if yahoo_data.get("Adj Close") is not None
+            else None
+        )
+        instance.volume = (
+            int(yahoo_data.get("Volume", 0))
+            if yahoo_data.get("Volume") is not None
+            else None
+        )
+        instance.data_source = data_source
+        instance.is_adjusted = True  # Assuming Yahoo data is typically adjusted
+        return instance
 
     @classmethod
     def create_placeholder(
         cls, asset_id: int, price_date: date, close_price: Decimal
     ) -> "PriceHistory":
         """Factory method to create a placeholder price history entry."""
-        return cls(  # type: ignore[call-arg]
-            asset_id=asset_id,
-            price_date=price_date,
-            close_price=close_price,
-            data_source="placeholder",
-            is_adjusted=False,
-        )
+        instance = cls()
+        instance.asset_id = asset_id
+        instance.price_date = price_date
+        instance.close_price = close_price
+        instance.data_source = "placeholder"
+        instance.is_adjusted = False
+        return instance
 
     def calculate_daily_return(self, previous_close: Decimal | None) -> None:
         """Calculate and set daily return based on previous day's close."""

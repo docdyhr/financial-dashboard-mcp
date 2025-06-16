@@ -18,6 +18,12 @@ class AssetBase(BaseSchema):
     description: str | None = Field(
         None, max_length=1000, description="Asset description"
     )
+    isin: str | None = Field(
+        None,
+        min_length=12,
+        max_length=12,
+        description="International Securities Identification Number (ISIN)",
+    )
     asset_type: AssetType = Field(..., description="Type of asset")
     category: AssetCategory = Field(..., description="Asset category for allocation")
     sector: str | None = Field(
@@ -42,13 +48,121 @@ class AssetBase(BaseSchema):
         """Validate ticker format."""
         if not v or not v.strip():
             raise ValueError("Ticker cannot be empty")
-        return v.upper().strip()
+
+        ticker = v.upper().strip()
+
+        # Common European exchange suffixes
+        european_suffixes = {
+            ".L": "London Stock Exchange",
+            ".PA": "Euronext Paris",
+            ".DE": "Frankfurt/XETRA",
+            ".MI": "Milan",
+            ".AS": "Amsterdam",
+            ".BR": "Brussels",
+            ".LS": "Lisbon",
+            ".MC": "Madrid",
+            ".VI": "Vienna",
+            ".ST": "Stockholm",
+            ".HE": "Helsinki",
+            ".OL": "Oslo",
+            ".CO": "Copenhagen",
+            ".IC": "Iceland",
+            ".SW": "Swiss Exchange",
+            ".TO": "Toronto",
+            ".V": "TSX Venture",
+            ".AX": "Australian Securities Exchange",
+            ".T": "Tokyo Stock Exchange",
+            ".HK": "Hong Kong Stock Exchange",
+            ".SG": "Singapore Exchange",
+            ".KS": "Korea Stock Exchange",
+            ".SS": "Shanghai Stock Exchange",
+            ".SZ": "Shenzhen Stock Exchange",
+            ".NS": "National Stock Exchange of India",
+            ".BO": "Bombay Stock Exchange",
+            ".SA": "Brazil Stock Exchange",
+        }
+
+        # Validate ticker format
+        if "." in ticker:
+            parts = ticker.split(".")
+            if len(parts) == 2:
+                base_ticker, suffix = parts
+                if not base_ticker or not suffix:
+                    raise ValueError(
+                        "Invalid ticker format: both base ticker and suffix are required"
+                    )
+                if len(base_ticker) < 1 or len(base_ticker) > 15:
+                    raise ValueError("Base ticker must be between 1 and 15 characters")
+                if len(suffix) < 1 or len(suffix) > 3:
+                    raise ValueError(
+                        "Exchange suffix must be between 1 and 3 characters"
+                    )
+                # Check if it's a known European/international suffix
+                full_suffix = "." + suffix
+                if full_suffix in european_suffixes:
+                    # Valid international ticker
+                    pass
+                else:
+                    # Unknown suffix - still allow but could warn
+                    pass
+            else:
+                raise ValueError(
+                    "Invalid ticker format: only one dot separator allowed"
+                )
+        else:
+            # US ticker format
+            if len(ticker) < 1 or len(ticker) > 10:
+                raise ValueError("US ticker must be between 1 and 10 characters")
+
+        return ticker
 
     @field_validator("currency")
     @classmethod
     def validate_currency(cls, v: str) -> str:
         """Validate currency format."""
         return v.upper()
+
+    @field_validator("isin")
+    @classmethod
+    def validate_isin(cls, v: str | None) -> str | None:
+        """Validate ISIN format and checksum."""
+        if v is None or v == "":
+            return None
+
+        v = v.upper().strip()
+
+        # Basic format validation
+        import re
+
+        if len(v) != 12 or not re.match(r"^[A-Z]{2}[A-Z0-9]{9}[0-9]$", v):
+            raise ValueError(
+                "ISIN must be 12 characters: 2 letters + 9 alphanumeric + 1 digit"
+            )
+
+        # Validate checksum using Luhn algorithm
+        converted = ""
+        for char in v[:-1]:  # Exclude check digit
+            if char.isalpha():
+                converted += str(ord(char.upper()) - ord("A") + 10)
+            else:
+                converted += char
+
+        total = 0
+        for i, digit in enumerate(reversed(converted)):
+            n = int(digit)
+            if i % 2 == 0:  # Every second digit from right
+                n *= 2
+                if n > 9:
+                    n = n // 10 + n % 10
+            total += n
+
+        check_digit = (10 - (total % 10)) % 10
+        if str(check_digit) != v[11]:
+            raise ValueError(
+                f"Invalid ISIN checksum (expected {check_digit}, got {v[11]})"
+            )
+
+        return v
 
     @field_validator("asset_type", mode="before")
     @classmethod
@@ -78,6 +192,9 @@ class AssetUpdate(BaseSchema):
 
     name: str | None = Field(None, min_length=1, max_length=255)
     description: str | None = Field(None, max_length=1000)
+    isin: str | None = Field(
+        None, min_length=12, max_length=12, description="ISIN code"
+    )
     sector: str | None = Field(None, max_length=100)
     industry: str | None = Field(None, max_length=100)
     exchange: str | None = Field(None, max_length=20)
@@ -92,6 +209,16 @@ class AssetUpdate(BaseSchema):
         if v is not None:
             return v.upper()
         return v
+
+    @field_validator("isin")
+    @classmethod
+    def validate_isin_update(cls, v: str | None) -> str | None:
+        """Validate ISIN format for updates."""
+        if v is None or v == "":
+            return None
+
+        # Use the same validation as AssetBase
+        return AssetBase.validate_isin(v)
 
 
 class AssetMarketData(BaseSchema):
@@ -147,13 +274,15 @@ class AssetSummary(BaseSchema):
     category: AssetCategory
     current_price: Decimal | None = None
     currency: str = "USD"
+    isin: str | None = None
     is_active: bool = True
 
 
 class AssetSearchParams(BaseSchema):
     """Parameters for asset search."""
 
-    query: str | None = Field(None, description="Search query (ticker or name)")
+    query: str | None = Field(None, description="Search query (ticker, name, or ISIN)")
+    isin: str | None = Field(None, description="Search by ISIN code")
     asset_type: AssetType | None = Field(None, description="Filter by asset type")
     category: AssetCategory | None = Field(None, description="Filter by category")
     sector: str | None = Field(None, description="Filter by sector")

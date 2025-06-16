@@ -598,24 +598,35 @@ def view_position_details(
                     st.metric(
                         "Quantity", f"{int(safe_float(position_detail['quantity']))}"
                     )
+                    avg_cost = safe_float(
+                        position_detail.get("average_cost_per_share", 0)
+                    )
                     st.metric(
                         "Average Cost",
-                        f"${position_detail['average_cost_per_share']:.2f}",
+                        f"${avg_cost:.2f}",
                     )
 
                 with col2:
+                    total_cost = safe_float(position_detail.get("total_cost_basis", 0))
                     st.metric(
                         "Total Cost Basis",
-                        f"${position_detail['total_cost_basis']:.2f}",
+                        f"${total_cost:.2f}",
                     )
-                    if position_detail.get("current_value"):
-                        st.metric(
-                            "Current Value", f"${position_detail['current_value']:.2f}"
+                    current_value = safe_float(position_detail.get("current_value"))
+                    if current_value > 0:
+                        st.metric("Current Value", f"${current_value:.2f}")
+                    pnl = safe_float(position_detail.get("unrealized_gain_loss"))
+                    if pnl != 0:
+                        pnl_pct = safe_float(
+                            position_detail.get("unrealized_gain_loss_percent", 0)
                         )
-                    if position_detail.get("unrealized_gain_loss"):
-                        pnl = position_detail["unrealized_gain_loss"]
-                        pnl_pct = position_detail.get("unrealized_gain_loss_percent", 0)
-                        st.metric("Unrealized P&L", f"${pnl:.2f}", f"{pnl_pct:.2f}%")
+                        delta_color = "normal" if pnl >= 0 else "inverse"
+                        st.metric(
+                            "Unrealized P&L",
+                            f"${pnl:.2f}",
+                            f"{pnl_pct:.2f}%",
+                            delta_color=delta_color,
+                        )
 
                 if position_detail.get("notes"):
                     st.text_area("Notes", value=position_detail["notes"], disabled=True)
@@ -640,36 +651,207 @@ def edit_position(backend_url: str, df: pd.DataFrame, selected_indices: list[int
 
     st.subheader("✏️ Edit Position")
 
-    col1, col2 = st.columns(2)
+    # Fetch current position details including asset info
+    try:
+        response = requests.get(
+            f"{backend_url}/api/v1/positions/{position_id}", timeout=10
+        )
+
+        if response.status_code != 200:
+            st.error(f"Failed to fetch position details: {response.status_code}")
+            return
+
+        data = response.json()
+        if not data.get("success"):
+            st.error("Failed to fetch position details")
+            return
+
+        position_detail = data["data"]
+        current_asset = position_detail["asset"]
+
+    except requests.exceptions.RequestException as e:
+        st.error(f"Error fetching position details: {e}")
+        return
+
+    # Create tabs for different editing options
+    tab1, tab2 = st.tabs(["📊 Position Details", "🏷️ Asset Information"])
+
+    with tab1:
+        col1, col2 = st.columns(2)
+
+        with col1:
+            new_quantity = st.number_input(
+                "Quantity",
+                value=safe_float(position_detail.get("quantity", 0)),
+                min_value=0.0,
+                step=0.1,
+                format="%.4f",
+            )
+
+            new_avg_cost = st.number_input(
+                "Average Cost per Share",
+                value=safe_float(position_detail.get("average_cost_per_share", 0)),
+                min_value=0.0,
+                step=0.01,
+                format="%.4f",
+            )
+
+        with col2:
+            new_account = st.text_input(
+                "Account Name", value=position_detail.get("account_name", "") or ""
+            )
+
+            new_notes = st.text_area(
+                "Notes", value=position_detail.get("notes", "") or ""
+            )
+
+    with tab2:
+        st.write("**Current Asset Information:**")
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.text_input(
+                "Current Ticker", value=current_asset["ticker"], disabled=True
+            )
+            st.text_input("Current Name", value=current_asset["name"], disabled=True)
+            st.text_input(
+                "Current Exchange",
+                value=current_asset.get("exchange", "N/A"),
+                disabled=True,
+            )
+
+        with col2:
+            st.text_input(
+                "Current Currency",
+                value=current_asset.get("currency", "USD"),
+                disabled=True,
+            )
+            st.text_input(
+                "Current Sector",
+                value=current_asset.get("sector", "N/A"),
+                disabled=True,
+            )
+            st.text_input(
+                "Current Country",
+                value=current_asset.get("country", "N/A"),
+                disabled=True,
+            )
+
+        st.divider()
+        st.write("**Edit Asset Information:**")
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            new_ticker = st.text_input(
+                "New Ticker Symbol",
+                value=current_asset["ticker"],
+                help="For European stocks, use format like ASML.PA, VODAFONE.L, SAP.DE",
+            )
+
+            new_name = st.text_input("Asset Name", value=current_asset["name"])
+
+            new_exchange = st.text_input(
+                "Exchange",
+                value=current_asset.get("exchange", ""),
+                help="e.g., London Stock Exchange, Euronext Paris, NASDAQ",
+            )
+
+        with col2:
+            new_currency = st.selectbox(
+                "Currency",
+                options=[
+                    "USD",
+                    "EUR",
+                    "GBP",
+                    "CHF",
+                    "SEK",
+                    "NOK",
+                    "DKK",
+                    "CAD",
+                    "AUD",
+                    "JPY",
+                ],
+                index=(
+                    [
+                        "USD",
+                        "EUR",
+                        "GBP",
+                        "CHF",
+                        "SEK",
+                        "NOK",
+                        "DKK",
+                        "CAD",
+                        "AUD",
+                        "JPY",
+                    ].index(current_asset.get("currency", "USD"))
+                    if current_asset.get("currency", "USD")
+                    in [
+                        "USD",
+                        "EUR",
+                        "GBP",
+                        "CHF",
+                        "SEK",
+                        "NOK",
+                        "DKK",
+                        "CAD",
+                        "AUD",
+                        "JPY",
+                    ]
+                    else 0
+                ),
+            )
+
+            new_sector = st.text_input("Sector", value=current_asset.get("sector", ""))
+
+            new_country = st.text_input(
+                "Country Code",
+                value=current_asset.get("country", ""),
+                help="2-letter country code (e.g., US, GB, DE, FR)",
+            )
+
+        # Ticker validation and suggestion
+        if new_ticker and new_ticker != current_asset["ticker"]:
+            try:
+                from backend.services.ticker_utils import TickerUtils
+
+                is_valid, error_msg = TickerUtils.validate_ticker_format(new_ticker)
+                if not is_valid:
+                    st.error(f"Invalid ticker format: {error_msg}")
+                else:
+                    ticker_info = TickerUtils.parse_ticker(new_ticker)
+                    st.info(f"✓ Valid ticker format detected")
+
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        st.write(f"**Exchange:** {ticker_info.exchange_name}")
+                        st.write(
+                            f"**Currency:** {ticker_info.default_currency or 'Unknown'}"
+                        )
+                    with col2:
+                        st.write(
+                            f"**Country:** {ticker_info.country_code or 'Unknown'}"
+                        )
+                        st.write(
+                            f"**European:** {'Yes' if TickerUtils.is_european_ticker(new_ticker) else 'No'}"
+                        )
+            except ImportError:
+                st.warning(
+                    "Ticker validation service not available. Please ensure the ticker format is correct."
+                )
+
+    # Update buttons
+    col1, col2, col3 = st.columns(3)
 
     with col1:
-        new_quantity = st.number_input(
-            "Quantity", value=int(float(position["quantity"])), min_value=0, step=1
-        )
-
-        new_avg_cost = st.number_input(
-            "Average Cost per Share",
-            value=float(position["average_cost_per_share"]),
-            min_value=0.0,
-            step=0.01,
-        )
-
-    with col2:
-        new_account = st.text_input(
-            "Account Name", value=position.get("account_name", "") or ""
-        )
-
-        new_notes = st.text_area("Notes", value=position.get("notes", "") or "")
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-        if st.button("💾 Update Position", type="primary", key="update_position_final"):
+        if st.button(
+            "💾 Update Position Only", type="primary", key="update_position_only"
+        ):
             try:
                 update_data = {
-                    "quantity": str(int(new_quantity)),  # Ensure whole numbers
+                    "quantity": str(new_quantity),
                     "average_cost_per_share": str(new_avg_cost),
-                    "total_cost_basis": str(int(new_quantity) * new_avg_cost),
+                    "total_cost_basis": str(new_quantity * new_avg_cost),
                     "account_name": new_account if new_account else None,
                     "notes": new_notes if new_notes else None,
                 }
@@ -696,6 +878,168 @@ def edit_position(backend_url: str, df: pd.DataFrame, selected_indices: list[int
                 st.error(f"Error updating position: {e}")
 
     with col2:
+        # Check if asset information has changed
+        asset_changed = any(
+            [
+                new_ticker != current_asset["ticker"],
+                new_name != current_asset["name"],
+                new_exchange != current_asset.get("exchange", ""),
+                new_currency != current_asset.get("currency", "USD"),
+                new_sector != current_asset.get("sector", ""),
+                new_country != current_asset.get("country", ""),
+            ]
+        )
+
+        if asset_changed:
+            if st.button(
+                "🔄 Update Asset & Position", type="primary", key="update_both"
+            ):
+                try:
+                    # First update the asset
+                    asset_update_data = {
+                        "name": new_name,
+                        "exchange": new_exchange if new_exchange else None,
+                        "currency": new_currency,
+                        "sector": new_sector if new_sector else None,
+                        "country": new_country if new_country else None,
+                    }
+
+                    # Only update ticker if it has actually changed
+                    if new_ticker and new_ticker != current_asset["ticker"]:
+                        # For ticker changes, we need to validate first
+                        try:
+                            from backend.services.ticker_utils import TickerUtils
+
+                            is_valid, error_msg = TickerUtils.validate_ticker_format(
+                                new_ticker
+                            )
+                            if not is_valid:
+                                st.error(
+                                    f"Cannot update: Invalid ticker format - {error_msg}"
+                                )
+                                st.stop()
+                        except ImportError:
+                            st.warning(
+                                "Ticker validation not available, proceeding with update..."
+                            )
+
+                    asset_response = requests.put(
+                        f"{backend_url}/api/v1/assets/{current_asset['id']}",
+                        json=asset_update_data,
+                        timeout=10,
+                    )
+
+                    if asset_response.status_code == 200:
+                        # If ticker changed, we need to handle it specially
+                        if new_ticker != current_asset["ticker"]:
+                            # Check if an asset with new ticker already exists
+                            search_response = requests.get(
+                                f"{backend_url}/api/v1/assets/search",
+                                params={"query": new_ticker},
+                                timeout=10,
+                            )
+
+                            if search_response.status_code == 200:
+                                search_data = search_response.json()
+                                existing_assets = [
+                                    asset
+                                    for asset in search_data.get("data", [])
+                                    if asset["ticker"] == new_ticker
+                                ]
+
+                                if existing_assets:
+                                    # Asset with new ticker exists, need to merge/reassign
+                                    st.warning(
+                                        f"Asset with ticker {new_ticker} already exists. Please use the existing asset or choose a different ticker."
+                                    )
+                                    st.stop()
+                                else:
+                                    # Create new asset with new ticker
+                                    new_asset_data = {
+                                        "ticker": new_ticker,
+                                        "name": new_name,
+                                        "asset_type": current_asset["asset_type"],
+                                        "category": current_asset["category"],
+                                        "exchange": (
+                                            new_exchange if new_exchange else None
+                                        ),
+                                        "currency": new_currency,
+                                        "sector": new_sector if new_sector else None,
+                                        "country": new_country if new_country else None,
+                                    }
+
+                                    create_response = requests.post(
+                                        f"{backend_url}/api/v1/assets",
+                                        json=new_asset_data,
+                                        timeout=10,
+                                    )
+
+                                    if create_response.status_code == 201:
+                                        new_asset = create_response.json()["data"]
+                                        # Update position to use new asset
+                                        position_update_data = {
+                                            "asset_id": new_asset["id"],
+                                            "quantity": str(new_quantity),
+                                            "average_cost_per_share": str(new_avg_cost),
+                                            "total_cost_basis": str(
+                                                new_quantity * new_avg_cost
+                                            ),
+                                            "account_name": (
+                                                new_account if new_account else None
+                                            ),
+                                            "notes": new_notes if new_notes else None,
+                                        }
+                                    else:
+                                        st.error(
+                                            f"Failed to create new asset: {create_response.status_code}"
+                                        )
+                                        st.stop()
+                            else:
+                                st.error("Failed to search for existing assets")
+                                st.stop()
+                        else:
+                            # No ticker change, just update position
+                            position_update_data = {
+                                "quantity": str(new_quantity),
+                                "average_cost_per_share": str(new_avg_cost),
+                                "total_cost_basis": str(new_quantity * new_avg_cost),
+                                "account_name": new_account if new_account else None,
+                                "notes": new_notes if new_notes else None,
+                            }
+
+                        # Update position
+                        position_response = requests.put(
+                            f"{backend_url}/api/v1/positions/{position_id}",
+                            json=position_update_data,
+                            timeout=10,
+                        )
+
+                        if position_response.status_code == 200:
+                            st.success("Asset and position updated successfully!")
+                            # Clear session state
+                            if "show_edit" in st.session_state:
+                                del st.session_state["show_edit"]
+                            if "selected_position_index" in st.session_state:
+                                del st.session_state["selected_position_index"]
+                            st.rerun()
+                        else:
+                            st.error(
+                                f"Asset updated but failed to update position: {position_response.status_code}"
+                            )
+                    else:
+                        st.error(
+                            f"Failed to update asset: {asset_response.status_code}"
+                        )
+                        st.error(f"Response: {asset_response.text}")
+
+                except requests.exceptions.RequestException as e:
+                    st.error(f"Error updating asset and position: {e}")
+                except Exception as e:
+                    st.error(f"Unexpected error: {e}")
+        else:
+            st.write("*No asset changes detected*")
+
+    with col3:
         if st.button("❌ Cancel Edit", type="secondary", key="cancel_edit_final"):
             # Clear session state
             if "show_edit" in st.session_state:
@@ -766,123 +1110,149 @@ def view_position_transactions(
                             "price_per_share"
                         ].apply(
                             lambda x: (
-                                f"${safe_float(x):.2f}" if x is not None else "N/A"
+                                f"${safe_float(x):.4f}" if x is not None else "N/A"
                             )
                         )
 
-                    # Format quantity - whole numbers for stocks
-                    if "quantity" in display_df.columns:
-                        display_df["quantity"] = display_df["quantity"].apply(
-                            lambda x: (
-                                f"{int(safe_float(x))}" if x is not None else "N/A"
-                            )
-                        )
-
-                    # Select and rename columns for display
-                    columns_to_show = {
+                    # Rename columns for better display
+                    column_mapping = {
                         "transaction_date": "Date",
                         "transaction_type": "Type",
                         "quantity": "Quantity",
-                        "price_per_share": "Price",
-                        "total_amount": "Gross Amount",
+                        "price_per_share": "Price/Share",
+                        "total_amount": "Total Amount",
                         "commission": "Commission",
                         "net_amount": "Net Amount",
-                        "notes": "Notes",
                     }
 
-                    available_columns = [
-                        col for col in columns_to_show if col in display_df.columns
-                    ]
-                    rename_dict = {
-                        k: v
-                        for k, v in columns_to_show.items()
-                        if k in available_columns
-                    }
+                    display_df = display_df.rename(columns=column_mapping)
 
-                    final_df = display_df[available_columns].rename(columns=rename_dict)
-
-                    # Display the transactions table
-                    st.dataframe(final_df, use_container_width=True)
-
-                    # Transaction summary
-                    st.divider()
-                    col1, col2, col3 = st.columns(3)
-
-                    with col1:
-                        buy_count = len(
-                            [t for t in transactions if t["transaction_type"] == "buy"]
-                        )
-                        st.metric("Buy Transactions", buy_count)
-
-                    with col2:
-                        sell_count = len(
-                            [t for t in transactions if t["transaction_type"] == "sell"]
-                        )
-                        st.metric("Sell Transactions", sell_count)
-
-                    with col3:
-                        dividend_count = len(
-                            [
-                                t
-                                for t in transactions
-                                if t["transaction_type"] == "dividend"
-                            ]
-                        )
-                        st.metric("Dividend Payments", dividend_count)
-
-                    # Calculate totals
-                    total_invested = sum(
-                        safe_float(t.get("total_amount", 0))
-                        for t in transactions
-                        if t["transaction_type"] == "buy"
-                    )
-                    total_proceeds = sum(
-                        safe_float(t.get("total_amount", 0))
-                        for t in transactions
-                        if t["transaction_type"] == "sell"
-                    )
-                    total_dividends = sum(
-                        safe_float(t.get("total_amount", 0))
-                        for t in transactions
-                        if t["transaction_type"] == "dividend"
-                    )
-                    total_fees = sum(
-                        safe_float(t.get("commission", 0)) for t in transactions
-                    )
-
-                    st.divider()
-                    col1, col2, col3, col4 = st.columns(4)
-
-                    with col1:
-                        st.metric("Total Invested", f"${total_invested:,.2f}")
-
-                    with col2:
-                        st.metric("Total Proceeds", f"${total_proceeds:,.2f}")
-
-                    with col3:
-                        st.metric("Total Dividends", f"${total_dividends:,.2f}")
-
-                    with col4:
-                        st.metric("Total Fees", f"${total_fees:,.2f}")
-
+                    # Display the table
+                    st.dataframe(display_df, use_container_width=True, hide_index=True)
                 else:
                     st.info("No transactions found for this position.")
-                    st.write("Transactions will appear here when you:")
-                    st.write("• Buy or sell shares of this asset")
-                    st.write("• Receive dividend payments")
-                    st.write("• Experience stock splits or other corporate actions")
-
             else:
-                st.error("Failed to load transaction data.")
-
+                st.error("No transaction data available.")
         else:
             st.error(f"Failed to fetch transactions: {response.status_code}")
 
     except requests.exceptions.RequestException as e:
         st.error(f"Error fetching transactions: {e}")
-        st.info(
-            "The transaction history feature requires the backend API to be running."
-        )
+
+
+def safe_format_currency(value, default="$0.00"):
+    """Safely format a value as currency."""
+    try:
+        if value is None:
+            return default
+        return f"${float(value):.2f}"
+    except (ValueError, TypeError):
+        return default
+
+
+def validate_ticker_input(ticker: str) -> tuple[bool, str]:
+    """Validate ticker input and provide helpful feedback."""
+    if not ticker or not ticker.strip():
+        return False, "Ticker cannot be empty"
+
+    ticker = ticker.upper().strip()
+
+    # Import validation function
+    try:
+        from backend.services.ticker_utils import TickerUtils
+
+        is_valid, error_msg = TickerUtils.validate_ticker_format(ticker)
+        return is_valid, error_msg or "Valid format"
+    except ImportError:
+        # Fallback validation if utils not available
+        import re
+
+        if not re.match(r"^[A-Z0-9.-]+$", ticker):
+            return False, "Ticker can only contain letters, numbers, dots, and hyphens"
+
+        if len(ticker) > 20:
+            return False, "Ticker too long (max 20 characters)"
+
+        return True, "Valid format"
+
+
+def get_ticker_suggestions(ticker: str, exchange_hint: str = None) -> list[str]:
+    """Get ticker format suggestions."""
+    try:
+        from backend.services.ticker_utils import TickerUtils
+
+        suggestions = []
+
+        if exchange_hint:
+            suggested = TickerUtils.suggest_ticker_format(ticker, exchange_hint)
+            if suggested != ticker:
+                suggestions.append(suggested)
+
+        # Add common European formats if base ticker provided
+        if "." not in ticker and len(ticker) <= 10:
+            common_formats = [
+                f"{ticker}.L",  # London
+                f"{ticker}.PA",  # Paris
+                f"{ticker}.DE",  # Frankfurt
+                f"{ticker}.MI",  # Milan
+                f"{ticker}.AS",  # Amsterdam
+            ]
+            suggestions.extend(common_formats)
+
+        return suggestions[:5]  # Limit to 5 suggestions
+    except ImportError:
+        return []
+
+
+def portfolio_summary_metrics(backend_url: str):
+    """Display portfolio summary metrics."""
+    import requests
+
+    try:
+        response = requests.get(f"{backend_url}/api/v1/portfolio/summary", timeout=10)
+
+        if response.status_code == 200:
+            data = response.json()
+            if data.get("success"):
+                summary = data["data"]
+
+                col1, col2, col3, col4 = st.columns(4)
+
+                with col1:
+                    total_value = safe_float(summary.get("total_market_value", 0))
+                    st.metric(
+                        "Total Portfolio Value", safe_format_currency(total_value)
+                    )
+
+                with col2:
+                    total_cost = safe_float(summary.get("total_cost_basis", 0))
+                    st.metric("Total Cost Basis", safe_format_currency(total_cost))
+
+                with col3:
+                    total_pnl = safe_float(summary.get("total_unrealized_pnl", 0))
+                    pnl_pct = safe_float(summary.get("total_unrealized_pnl_percent", 0))
+                    delta_color = "normal" if total_pnl >= 0 else "inverse"
+                    st.metric(
+                        "Unrealized P&L",
+                        safe_format_currency(total_pnl),
+                        f"{pnl_pct:.2f}%",
+                        delta_color=delta_color,
+                    )
+
+                with col4:
+                    position_count = summary.get("total_positions", 0)
+                    st.metric("Total Positions", f"{position_count}")
+
+                return summary
+            else:
+                st.error("Failed to fetch portfolio summary")
+        else:
+            st.error(f"Failed to fetch portfolio summary: {response.status_code}")
+
+    except requests.exceptions.RequestException as e:
+        st.error(f"Error fetching portfolio summary: {e}")
+
+    return None
 
 
 def portfolio_value_chart(backend_url: str):
@@ -897,6 +1267,9 @@ def portfolio_value_chart(backend_url: str):
         )
 
         # Placeholder chart with sample data
+        import pandas as pd
+        import plotly.graph_objects as go
+
         dates = pd.date_range(start="2024-01-01", end="2024-12-31", freq="D")
 
         # Validate date range

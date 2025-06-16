@@ -6,6 +6,10 @@ from datetime import datetime
 import pandas as pd
 import requests
 import streamlit as st
+from components.enhanced_portfolio import enhanced_portfolio_page
+from components.isin_analytics_dashboard import isin_analytics_dashboard
+from components.isin_input import isin_management_page
+from components.isin_sync_monitor import isin_sync_monitor_page
 from components.portfolio import (
     asset_allocation_chart,
     holdings_table,
@@ -89,10 +93,54 @@ def portfolio_page():
     with tab2:
         st.subheader("Add New Position")
 
+        # Input method selection
+        input_method = st.radio(
+            "Input Method",
+            ["Ticker Symbol", "ISIN Code"],
+            horizontal=True,
+            help="Choose how to identify the security",
+        )
+
         col1, col2 = st.columns(2)
 
         with col1:
-            symbol = st.text_input("Stock Symbol", placeholder="e.g., AAPL")
+            if input_method == "Ticker Symbol":
+                symbol = st.text_input("Stock Symbol", placeholder="e.g., AAPL")
+                isin_code = None
+            else:
+                isin_code = (
+                    st.text_input(
+                        "ISIN Code",
+                        placeholder="e.g., US0378331005",
+                        max_chars=12,
+                        help="12-character International Securities Identification Number",
+                    )
+                    .upper()
+                    .strip()
+                )
+                symbol = None
+
+                # ISIN validation and ticker lookup
+                if isin_code and len(isin_code) == 12:
+                    try:
+                        response = requests.post(
+                            f"{BACKEND_URL}/isin/resolve",
+                            json={"identifier": isin_code},
+                            timeout=10,
+                        )
+                        if response.status_code == 200:
+                            resolve_data = response.json()
+                            if resolve_data.get("found"):
+                                symbol = resolve_data.get("result", {}).get("ticker")
+                                if symbol:
+                                    st.success(f"✅ Resolved to: {symbol}")
+                                else:
+                                    st.warning("⚠️ ISIN found but no ticker available")
+                            else:
+                                st.error("❌ ISIN not found in database")
+                    except Exception as e:
+                        st.error(f"❌ Error resolving ISIN: {e}")
+
             quantity = st.number_input("Quantity", min_value=0.0, step=0.01)
             purchase_price = st.number_input("Purchase Price", min_value=0.0, step=0.01)
 
@@ -102,14 +150,21 @@ def portfolio_page():
             )
             notes = st.text_area("Notes (optional)")
 
+        # Determine identifier for validation
+        identifier = symbol if input_method == "Ticker Symbol" else isin_code
+
         if st.button("Add Position", type="primary"):
-            if symbol and quantity > 0 and purchase_price > 0:
+            if identifier and quantity > 0 and purchase_price > 0:
                 try:
-                    # First, try to get the asset by ticker
-                    asset_response = requests.get(
-                        f"{BACKEND_URL}/api/v1/assets/ticker/{symbol.upper()}",
-                        timeout=10,
-                    )
+                    # First, try to get the asset by ticker (symbol should be resolved from ISIN if needed)
+                    if symbol:
+                        asset_response = requests.get(
+                            f"{BACKEND_URL}/api/v1/assets/ticker/{symbol.upper()}",
+                            timeout=10,
+                        )
+                    else:
+                        st.error("❌ Could not resolve identifier to ticker symbol")
+                        st.stop()
 
                     asset_id = None
                     if asset_response.status_code == 200:
@@ -172,7 +227,21 @@ def portfolio_page():
                 except requests.exceptions.RequestException as e:
                     st.error(f"Error adding position: {e}")
             else:
-                st.warning("Please fill in all required fields.")
+                missing_fields = []
+                if not identifier:
+                    missing_fields.append(
+                        "Stock Symbol"
+                        if input_method == "Ticker Symbol"
+                        else "ISIN Code"
+                    )
+                if quantity <= 0:
+                    missing_fields.append("Quantity")
+                if purchase_price <= 0:
+                    missing_fields.append("Purchase Price")
+
+                st.error(
+                    f"Please fill in all required fields: {', '.join(missing_fields)}"
+                )
 
     with tab3:
         st.subheader("📈 Transaction History")
@@ -603,7 +672,17 @@ def main():
         st.header("🧭 Navigation")
         page = st.selectbox(
             "Choose a page",
-            ["Dashboard", "Portfolio", "Tasks", "Analytics", "Settings"],
+            [
+                "Dashboard",
+                "Portfolio",
+                "Enhanced Portfolio",
+                "ISIN Management",
+                "ISIN Sync Monitor",
+                "ISIN Analytics",
+                "Tasks",
+                "Analytics",
+                "Settings",
+            ],
         )
 
         st.divider()
@@ -632,10 +711,18 @@ def main():
         dashboard_page()
     elif page == "Portfolio":
         portfolio_page()
+    elif page == "Enhanced Portfolio":
+        enhanced_portfolio_page()
     elif page == "Tasks":
         tasks_page()
     elif page == "Analytics":
         analytics_page()
+    elif page == "ISIN Management":
+        isin_management_page()
+    elif page == "ISIN Sync Monitor":
+        isin_sync_monitor_page()
+    elif page == "ISIN Analytics":
+        isin_analytics_dashboard()
     elif page == "Settings":
         settings_page()
 

@@ -234,3 +234,281 @@ def error_test_cases() -> dict[str, dict[str, Any]]:
             "expected_error": "ValueError",
         },
     }
+
+
+@pytest.fixture
+def sample_isin_data() -> dict[str, Any]:
+    """Sample ISIN data for testing ISIN functionality."""
+    return {
+        "valid_isins": [
+            "US0378331005",  # Apple Inc.
+            "DE0007164600",  # SAP SE
+            "GB0002162385",  # BP plc
+            "FR0000120073",  # Airbus SE
+            "NL0011794037",  # ASML Holding N.V.
+            "CH0012005267",  # Nestlé S.A.
+        ],
+        "invalid_isins": [
+            "US037833100",  # Too short
+            "US0378331006",  # Invalid check digit
+            "123456789012",  # Invalid format
+            "US03783310AB",  # Invalid characters
+            "",  # Empty string
+            "INVALIDFORMAT",  # Wrong format
+        ],
+        "isin_mappings": {
+            "US0378331005": {
+                "ticker": "AAPL",
+                "exchange": "XNAS",
+                "name": "Apple Inc.",
+                "country": "US",
+                "currency": "USD",
+            },
+            "DE0007164600": {
+                "ticker": "SAP",
+                "exchange": "XETR",
+                "name": "SAP SE",
+                "country": "DE",
+                "currency": "EUR",
+            },
+            "GB0002162385": {
+                "ticker": "BP",
+                "exchange": "XLON",
+                "name": "BP plc",
+                "country": "GB",
+                "currency": "GBP",
+            },
+        },
+    }
+
+
+@pytest.fixture
+def sample_european_exchanges() -> list[dict[str, Any]]:
+    """Sample European exchange data for testing."""
+    return [
+        {
+            "code": "XETR",
+            "name": "Xetra",
+            "country": "DE",
+            "currency": "EUR",
+            "timezone": "Europe/Berlin",
+        },
+        {
+            "code": "XFRA",
+            "name": "Frankfurt Stock Exchange",
+            "country": "DE",
+            "currency": "EUR",
+            "timezone": "Europe/Berlin",
+        },
+        {
+            "code": "XLON",
+            "name": "London Stock Exchange",
+            "country": "GB",
+            "currency": "GBP",
+            "timezone": "Europe/London",
+        },
+        {
+            "code": "XPAR",
+            "name": "Euronext Paris",
+            "country": "FR",
+            "currency": "EUR",
+            "timezone": "Europe/Paris",
+        },
+        {
+            "code": "XAMS",
+            "name": "Euronext Amsterdam",
+            "country": "NL",
+            "currency": "EUR",
+            "timezone": "Europe/Amsterdam",
+        },
+    ]
+
+
+@pytest.fixture
+def sample_sync_job_data() -> dict[str, Any]:
+    """Sample sync job data for testing sync functionality."""
+    return {
+        "job_id": "sync_123456789_100",
+        "source": "test_sync",
+        "isins": ["US0378331005", "DE0007164600", "GB0002162385"],
+        "status": "pending",
+        "total": 3,
+        "progress": 0,
+        "created_at": "2024-01-15T10:30:00Z",
+        "results": {},
+        "errors": [],
+    }
+
+
+@pytest.fixture
+def sample_market_quotes() -> dict[str, dict[str, Any]]:
+    """Sample market quote data for testing market data services."""
+    return {
+        "US0378331005": {
+            "symbol": "AAPL",
+            "isin": "US0378331005",
+            "price": 150.00,
+            "currency": "USD",
+            "change": 5.00,
+            "change_percent": 3.45,
+            "volume": 45678900,
+            "bid": 149.95,
+            "ask": 150.05,
+            "source": "yahoo_finance",
+            "timestamp": "2024-01-15T16:00:00Z",
+        },
+        "DE0007164600": {
+            "symbol": "SAP",
+            "isin": "DE0007164600",
+            "price": 120.50,
+            "currency": "EUR",
+            "change": -2.30,
+            "change_percent": -1.87,
+            "volume": 1234567,
+            "bid": 120.45,
+            "ask": 120.55,
+            "source": "deutsche_borse",
+            "timestamp": "2024-01-15T16:00:00Z",
+        },
+    }
+
+
+@pytest.fixture
+def sample_conflict_data() -> dict[str, Any]:
+    """Sample conflict data for testing conflict resolution."""
+    return {
+        "isin": "DE0007164600",
+        "existing_mapping": {
+            "ticker": "SAP",
+            "exchange_code": "XETR",
+            "security_name": "SAP SE",
+            "confidence": 0.95,
+            "source": "manual_verified",
+        },
+        "new_mapping": {
+            "ticker": "SAP.DE",
+            "exchange_code": "XFRA",
+            "security_name": "SAP AG",
+            "confidence": 0.87,
+            "source": "german_data_providers",
+        },
+        "conflict_type": "ticker_mismatch",
+    }
+
+
+@pytest.fixture
+def mock_external_apis():
+    """Mock external API responses for testing."""
+    return {
+        "yahoo_finance": {
+            "info": {
+                "regularMarketPrice": 150.0,
+                "currency": "USD",
+                "marketCap": 2400000000000,
+                "trailingPE": 28.5,
+            }
+        },
+        "deutsche_borse": {
+            "security_info": {
+                "isin": "DE0007164600",
+                "ticker_symbol": "SAP",
+                "name": "SAP SE",
+                "currency": "EUR",
+                "exchange": "XETR",
+            }
+        },
+        "boerse_frankfurt": {
+            "quote": {
+                "price": 120.50,
+                "currency": "EUR",
+                "change": -2.30,
+                "volume": 1234567,
+            }
+        },
+    }
+
+
+@pytest.fixture
+def sample_validation_cache() -> list[dict[str, Any]]:
+    """Sample ISIN validation cache entries for testing."""
+    return [
+        {
+            "isin": "US0378331005",
+            "is_valid": True,
+            "country_code": "US",
+            "country_name": "United States",
+            "cached_at": "2024-01-15T10:00:00Z",
+        },
+        {
+            "isin": "DE0007164600",
+            "is_valid": True,
+            "country_code": "DE",
+            "country_name": "Germany",
+            "cached_at": "2024-01-15T10:00:00Z",
+        },
+        {
+            "isin": "INVALID123",
+            "is_valid": False,
+            "validation_error": "Invalid ISIN format",
+            "cached_at": "2024-01-15T10:00:00Z",
+        },
+    ]
+
+
+@pytest.fixture
+def isin_test_cases() -> dict[str, list[tuple[str, bool, str]]]:
+    """Comprehensive ISIN test cases for validation testing."""
+    return {
+        "valid_cases": [
+            ("US0378331005", True, "Apple Inc. - Valid US ISIN"),
+            ("DE0007164600", True, "SAP SE - Valid German ISIN"),
+            ("GB0002162385", True, "BP plc - Valid UK ISIN"),
+            ("FR0000120073", True, "Airbus SE - Valid French ISIN"),
+            ("NL0011794037", True, "ASML - Valid Dutch ISIN"),
+            ("CH0012005267", True, "Nestlé - Valid Swiss ISIN"),
+            ("JP3902900004", True, "Nintendo - Valid Japanese ISIN"),
+            ("CA0679011084", True, "Barrick Gold - Valid Canadian ISIN"),
+        ],
+        "invalid_cases": [
+            ("US037833100", False, "Too short - 11 characters"),
+            ("US0378331006", False, "Invalid check digit"),
+            ("123456789012", False, "Invalid country code"),
+            ("US03783310AB", False, "Invalid characters in national code"),
+            ("US03783310055", False, "Too long - 13 characters"),
+            ("", False, "Empty string"),
+            ("INVALIDFORMAT", False, "Completely wrong format"),
+            ("us0378331005", False, "Lowercase characters"),
+            ("US-378331005", False, "Invalid separator character"),
+            ("US 378331005", False, "Space character in ISIN"),
+        ],
+        "edge_cases": [
+            ("XS0000000000", True, "International ISIN"),
+            ("EU0000000000", True, "European ISIN"),
+            ("QS0000000000", False, "Non-existent country code"),
+            ("US000000000A", False, "Letter in check digit position"),
+        ],
+    }
+
+
+@pytest.fixture
+def performance_test_data() -> dict[str, Any]:
+    """Data for performance testing ISIN operations."""
+    return {
+        "small_batch": ["US0378331005", "DE0007164600", "GB0002162385"],
+        "medium_batch": [f"US{str(i).zfill(9)}5" for i in range(100)],
+        "large_batch": [f"DE{str(i).zfill(9)}0" for i in range(1000)],
+        "expected_times": {
+            "validation": 0.001,  # seconds per ISIN
+            "mapping_lookup": 0.01,  # seconds per ISIN
+            "sync_operation": 1.0,  # seconds per ISIN
+        },
+    }
+
+
+@pytest.fixture
+def integration_test_markers():
+    """Pytest markers for integration tests."""
+    return pytest.mark.skipif(
+        not pytest.config.getoption("--run-integration"),
+        reason="Integration tests require --run-integration flag",
+    )
