@@ -1,7 +1,6 @@
 """ISIN (International Securities Identification Number) schemas for API operations."""
 
 from datetime import datetime
-from typing import List, Optional
 
 from pydantic import Field, field_validator
 
@@ -40,11 +39,11 @@ class ISINValidationResponse(BaseSchema):
 
     isin: str = Field(..., description="ISIN code that was validated")
     is_valid: bool = Field(..., description="Whether the ISIN is valid")
-    country_code: Optional[str] = Field(None, description="Country code from ISIN")
-    country_name: Optional[str] = Field(None, description="Country name")
-    national_code: Optional[str] = Field(None, description="National securities code")
-    check_digit: Optional[str] = Field(None, description="Check digit")
-    validation_error: Optional[str] = Field(
+    country_code: str | None = Field(None, description="Country code from ISIN")
+    country_name: str | None = Field(None, description="Country name")
+    national_code: str | None = Field(None, description="National securities code")
+    check_digit: str | None = Field(None, description="Check digit")
+    validation_error: str | None = Field(
         None, description="Validation error message if invalid"
     )
 
@@ -54,16 +53,16 @@ class ISINMappingBase(BaseSchema):
 
     isin: str = Field(..., min_length=12, max_length=12, description="ISIN code")
     ticker: str = Field(..., min_length=1, max_length=20, description="Ticker symbol")
-    exchange_code: Optional[str] = Field(
+    exchange_code: str | None = Field(
         None, max_length=10, description="Exchange code"
     )
-    exchange_name: Optional[str] = Field(
+    exchange_name: str | None = Field(
         None, max_length=100, description="Exchange name"
     )
-    security_name: Optional[str] = Field(
+    security_name: str | None = Field(
         None, max_length=200, description="Security name"
     )
-    currency: Optional[str] = Field(
+    currency: str | None = Field(
         None, min_length=3, max_length=3, description="Currency code"
     )
     source: str = Field(..., max_length=50, description="Data source")
@@ -90,7 +89,7 @@ class ISINMappingBase(BaseSchema):
 
     @field_validator("currency")
     @classmethod
-    def validate_currency(cls, v: Optional[str]) -> Optional[str]:
+    def validate_currency(cls, v: str | None) -> str | None:
         """Validate currency code."""
         if v is not None:
             return v.upper().strip()
@@ -100,19 +99,17 @@ class ISINMappingBase(BaseSchema):
 class ISINMappingCreate(ISINMappingBase):
     """Schema for creating ISIN ticker mappings."""
 
-    pass
-
 
 class ISINMappingUpdate(BaseSchema):
     """Schema for updating ISIN ticker mappings."""
 
-    exchange_code: Optional[str] = Field(None, max_length=10)
-    exchange_name: Optional[str] = Field(None, max_length=100)
-    security_name: Optional[str] = Field(None, max_length=200)
-    currency: Optional[str] = Field(None, min_length=3, max_length=3)
-    source: Optional[str] = Field(None, max_length=50)
-    confidence: Optional[float] = Field(None, ge=0.0, le=1.0)
-    is_active: Optional[bool] = None
+    exchange_code: str | None = Field(None, max_length=10)
+    exchange_name: str | None = Field(None, max_length=100)
+    security_name: str | None = Field(None, max_length=200)
+    currency: str | None = Field(None, min_length=3, max_length=3)
+    source: str | None = Field(None, max_length=50)
+    confidence: float | None = Field(None, ge=0.0, le=1.0)
+    is_active: bool | None = None
 
 
 class ISINMappingResponse(ISINMappingBase, TimestampMixin):
@@ -126,12 +123,12 @@ class ISINMappingResponse(ISINMappingBase, TimestampMixin):
 class ISINMappingSearchParams(BaseSchema):
     """Parameters for searching ISIN mappings."""
 
-    isin: Optional[str] = Field(None, description="Filter by ISIN")
-    ticker: Optional[str] = Field(None, description="Filter by ticker")
-    exchange_code: Optional[str] = Field(None, description="Filter by exchange")
-    source: Optional[str] = Field(None, description="Filter by data source")
+    isin: str | None = Field(None, description="Filter by ISIN")
+    ticker: str | None = Field(None, description="Filter by ticker")
+    exchange_code: str | None = Field(None, description="Filter by exchange")
+    source: str | None = Field(None, description="Filter by data source")
     is_active: bool = Field(True, description="Filter by active status")
-    min_confidence: Optional[float] = Field(
+    min_confidence: float | None = Field(
         None, ge=0.0, le=1.0, description="Minimum confidence score"
     )
 
@@ -140,10 +137,10 @@ class ISINResolutionRequest(BaseSchema):
     """Schema for ISIN to ticker resolution requests."""
 
     identifier: str = Field(..., description="ISIN code or ticker symbol to resolve")
-    preferred_exchange: Optional[str] = Field(
+    preferred_exchange: str | None = Field(
         None, description="Preferred exchange code"
     )
-    preferred_country: Optional[str] = Field(None, description="Preferred country code")
+    preferred_country: str | None = Field(None, description="Preferred country code")
 
     @field_validator("identifier")
     @classmethod
@@ -156,9 +153,9 @@ class TickerInfo(BaseSchema):
     """Information about a ticker symbol."""
 
     ticker: str = Field(..., description="Ticker symbol")
-    exchange_code: Optional[str] = Field(None, description="Exchange code")
-    exchange_name: Optional[str] = Field(None, description="Exchange name")
-    currency: Optional[str] = Field(None, description="Currency")
+    exchange_code: str | None = Field(None, description="Exchange code")
+    exchange_name: str | None = Field(None, description="Exchange name")
+    currency: str | None = Field(None, description="Currency")
     confidence: float = Field(..., description="Confidence score")
     source: str = Field(..., description="Data source")
 
@@ -167,20 +164,20 @@ class ISINResolutionResponse(BaseSchema):
     """Schema for ISIN to ticker resolution responses."""
 
     original_identifier: str = Field(..., description="Original input identifier")
-    resolved_ticker: Optional[str] = Field(None, description="Resolved ticker symbol")
+    resolved_ticker: str | None = Field(None, description="Resolved ticker symbol")
     identifier_type: str = Field(..., description="Type: 'isin' or 'ticker'")
     success: bool = Field(..., description="Whether resolution was successful")
-    error: Optional[str] = Field(None, description="Error message if resolution failed")
+    error: str | None = Field(None, description="Error message if resolution failed")
 
     # ISIN-specific information (if input was ISIN)
-    isin: Optional[str] = Field(None, description="ISIN code")
-    country_code: Optional[str] = Field(None, description="Country code")
-    country_name: Optional[str] = Field(None, description="Country name")
-    national_code: Optional[str] = Field(None, description="National code")
-    check_digit: Optional[str] = Field(None, description="Check digit")
+    isin: str | None = Field(None, description="ISIN code")
+    country_code: str | None = Field(None, description="Country code")
+    country_name: str | None = Field(None, description="Country name")
+    national_code: str | None = Field(None, description="National code")
+    check_digit: str | None = Field(None, description="Check digit")
 
     # Available ticker options
-    available_tickers: Optional[List[TickerInfo]] = Field(
+    available_tickers: list[TickerInfo] | None = Field(
         None, description="List of available ticker mappings"
     )
 
@@ -188,17 +185,17 @@ class ISINResolutionResponse(BaseSchema):
 class ISINLookupRequest(BaseSchema):
     """Schema for looking up assets by ISIN."""
 
-    isins: List[str] = Field(
+    isins: list[str] = Field(
         ..., min_items=1, max_items=50, description="List of ISIN codes to lookup"
     )
     include_inactive: bool = Field(False, description="Include inactive mappings")
-    preferred_exchanges: Optional[List[str]] = Field(
+    preferred_exchanges: list[str] | None = Field(
         None, description="Preferred exchange codes"
     )
 
     @field_validator("isins")
     @classmethod
-    def validate_isins(cls, v: List[str]) -> List[str]:
+    def validate_isins(cls, v: list[str]) -> list[str]:
         """Validate ISIN format for bulk lookup."""
         validated = []
         for isin in v:
@@ -216,14 +213,14 @@ class ISINLookupResult(BaseSchema):
 
     isin: str = Field(..., description="ISIN code")
     success: bool = Field(..., description="Whether lookup was successful")
-    tickers: List[TickerInfo] = Field(default=[], description="Found ticker mappings")
-    error: Optional[str] = Field(None, description="Error message if lookup failed")
+    tickers: list[TickerInfo] = Field(default=[], description="Found ticker mappings")
+    error: str | None = Field(None, description="Error message if lookup failed")
 
 
 class ISINLookupResponse(BaseSchema):
     """Schema for bulk ISIN lookup responses."""
 
-    results: List[ISINLookupResult] = Field(
+    results: list[ISINLookupResult] = Field(
         ..., description="Lookup results for each ISIN"
     )
     total_requested: int = Field(..., description="Total ISINs requested")
@@ -273,7 +270,7 @@ class ISINSuggestionResponse(BaseSchema):
     base_ticker: str = Field(..., description="Base ticker symbol")
     country_code: str = Field(..., description="Country from ISIN")
     country_name: str = Field(..., description="Country name")
-    suggestions: List[TickerSuggestion] = Field(
+    suggestions: list[TickerSuggestion] = Field(
         ..., description="List of suggested ticker formats"
     )
 
@@ -287,16 +284,16 @@ class ISINStatistics(BaseSchema):
     unique_tickers: int = Field(..., description="Number of unique tickers")
     countries_covered: int = Field(..., description="Number of countries covered")
     exchanges_covered: int = Field(..., description="Number of exchanges covered")
-    top_countries: List[dict] = Field(..., description="Top countries by mapping count")
-    top_exchanges: List[dict] = Field(..., description="Top exchanges by mapping count")
-    data_sources: List[dict] = Field(..., description="Data sources and their counts")
-    last_updated: Optional[datetime] = Field(None, description="Last update timestamp")
+    top_countries: list[dict] = Field(..., description="Top countries by mapping count")
+    top_exchanges: list[dict] = Field(..., description="Top exchanges by mapping count")
+    data_sources: list[dict] = Field(..., description="Data sources and their counts")
+    last_updated: datetime | None = Field(None, description="Last update timestamp")
 
 
 class ISINImportRequest(BaseSchema):
     """Schema for importing ISIN mappings in bulk."""
 
-    mappings: List[ISINMappingCreate] = Field(
+    mappings: list[ISINMappingCreate] = Field(
         ..., min_items=1, max_items=1000, description="ISIN mappings to import"
     )
     update_existing: bool = Field(
@@ -314,13 +311,13 @@ class ISINImportResult(BaseSchema):
     status: str = Field(
         ..., description="Import status: created, updated, skipped, error"
     )
-    error: Optional[str] = Field(None, description="Error message if import failed")
+    error: str | None = Field(None, description="Error message if import failed")
 
 
 class ISINImportResponse(BaseSchema):
     """Schema for bulk ISIN import responses."""
 
-    results: List[ISINImportResult] = Field(
+    results: list[ISINImportResult] = Field(
         ..., description="Import results for each mapping"
     )
     total_requested: int = Field(..., description="Total mappings requested")

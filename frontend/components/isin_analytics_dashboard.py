@@ -6,7 +6,7 @@ including coverage metrics, data quality analysis, and performance monitoring.
 
 import logging
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 BACKEND_URL = "http://localhost:8000"
 
 
-def call_api(endpoint: str, method: str = "GET", data: Dict = None) -> Optional[Dict]:
+def call_api(endpoint: str, method: str = "GET", data: dict = None) -> dict | None:
     """Call API with error handling."""
     try:
         url = f"{BACKEND_URL}{endpoint}"
@@ -35,15 +35,14 @@ def call_api(endpoint: str, method: str = "GET", data: Dict = None) -> Optional[
 
         if response.status_code == 200:
             return response.json()
-        else:
-            st.error(f"API Error {response.status_code}: {response.text}")
-            return None
+        st.error(f"API Error {response.status_code}: {response.text}")
+        return None
     except requests.exceptions.RequestException as e:
         st.error(f"Connection error: {e}")
         return None
 
 
-def get_isin_statistics() -> Optional[Dict]:
+def get_isin_statistics() -> dict | None:
     """Get comprehensive ISIN statistics."""
     try:
         # This would call the ISIN statistics endpoint
@@ -167,7 +166,7 @@ def get_exchange_distribution() -> pd.DataFrame:
         return pd.DataFrame()
 
 
-def get_quality_metrics() -> Dict[str, Any]:
+def get_quality_metrics() -> dict[str, Any]:
     """Get data quality metrics."""
     try:
         return {

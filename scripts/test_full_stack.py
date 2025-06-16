@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Comprehensive Full Stack Integration Test for Financial Dashboard
+"""Comprehensive Full Stack Integration Test for Financial Dashboard
 
 This script tests the complete integration of all services:
 - PostgreSQL database connectivity
@@ -25,7 +24,6 @@ import os
 import sys
 import time
 from pathlib import Path
-from typing import Dict
 
 import psutil
 import redis
@@ -48,8 +46,8 @@ class FullStackTester:
 
     def __init__(self, verbose: bool = False):
         self.verbose = verbose
-        self.results: Dict[str, bool] = {}
-        self.errors: Dict[str, str] = {}
+        self.results: dict[str, bool] = {}
+        self.errors: dict[str, str] = {}
 
         # Load environment
         self._load_environment()
@@ -257,9 +255,8 @@ class FullStackTester:
                 self._log_test("Redis Operations", True, "Set/Get test passed")
                 r.delete(test_key)  # Cleanup
                 return True
-            else:
-                self._log_test("Redis Operations", False, "Set/Get test failed")
-                return False
+            self._log_test("Redis Operations", False, "Set/Get test failed")
+            return False
 
         except Exception as e:
             self._log_test("Redis Connection", False, str(e))
@@ -419,9 +416,8 @@ class FullStackTester:
                 workers = response.json()
                 self._log_test("Flower API", True, f"{len(workers)} worker(s) visible")
                 return True
-            else:
-                self._log_test("Flower API", False, f"Status: {response.status_code}")
-                return False
+            self._log_test("Flower API", False, f"Status: {response.status_code}")
+            return False
 
         except requests.exceptions.ConnectionError:
             self._log_test(
@@ -457,14 +453,12 @@ class FullStackTester:
                 ):
                     self._log_test("Frontend Main Page", True, "Streamlit detected")
                     return True
-                else:
-                    self._log_test("Frontend Main Page", False, "Not a Streamlit app")
-                    return False
-            else:
-                self._log_test(
-                    "Frontend Main Page", False, f"Status: {response.status_code}"
-                )
+                self._log_test("Frontend Main Page", False, "Not a Streamlit app")
                 return False
+            self._log_test(
+                "Frontend Main Page", False, f"Status: {response.status_code}"
+            )
+            return False
 
         except requests.exceptions.ConnectionError:
             self._log_test(
@@ -522,9 +516,8 @@ class FullStackTester:
                 # Cleanup
                 asyncio.run(mcp_server.cleanup())
                 return True
-            else:
-                self._log_test("MCP Initialization", False, "No tools loaded")
-                return False
+            self._log_test("MCP Initialization", False, "No tools loaded")
+            return False
 
         except ImportError as e:
             self._log_test("MCP Server Import", False, f"Import error: {e}")
@@ -593,7 +586,7 @@ class FullStackTester:
             self._log_test("Integration Flow", False, str(e))
             return False
 
-    def generate_report(self) -> Dict:
+    def generate_report(self) -> dict:
         """Generate comprehensive test report."""
         total_tests = len(self.results)
         passed_tests = sum(1 for result in self.results.values() if result)

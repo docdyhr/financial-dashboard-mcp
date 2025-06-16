@@ -1,14 +1,13 @@
 """API endpoints for ISIN sync service management."""
 
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from backend.database import get_db_session
-from backend.schemas.isin import ISINSyncJobResponse
 from backend.services.isin_sync_service import ConflictResolution, get_isin_sync_service
 
 logger = logging.getLogger(__name__)
@@ -19,7 +18,7 @@ router = APIRouter(prefix="/isin/sync", tags=["ISIN Sync"])
 class SyncJobRequest(BaseModel):
     """Request model for creating sync jobs."""
 
-    isins: List[str] = Field(..., description="List of ISINs to sync")
+    isins: list[str] = Field(..., description="List of ISINs to sync")
     source: str = Field(default="manual", description="Data source for sync")
     priority: str = Field(
         default="normal", description="Job priority (low, normal, high)"
@@ -31,24 +30,23 @@ class ConflictResolutionRequest(BaseModel):
 
     isin: str = Field(..., description="ISIN with conflict")
     resolution: str = Field(..., description="Resolution strategy")
-    reason: Optional[str] = Field(None, description="Reason for resolution")
+    reason: str | None = Field(None, description="Reason for resolution")
 
 
 class BulkSyncRequest(BaseModel):
     """Request model for bulk sync operations."""
 
-    country_codes: Optional[List[str]] = Field(
+    country_codes: list[str] | None = Field(
         None, description="Country codes to sync"
     )
-    exchanges: Optional[List[str]] = Field(None, description="Exchange codes to sync")
+    exchanges: list[str] | None = Field(None, description="Exchange codes to sync")
     max_isins: int = Field(default=1000, description="Maximum ISINs to sync")
     source: str = Field(default="bulk_sync", description="Source identifier")
 
 
 @router.get("/status")
-async def get_sync_status() -> Dict[str, Any]:
-    """
-    Get overall sync service status and statistics.
+async def get_sync_status() -> dict[str, Any]:
+    """Get overall sync service status and statistics.
 
     Returns comprehensive information about the sync service including
     running jobs, conflicts, and performance metrics.
@@ -68,12 +66,11 @@ async def get_sync_status() -> Dict[str, Any]:
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/jobs", response_model=Dict[str, Any])
+@router.post("/jobs", response_model=dict[str, Any])
 async def create_sync_job(
     request: SyncJobRequest, background_tasks: BackgroundTasks
-) -> Dict[str, Any]:
-    """
-    Create a new ISIN sync job.
+) -> dict[str, Any]:
+    """Create a new ISIN sync job.
 
     This endpoint queues a new synchronization job for the specified ISINs.
     The job will be processed asynchronously in the background.
@@ -123,9 +120,8 @@ async def create_sync_job(
 
 
 @router.get("/jobs/{job_id}")
-async def get_job_status(job_id: str) -> Dict[str, Any]:
-    """
-    Get status of a specific sync job.
+async def get_job_status(job_id: str) -> dict[str, Any]:
+    """Get status of a specific sync job.
 
     Returns detailed information about job progress, results, and any errors.
     """
@@ -151,10 +147,9 @@ async def get_job_status(job_id: str) -> Dict[str, Any]:
 
 @router.get("/jobs")
 async def list_sync_jobs(
-    status: Optional[str] = None, limit: int = 50
-) -> Dict[str, Any]:
-    """
-    List sync jobs with optional filtering.
+    status: str | None = None, limit: int = 50
+) -> dict[str, Any]:
+    """List sync jobs with optional filtering.
 
     Args:
         status: Filter by job status (pending, running, completed, failed)
@@ -189,9 +184,8 @@ async def list_sync_jobs(
 
 
 @router.get("/conflicts")
-async def get_pending_conflicts(limit: int = 50) -> Dict[str, Any]:
-    """
-    Get pending conflicts that require manual resolution.
+async def get_pending_conflicts(limit: int = 50) -> dict[str, Any]:
+    """Get pending conflicts that require manual resolution.
 
     Returns a list of mapping conflicts that couldn't be automatically resolved.
     """
@@ -211,9 +205,8 @@ async def get_pending_conflicts(limit: int = 50) -> Dict[str, Any]:
 
 
 @router.post("/conflicts/resolve")
-async def resolve_conflict(request: ConflictResolutionRequest) -> Dict[str, Any]:
-    """
-    Manually resolve a mapping conflict.
+async def resolve_conflict(request: ConflictResolutionRequest) -> dict[str, Any]:
+    """Manually resolve a mapping conflict.
 
     This endpoint allows manual resolution of conflicts that couldn't be
     automatically resolved by the sync service.
@@ -263,9 +256,8 @@ async def start_bulk_sync(
     request: BulkSyncRequest,
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db_session),
-) -> Dict[str, Any]:
-    """
-    Start bulk synchronization based on criteria.
+) -> dict[str, Any]:
+    """Start bulk synchronization based on criteria.
 
     This endpoint allows syncing large numbers of ISINs based on
     country codes, exchanges, or other criteria.
@@ -329,9 +321,8 @@ async def start_bulk_sync(
 
 
 @router.post("/service/start")
-async def start_sync_service() -> Dict[str, Any]:
-    """
-    Start the background sync service.
+async def start_sync_service() -> dict[str, Any]:
+    """Start the background sync service.
 
     This endpoint starts the background synchronization service if it's not already running.
     """
@@ -359,9 +350,8 @@ async def start_sync_service() -> Dict[str, Any]:
 
 
 @router.post("/service/stop")
-async def stop_sync_service() -> Dict[str, Any]:
-    """
-    Stop the background sync service.
+async def stop_sync_service() -> dict[str, Any]:
+    """Stop the background sync service.
 
     This endpoint stops the background synchronization service and waits for
     currently running jobs to complete.
@@ -390,9 +380,8 @@ async def stop_sync_service() -> Dict[str, Any]:
 
 
 @router.delete("/jobs/{job_id}")
-async def cancel_sync_job(job_id: str) -> Dict[str, Any]:
-    """
-    Cancel a pending or running sync job.
+async def cancel_sync_job(job_id: str) -> dict[str, Any]:
+    """Cancel a pending or running sync job.
 
     This endpoint attempts to cancel a sync job. Jobs that are already
     completed cannot be cancelled.
@@ -430,9 +419,8 @@ async def cancel_sync_job(job_id: str) -> Dict[str, Any]:
 
 
 @router.get("/health")
-async def sync_service_health() -> Dict[str, Any]:
-    """
-    Get health status of the sync service.
+async def sync_service_health() -> dict[str, Any]:
+    """Get health status of the sync service.
 
     Returns detailed health information including service status,
     queue health, and recent performance metrics.

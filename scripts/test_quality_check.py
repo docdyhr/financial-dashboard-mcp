@@ -1,22 +1,18 @@
 #!/usr/bin/env python3
-"""
-Comprehensive test coverage analysis and quality validation script.
+"""Comprehensive test coverage analysis and quality validation script.
 
 This script analyzes test coverage, validates test quality, and provides
 actionable recommendations for improving the test suite.
 """
 
 import argparse
-import glob
 import json
-import os
 import subprocess
 import sys
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
 
 # Add project root to path
 PROJECT_ROOT = Path(__file__).parent.parent
@@ -32,7 +28,7 @@ class CoverageMetrics:
     missing: int
     excluded: int
     coverage: float
-    missing_lines: List[str]
+    missing_lines: list[str]
 
 
 @dataclass
@@ -55,12 +51,12 @@ class TestQualityMetrics:
 class QualityReport:
     """Overall quality report."""
 
-    coverage_metrics: Dict[str, CoverageMetrics]
+    coverage_metrics: dict[str, CoverageMetrics]
     test_metrics: TestQualityMetrics
     quality_score: float
-    recommendations: List[str]
-    warnings: List[str]
-    errors: List[str]
+    recommendations: list[str]
+    warnings: list[str]
+    errors: list[str]
 
 
 class TestCoverageAnalyzer:
@@ -89,7 +85,7 @@ class TestCoverageAnalyzer:
             ]
 
             result = subprocess.run(
-                cmd, cwd=self.project_root, capture_output=True, text=True
+                cmd, cwd=self.project_root, capture_output=True, text=True, check=False
             )
 
             if result.returncode != 0:
@@ -102,7 +98,7 @@ class TestCoverageAnalyzer:
             print(f"Error running coverage analysis: {e}")
             return False
 
-    def parse_coverage_xml(self) -> Dict[str, CoverageMetrics]:
+    def parse_coverage_xml(self) -> dict[str, CoverageMetrics]:
         """Parse coverage XML report."""
         if not self.coverage_xml_path.exists():
             return {}
@@ -157,7 +153,7 @@ class TestCoverageAnalyzer:
             print(f"Error parsing coverage XML: {e}")
             return {}
 
-    def calculate_overall_coverage(self, metrics: Dict[str, CoverageMetrics]) -> float:
+    def calculate_overall_coverage(self, metrics: dict[str, CoverageMetrics]) -> float:
         """Calculate overall coverage percentage."""
         if not metrics:
             return 0.0
@@ -255,8 +251,8 @@ class TestQualityValidator:
         self.min_test_ratio = 0.5  # Minimum test files to source files ratio
 
     def validate_coverage(
-        self, metrics: Dict[str, CoverageMetrics]
-    ) -> Tuple[List[str], List[str]]:
+        self, metrics: dict[str, CoverageMetrics]
+    ) -> tuple[list[str], list[str]]:
         """Validate coverage metrics and return warnings/errors."""
         warnings = []
         errors = []
@@ -294,7 +290,7 @@ class TestQualityValidator:
 
     def validate_test_quality(
         self, test_metrics: TestQualityMetrics
-    ) -> Tuple[List[str], List[str]]:
+    ) -> tuple[list[str], list[str]]:
         """Validate test quality metrics."""
         warnings = []
         errors = []
@@ -336,9 +332,9 @@ class TestQualityValidator:
 
     def generate_recommendations(
         self,
-        coverage_metrics: Dict[str, CoverageMetrics],
+        coverage_metrics: dict[str, CoverageMetrics],
         test_metrics: TestQualityMetrics,
-    ) -> List[str]:
+    ) -> list[str]:
         """Generate actionable recommendations."""
         recommendations = []
 
@@ -389,7 +385,7 @@ class TestQualityValidator:
                 )
 
         # ISIN-specific recommendations
-        isin_files = [f for f in coverage_metrics.keys() if "isin" in f.lower()]
+        isin_files = [f for f in coverage_metrics if "isin" in f.lower()]
         if isin_files:
             low_isin_coverage = [
                 f for f in isin_files if coverage_metrics[f].coverage < 85
@@ -403,7 +399,7 @@ class TestQualityValidator:
 
     def calculate_quality_score(
         self,
-        coverage_metrics: Dict[str, CoverageMetrics],
+        coverage_metrics: dict[str, CoverageMetrics],
         test_metrics: TestQualityMetrics,
     ) -> float:
         """Calculate overall quality score (0-100)."""
@@ -455,7 +451,7 @@ class TestQualityValidator:
 class TestQualityReporter:
     """Generates test quality reports."""
 
-    def print_coverage_report(self, metrics: Dict[str, CoverageMetrics]):
+    def print_coverage_report(self, metrics: dict[str, CoverageMetrics]):
         """Print coverage report to console."""
         if not metrics:
             print("❌ No coverage data available")
@@ -543,7 +539,7 @@ class TestQualityReporter:
         else:
             print("🔴 Poor test quality - significant improvements needed")
 
-    def print_recommendations(self, recommendations: List[str]):
+    def print_recommendations(self, recommendations: list[str]):
         """Print recommendations."""
         if not recommendations:
             return
@@ -553,7 +549,7 @@ class TestQualityReporter:
         for i, rec in enumerate(recommendations, 1):
             print(f"{i}. {rec}")
 
-    def print_warnings_and_errors(self, warnings: List[str], errors: List[str]):
+    def print_warnings_and_errors(self, warnings: list[str], errors: list[str]):
         """Print warnings and errors."""
         if errors:
             print("\n❌ Errors")

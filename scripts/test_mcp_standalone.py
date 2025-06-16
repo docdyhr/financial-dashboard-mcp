@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Test MCP Server for Claude Desktop Integration
+"""Test MCP Server for Claude Desktop Integration
 
 This script tests the MCP server in standalone mode to verify it works
 correctly with Claude Desktop. It simulates the MCP protocol communication
@@ -18,7 +17,7 @@ import json
 import logging
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 # Add project root to Python path
 project_root = Path(__file__).parent.parent
@@ -52,7 +51,7 @@ class MCPTester:
             logger.error(f"❌ Failed to initialize MCP Server: {e}")
             return False
 
-    async def list_tools(self) -> List[Dict]:
+    async def list_tools(self) -> list[dict]:
         """Test listing all available tools."""
         if not self.mcp_server:
             logger.error("MCP Server not initialized")
@@ -82,7 +81,7 @@ class MCPTester:
             return []
 
     async def test_tool_execution(
-        self, tool_name: str, arguments: Optional[Dict[str, Any]] = None
+        self, tool_name: str, arguments: dict[str, Any] | None = None
     ) -> bool:
         """Test executing a specific tool."""
         if not self.mcp_server:
@@ -127,15 +126,14 @@ class MCPTester:
                     for item in result:
                         logger.info(f"   Result: {item.text[:200]}...")
                 return True
-            else:
-                logger.error("❌ Tool execution failed - no result")
-                return False
+            logger.error("❌ Tool execution failed - no result")
+            return False
 
         except Exception as e:
             logger.error(f"❌ Tool execution failed: {e}")
             return False
 
-    async def test_sample_tools(self) -> Dict[str, bool]:
+    async def test_sample_tools(self) -> dict[str, bool]:
         """Test a sample of tools with various scenarios."""
         test_results = {}
 
@@ -314,9 +312,8 @@ class MCPTester:
                 logger.info("  • Claude Desktop configuration generated")
                 logger.info("  • Portfolio/market tools may need backend running")
                 return True
-            else:
-                logger.error("\n❌ MCP Server has critical issues")
-                return False
+            logger.error("\n❌ MCP Server has critical issues")
+            return False
 
         except Exception as e:
             logger.error(f"💥 Test suite crashed: {e}")

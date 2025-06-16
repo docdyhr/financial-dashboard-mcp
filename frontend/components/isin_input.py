@@ -2,7 +2,6 @@
 
 import logging
 import re
-from typing import Dict, List, Optional, Tuple
 
 import requests
 import streamlit as st
@@ -12,9 +11,8 @@ logger = logging.getLogger(__name__)
 BACKEND_URL = "http://localhost:8000"
 
 
-def validate_isin_format(isin: str) -> Tuple[bool, str]:
-    """
-    Validate ISIN format locally before sending to backend.
+def validate_isin_format(isin: str) -> tuple[bool, str]:
+    """Validate ISIN format locally before sending to backend.
 
     Args:
         isin: The ISIN code to validate
@@ -37,9 +35,8 @@ def validate_isin_format(isin: str) -> Tuple[bool, str]:
     return True, ""
 
 
-def call_isin_api(endpoint: str, data: Dict) -> Optional[Dict]:
-    """
-    Call ISIN API endpoint with error handling.
+def call_isin_api(endpoint: str, data: dict) -> dict | None:
+    """Call ISIN API endpoint with error handling.
 
     Args:
         endpoint: API endpoint path
@@ -54,9 +51,8 @@ def call_isin_api(endpoint: str, data: Dict) -> Optional[Dict]:
         )
         if response.status_code == 200:
             return response.json()
-        else:
-            st.error(f"API Error {response.status_code}: {response.text}")
-            return None
+        st.error(f"API Error {response.status_code}: {response.text}")
+        return None
     except requests.exceptions.RequestException as e:
         st.error(f"Connection error: {e}")
         return None
@@ -68,9 +64,8 @@ def isin_input_widget(
     help_text: str = "International Securities Identification Number (12 characters)",
     auto_lookup: bool = True,
     show_suggestions: bool = True,
-) -> Optional[Dict]:
-    """
-    ISIN input widget with validation and ticker lookup.
+) -> dict | None:
+    """ISIN input widget with validation and ticker lookup.
 
     Args:
         key: Unique key for the widget
@@ -202,43 +197,41 @@ def isin_input_widget(
                                         else None
                                     ),
                                 }
-                            else:
-                                st.warning("⚠️ No ticker mappings found for this ISIN")
+                            st.warning("⚠️ No ticker mappings found for this ISIN")
 
-                                # Show ticker suggestions if enabled
-                                if show_suggestions:
-                                    st.subheader("💡 Ticker Format Suggestions")
+                            # Show ticker suggestions if enabled
+                            if show_suggestions:
+                                st.subheader("💡 Ticker Format Suggestions")
 
-                                    suggestion_result = call_isin_api(
-                                        "suggestions",
-                                        {"isin": isin, "max_suggestions": 5},
-                                    )
+                                suggestion_result = call_isin_api(
+                                    "suggestions",
+                                    {"isin": isin, "max_suggestions": 5},
+                                )
 
-                                    if suggestion_result and suggestion_result.get(
+                                if suggestion_result and suggestion_result.get(
+                                    "suggestions"
+                                ):
+                                    for suggestion in suggestion_result[
                                         "suggestions"
-                                    ):
-                                        for suggestion in suggestion_result[
-                                            "suggestions"
-                                        ]:
-                                            st.info(
-                                                f"💡 Try: {suggestion.get('ticker')} ({suggestion.get('explanation', 'No explanation')})"
-                                            )
+                                    ]:
+                                        st.info(
+                                            f"💡 Try: {suggestion.get('ticker')} ({suggestion.get('explanation', 'No explanation')})"
+                                        )
 
-                                return {
-                                    "isin": isin,
-                                    "is_valid": True,
-                                    "country_code": validation_result.get(
-                                        "country_code"
-                                    ),
-                                    "country_name": validation_result.get(
-                                        "country_name"
-                                    ),
-                                    "mappings": [],
-                                    "primary_ticker": None,
-                                    "primary_exchange": None,
-                                }
-                        else:
-                            st.error("❌ Failed to lookup ticker mappings")
+                            return {
+                                "isin": isin,
+                                "is_valid": True,
+                                "country_code": validation_result.get(
+                                    "country_code"
+                                ),
+                                "country_name": validation_result.get(
+                                    "country_name"
+                                ),
+                                "mappings": [],
+                                "primary_ticker": None,
+                                "primary_exchange": None,
+                            }
+                        st.error("❌ Failed to lookup ticker mappings")
                 else:
                     st.error(
                         f"❌ Invalid ISIN: {validation_result.get('error', 'Unknown error')}"
@@ -250,8 +243,7 @@ def isin_input_widget(
 
 
 def isin_to_ticker_converter(key: str = "isin_converter") -> None:
-    """
-    ISIN to ticker converter widget.
+    """ISIN to ticker converter widget.
 
     Args:
         key: Unique key for the widget
@@ -325,8 +317,7 @@ def isin_to_ticker_converter(key: str = "isin_converter") -> None:
 
 
 def bulk_isin_lookup(key: str = "bulk_lookup") -> None:
-    """
-    Bulk ISIN lookup widget.
+    """Bulk ISIN lookup widget.
 
     Args:
         key: Unique key for the widget
@@ -436,8 +427,7 @@ def bulk_isin_lookup(key: str = "bulk_lookup") -> None:
 
 
 def isin_management_page():
-    """
-    Complete ISIN management page combining all widgets.
+    """Complete ISIN management page combining all widgets.
     """
     st.title("🔢 ISIN Management")
     st.markdown("*International Securities Identification Number tools*")

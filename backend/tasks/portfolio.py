@@ -21,8 +21,7 @@ logger = logging.getLogger(__name__)
 def calculate_portfolio_performance(
     self, user_id: int, days_back: int = 30
 ) -> dict[str, Any]:
-    """
-    Calculate portfolio performance metrics for a user.
+    """Calculate portfolio performance metrics for a user.
 
     Args:
         user_id: User ID to calculate performance for
@@ -176,11 +175,9 @@ def calculate_portfolio_performance(
                     sector_allocation[sector] = 0.0
                 sector_allocation[sector] += weight
 
-            # Set allocation breakdowns directly to avoid mypy index errors
-            metrics["allocation"] = {
-                "by_asset_type": asset_type_allocation,
-                "by_sector": sector_allocation,
-            }
+            metrics["allocation"]["by_asset_type"] = asset_type_allocation
+            metrics["allocation"]["by_sector"] = sector_allocation
+
             return {"status": "completed", "user_id": user_id, "metrics": metrics}
 
     except Exception as e:
@@ -191,8 +188,7 @@ def calculate_portfolio_performance(
 
 @celery_app.task(bind=True, name="create_portfolio_snapshot")  # type: ignore[misc]
 def create_portfolio_snapshot(self, user_id: int | None = None) -> dict[str, Any]:
-    """
-    Create daily portfolio snapshot(s) for tracking historical performance.
+    """Create daily portfolio snapshot(s) for tracking historical performance.
 
     Args:
         user_id: Specific user ID, or None for all users
@@ -331,8 +327,7 @@ def create_portfolio_snapshot(self, user_id: int | None = None) -> dict[str, Any
 def generate_portfolio_report(
     self, user_id: int, report_type: str = "monthly"
 ) -> dict[str, Any]:
-    """
-    Generate comprehensive portfolio report.
+    """Generate comprehensive portfolio report.
 
     Args:
         user_id: User ID to generate report for

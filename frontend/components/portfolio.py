@@ -1,10 +1,7 @@
 """Portfolio overview components for the Financial Dashboard."""
 
-from typing import Dict
-
 import pandas as pd
 import plotly.express as px
-import plotly.graph_objects as go
 import requests
 import streamlit as st
 
@@ -589,7 +586,7 @@ def view_position_details(
             if data.get("success"):
                 position_detail = data["data"]
 
-                st.subheader(f"📊 Position Details")
+                st.subheader("📊 Position Details")
 
                 col1, col2 = st.columns(2)
 
@@ -820,7 +817,7 @@ def edit_position(backend_url: str, df: pd.DataFrame, selected_indices: list[int
                     st.error(f"Invalid ticker format: {error_msg}")
                 else:
                     ticker_info = TickerUtils.parse_ticker(new_ticker)
-                    st.info(f"✓ Valid ticker format detected")
+                    st.info("✓ Valid ticker format detected")
 
                     col1, col2 = st.columns(2)
                     with col1:
@@ -1244,8 +1241,7 @@ def portfolio_summary_metrics(backend_url: str):
                     st.metric("Total Positions", f"{position_count}")
 
                 return summary
-            else:
-                st.error("Failed to fetch portfolio summary")
+            st.error("Failed to fetch portfolio summary")
         else:
             st.error(f"Failed to fetch portfolio summary: {response.status_code}")
 

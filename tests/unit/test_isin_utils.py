@@ -5,19 +5,17 @@ parsing, caching, and mapping operations.
 """
 
 from datetime import datetime, timedelta
-from decimal import Decimal
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import pytest
 
-from backend.models.isin import ISINTickerMapping, ISINValidationCache
+from backend.models.isin import ISINValidationCache
 from backend.services.isin_utils import (
     ISINMapping,
     ISINMappingService,
     ISINService,
     ISINUtils,
     ISINValidationError,
-    get_isin_service,
 )
 
 
@@ -465,7 +463,7 @@ class TestISINErrorHandling:
         """Test handling of external API errors."""
         # This would test error handling for external data provider APIs
         # when they're unavailable or return errors
-        pass  # Placeholder for external API error testing
+        # Placeholder for external API error testing
 
     def test_malformed_data_handling(self):
         """Test handling of malformed data."""

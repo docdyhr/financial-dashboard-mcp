@@ -4,25 +4,21 @@ This component provides advanced portfolio visualization capabilities leveraging
 the ISIN infrastructure for comprehensive European market coverage.
 """
 
-import asyncio
 import logging
-from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
+from datetime import datetime
 
 import numpy as np
 import pandas as pd
 import plotly.express as px
-import plotly.graph_objects as go
 import requests
 import streamlit as st
-from plotly.subplots import make_subplots
 
 logger = logging.getLogger(__name__)
 
 BACKEND_URL = "http://localhost:8000"
 
 
-def call_api(endpoint: str, method: str = "GET", data: Dict = None) -> Optional[Dict]:
+def call_api(endpoint: str, method: str = "GET", data: dict = None) -> dict | None:
     """Call API with error handling."""
     try:
         url = f"{BACKEND_URL}{endpoint}"
@@ -36,15 +32,14 @@ def call_api(endpoint: str, method: str = "GET", data: Dict = None) -> Optional[
 
         if response.status_code == 200:
             return response.json()
-        else:
-            st.error(f"API Error {response.status_code}: {response.text}")
-            return None
+        st.error(f"API Error {response.status_code}: {response.text}")
+        return None
     except requests.exceptions.RequestException as e:
         st.error(f"Connection error: {e}")
         return None
 
 
-def get_portfolio_data() -> Optional[pd.DataFrame]:
+def get_portfolio_data() -> pd.DataFrame | None:
     """Fetch enhanced portfolio data with ISIN information."""
     try:
         # Get portfolio positions
@@ -99,7 +94,7 @@ def get_portfolio_data() -> Optional[pd.DataFrame]:
         return None
 
 
-def get_real_time_quotes(isins: List[str]) -> Dict[str, Dict]:
+def get_real_time_quotes(isins: list[str]) -> dict[str, dict]:
     """Get real-time quotes for ISINs."""
     try:
         # This would call the enhanced market data service

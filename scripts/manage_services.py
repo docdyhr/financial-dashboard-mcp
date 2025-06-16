@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Financial Dashboard Service Manager
+"""Financial Dashboard Service Manager
 
 This script provides comprehensive management for all services required by the
 Financial Dashboard application, including PostgreSQL, Redis, Celery, Flower,
@@ -24,7 +23,6 @@ import time
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Optional
 
 import psutil
 import redis
@@ -63,13 +61,13 @@ class ServiceConfig:
     """Configuration for a service."""
 
     name: str
-    command: List[str]
-    port: Optional[int] = None
-    health_check_url: Optional[str] = None
-    health_check_command: Optional[List[str]] = None
-    working_directory: Optional[str] = None
-    environment: Optional[Dict[str, str]] = None
-    depends_on: Optional[List[str]] = None
+    command: list[str]
+    port: int | None = None
+    health_check_url: str | None = None
+    health_check_command: list[str] | None = None
+    working_directory: str | None = None
+    environment: dict[str, str] | None = None
+    depends_on: list[str] | None = None
     startup_delay: int = 2
     shutdown_timeout: int = 30
     max_startup_time: int = 60
@@ -80,7 +78,7 @@ class ServiceManager:
 
     def __init__(self):
         self.project_root = PROJECT_ROOT
-        self.processes: Dict[str, subprocess.Popen] = {}
+        self.processes: dict[str, subprocess.Popen] = {}
         self.service_configs = self._load_service_configs()
         self.running = True
 
@@ -91,7 +89,7 @@ class ServiceManager:
         signal.signal(signal.SIGINT, self._signal_handler)
         signal.signal(signal.SIGTERM, self._signal_handler)
 
-    def _load_service_configs(self) -> Dict[str, ServiceConfig]:
+    def _load_service_configs(self) -> dict[str, ServiceConfig]:
         """Load service configurations."""
         return {
             "postgres": ServiceConfig(
@@ -244,7 +242,7 @@ class ServiceManager:
                     ],
                     input="dev_password\n",
                     text=True,
-                    capture_output=True,
+                    capture_output=True, check=False,
                 )
 
                 if result.returncode != 0:
@@ -253,7 +251,7 @@ class ServiceManager:
                         result = subprocess.run(
                             ["pg_ctl", "initdb", "-D", str(data_dir)],
                             capture_output=True,
-                            text=True,
+                            text=True, check=False,
                         )
                     except FileNotFoundError:
                         logger.error(
@@ -347,7 +345,7 @@ class ServiceManager:
                 elif config.health_check_command:
                     try:
                         result = subprocess.run(
-                            config.health_check_command, capture_output=True, timeout=5
+                            config.health_check_command, capture_output=True, timeout=5, check=False
                         )
                         if result.returncode == 0:
                             return ServiceStatus.RUNNING
@@ -359,10 +357,9 @@ class ServiceManager:
                         pass
 
                 return ServiceStatus.RUNNING
-            else:
-                # Process terminated
-                del self.processes[service_name]
-                return ServiceStatus.STOPPED
+            # Process terminated
+            del self.processes[service_name]
+            return ServiceStatus.STOPPED
 
         # Check if service is running externally
         if config.port:
@@ -615,7 +612,7 @@ class ServiceManager:
         for name, url in urls.items():
             logger.info(f"{name}: {url}")
 
-    def run_health_checks(self) -> Dict[str, bool]:
+    def run_health_checks(self) -> dict[str, bool]:
         """Run comprehensive health checks on all services."""
         logger.info("Running health checks...")
         results = {}

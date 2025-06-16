@@ -8,7 +8,6 @@ import logging
 import re
 import time
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Tuple
 
 import requests
 
@@ -17,8 +16,6 @@ logger = logging.getLogger(__name__)
 
 class ISINValidationError(Exception):
     """Exception raised for ISIN validation errors."""
-
-    pass
 
 
 @dataclass
@@ -31,7 +28,7 @@ class ISINInfo:
     check_digit: str
     country_name: str
     is_valid: bool
-    validation_error: Optional[str] = None
+    validation_error: str | None = None
 
 
 @dataclass
@@ -109,8 +106,7 @@ class ISINUtils:
 
     @classmethod
     def is_isin_format(cls, identifier: str) -> bool:
-        """
-        Check if a string matches ISIN format pattern.
+        """Check if a string matches ISIN format pattern.
 
         Args:
             identifier: String to check
@@ -126,9 +122,8 @@ class ISINUtils:
         return bool(re.match(pattern, identifier.upper()))
 
     @classmethod
-    def validate_isin_checksum(cls, isin: str) -> Tuple[bool, int]:
-        """
-        Validate ISIN checksum using the Luhn algorithm.
+    def validate_isin_checksum(cls, isin: str) -> tuple[bool, int]:
+        """Validate ISIN checksum using the Luhn algorithm.
 
         Args:
             isin: ISIN code to validate
@@ -162,8 +157,7 @@ class ISINUtils:
 
     @classmethod
     def parse_isin(cls, isin: str) -> ISINInfo:
-        """
-        Parse ISIN code and extract components.
+        """Parse ISIN code and extract components.
 
         Args:
             isin: ISIN code to parse
@@ -211,9 +205,8 @@ class ISINUtils:
         )
 
     @classmethod
-    def validate_isin(cls, isin: str) -> Tuple[bool, Optional[str]]:
-        """
-        Validate ISIN code completely.
+    def validate_isin(cls, isin: str) -> tuple[bool, str | None]:
+        """Validate ISIN code completely.
 
         Args:
             isin: ISIN code to validate
@@ -231,11 +224,11 @@ class ISINUtils:
 class ISINMappingService:
     """Service for mapping ISIN codes to ticker symbols."""
 
-    def __init__(self, openfigi_api_key: Optional[str] = None):
+    def __init__(self, openfigi_api_key: str | None = None):
         self.openfigi_api_key = openfigi_api_key
         self.rate_limit_delay = 2.0  # Seconds between API calls
         self.last_call_time = 0
-        self.cache: Dict[str, List[ISINMapping]] = {}
+        self.cache: dict[str, list[ISINMapping]] = {}
 
     def _respect_rate_limit(self):
         """Ensure we don't exceed API rate limits."""
@@ -247,10 +240,9 @@ class ISINMappingService:
         self.last_call_time = time.time()
 
     def lookup_isin_openfigi(
-        self, isin: str, exchange_code: Optional[str] = None
-    ) -> List[ISINMapping]:
-        """
-        Lookup ISIN using OpenFIGI API.
+        self, isin: str, exchange_code: str | None = None
+    ) -> list[ISINMapping]:
+        """Lookup ISIN using OpenFIGI API.
 
         Args:
             isin: ISIN code to lookup
@@ -296,21 +288,19 @@ class ISINMappingService:
                         mappings.append(mapping)
 
                 return mappings
-            else:
-                logger.warning(
-                    f"OpenFIGI API error for {isin}: {response.status_code} - {response.text}"
-                )
-                return []
+            logger.warning(
+                f"OpenFIGI API error for {isin}: {response.status_code} - {response.text}"
+            )
+            return []
 
         except Exception as e:
             logger.error(f"Error looking up ISIN {isin} via OpenFIGI: {e}")
             return []
 
     def lookup_isin_cached(
-        self, isin: str, exchange_code: Optional[str] = None
-    ) -> List[ISINMapping]:
-        """
-        Lookup ISIN with caching.
+        self, isin: str, exchange_code: str | None = None
+    ) -> list[ISINMapping]:
+        """Lookup ISIN with caching.
 
         Args:
             isin: ISIN code to lookup
@@ -337,10 +327,9 @@ class ISINMappingService:
         return mappings
 
     def get_best_ticker_for_exchange(
-        self, isin: str, preferred_exchange: Optional[str] = None
-    ) -> Optional[str]:
-        """
-        Get the best ticker symbol for an ISIN, optionally preferring a specific exchange.
+        self, isin: str, preferred_exchange: str | None = None
+    ) -> str | None:
+        """Get the best ticker symbol for an ISIN, optionally preferring a specific exchange.
 
         Args:
             isin: ISIN code
@@ -367,12 +356,11 @@ class ISINMappingService:
 class ISINService:
     """Main ISIN service combining validation and mapping functionality."""
 
-    def __init__(self, openfigi_api_key: Optional[str] = None):
+    def __init__(self, openfigi_api_key: str | None = None):
         self.mapping_service = ISINMappingService(openfigi_api_key)
 
-    def resolve_identifier(self, identifier: str) -> Tuple[str, str]:
-        """
-        Resolve an identifier that could be either a ticker or ISIN.
+    def resolve_identifier(self, identifier: str) -> tuple[str, str]:
+        """Resolve an identifier that could be either a ticker or ISIN.
 
         Args:
             identifier: Ticker symbol or ISIN code
@@ -405,18 +393,15 @@ class ISINService:
 
                 if ticker:
                     return ticker, "isin"
-                else:
-                    # Return the ISIN itself if no ticker mapping found
-                    return identifier, "isin"
-            else:
-                raise ISINValidationError(f"Invalid ISIN: {error}")
+                # Return the ISIN itself if no ticker mapping found
+                return identifier, "isin"
+            raise ISINValidationError(f"Invalid ISIN: {error}")
 
         # Assume it's a ticker
         return identifier, "ticker"
 
-    def get_asset_info(self, identifier: str) -> Dict[str, any]:
-        """
-        Get comprehensive asset information from identifier.
+    def get_asset_info(self, identifier: str) -> dict[str, any]:
+        """Get comprehensive asset information from identifier.
 
         Args:
             identifier: Ticker symbol or ISIN code

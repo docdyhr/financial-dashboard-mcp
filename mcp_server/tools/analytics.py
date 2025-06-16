@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 class AnalyticsTools:
     """AI-powered analytics and recommendation tools for MCP."""
 
-    def __init__(self, backend_url: str = "http://localhost:8000"):
+    def __init__(self, backend_url: str = "http://localhost:8000") -> None:
         """Initialize analytics tools with backend URL."""
         self.backend_url = backend_url
         self.http_client = httpx.AsyncClient(timeout=30.0)
@@ -151,7 +151,7 @@ class AnalyticsTools:
                 return await self._generate_insights(arguments)
             return [TextContent(type="text", text=f"Unknown tool: {name}")]
         except Exception as e:
-            logger.error(f"Error executing tool {name}: {e}")
+            logger.exception("Error executing tool %s", name)
             return [TextContent(type="text", text=f"Error executing {name}: {e!s}")]
 
     async def _recommend_allocation(
@@ -186,7 +186,7 @@ class AnalyticsTools:
             current_response = await self.http_client.get(
                 f"{self.backend_url}/api/portfolio/allocation"
             )
-            current_allocation = {}
+            current_allocation: dict[str, float] = {}
             if current_response.status_code == 200:
                 current_data = current_response.json()
                 for item in current_data.get("allocation", []):
@@ -260,7 +260,7 @@ class AnalyticsTools:
 
         # This is a demo implementation - in production, this would use
         # real market data, screening tools, and ML models
-        opportunities = []
+        opportunities: list[dict[str, Any]] = []
 
         if "growth" in criteria or "tech" in criteria:
             opportunities.extend(
@@ -329,14 +329,14 @@ class AnalyticsTools:
             )
 
         # Remove duplicates and sort by score
-        seen = set()
-        unique_opportunities = []
+        seen: set[str] = set()
+        unique_opportunities: list[dict[str, Any]] = []
         for opp in opportunities:
             if opp["ticker"] not in seen:
                 unique_opportunities.append(opp)
                 seen.add(opp["ticker"])
 
-        unique_opportunities.sort(key=lambda x: x["score"], reverse=True)
+        unique_opportunities.sort(key=lambda x: float(x["score"]), reverse=True)
         unique_opportunities = unique_opportunities[:max_results]
 
         if not unique_opportunities:
@@ -363,7 +363,7 @@ Found {len(unique_opportunities)} opportunities matching your criteria:
 """
 
         for i, opp in enumerate(unique_opportunities, 1):
-            score_stars = "⭐" * int(opp["score"] / 2)
+            score_stars = "⭐" * int(float(opp["score"]) / 2)
             opportunity_text += f"""**{i}. {opp['ticker']} - {opp['name']}**
   • Investment Score: {opp['score']}/10 {score_stars}
   • Rationale: {opp['reason']}
@@ -413,7 +413,7 @@ Found {len(unique_opportunities)} opportunities matching your criteria:
             total_value = summary_data.get("total_value", 0.0)
 
             # Process current allocation
-            current_allocation = {}
+            current_allocation: dict[str, float] = {}
             for item in allocation_data.get("allocation", []):
                 asset_type = item.get("asset_type", "").lower()
                 percentage = item.get("percentage", 0.0)
@@ -448,7 +448,7 @@ Found {len(unique_opportunities)} opportunities matching your criteria:
 """
 
         needs_rebalancing = False
-        rebalancing_actions = []
+        rebalancing_actions: list[dict[str, Any]] = []
 
         for asset_type in ["stocks", "bonds", "cash"]:
             current_pct = current_allocation.get(asset_type, 0)
@@ -478,8 +478,8 @@ Found {len(unique_opportunities)} opportunities matching your criteria:
 
         if needs_rebalancing:
             rebalance_text += "\n\n**Recommended Actions:**\n"
-            for action in rebalancing_actions:
-                rebalance_text += f"  • {action['action']} ${action['amount']:,.0f} in {action['asset_type']}\n"
+            for action_item in rebalancing_actions:
+                rebalance_text += f"  • {action_item['action']} ${action_item['amount']:,.0f} in {action_item['asset_type']}\n"
 
             rebalance_text += """
 **Rebalancing Tips:**
@@ -523,12 +523,12 @@ Found {len(unique_opportunities)} opportunities matching your criteria:
                 ]
 
             summary_data = summary_response.json()
-            positions_data = (
+            positions_data: dict[str, Any] = (
                 positions_response.json()
                 if positions_response.status_code == 200
                 else {}
             )
-            performance_data = (
+            performance_data: dict[str, Any] = (
                 performance_response.json()
                 if performance_response.status_code == 200
                 else {}
@@ -543,10 +543,19 @@ Found {len(unique_opportunities)} opportunities matching your criteria:
 
         insights_text = "**AI Portfolio Insights** 🤖\n\n"
 
+        # Common data used across insights
+        positions: list[dict[str, Any]] = positions_data.get("positions", [])
+        num_positions = len(positions)
+        total_value: float = sum(pos.get("total_value", 0) for pos in positions)
+
         # Performance insights
         if focus_area in ["performance", "all"]:
-            ytd_return = performance_data.get("YTD", {}).get("return_percentage", 0)
-            monthly_return = performance_data.get("1M", {}).get("return_percentage", 0)
+            ytd_return: float = performance_data.get("YTD", {}).get(
+                "return_percentage", 0
+            )
+            monthly_return: float = performance_data.get("1M", {}).get(
+                "return_percentage", 0
+            )
 
             insights_text += "**📈 Performance Analysis:**\n"
             if ytd_return > 10:
@@ -567,10 +576,6 @@ Found {len(unique_opportunities)} opportunities matching your criteria:
 
         # Risk insights
         if focus_area in ["risk", "all"]:
-            positions = positions_data.get("positions", [])
-            num_positions = len(positions)
-            total_value = sum(pos.get("total_value", 0) for pos in positions)
-
             insights_text += "\n**⚠️ Risk Analysis:**\n"
             if num_positions < 5:
                 insights_text += (
@@ -582,8 +587,10 @@ Found {len(unique_opportunities)} opportunities matching your criteria:
                 )
 
             if positions:
-                max_position = max(positions, key=lambda x: x.get("total_value", 0))
-                max_percentage = (
+                max_position: dict[str, Any] = max(
+                    positions, key=lambda x: x.get("total_value", 0)
+                )
+                max_percentage: float = (
                     (max_position.get("total_value", 0) / total_value * 100)
                     if total_value > 0
                     else 0

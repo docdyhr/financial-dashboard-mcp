@@ -2,7 +2,6 @@
 
 import re
 from dataclasses import dataclass
-from typing import Dict, Optional, Tuple
 
 
 @dataclass
@@ -10,11 +9,11 @@ class TickerInfo:
     """Information about a ticker symbol."""
 
     base_ticker: str
-    exchange_suffix: Optional[str]
-    exchange_name: Optional[str]
-    country_code: Optional[str]
-    default_currency: Optional[str]
-    market_timezone: Optional[str]
+    exchange_suffix: str | None
+    exchange_name: str | None
+    country_code: str | None
+    default_currency: str | None
+    market_timezone: str | None
     is_international: bool
 
 
@@ -256,28 +255,26 @@ class TickerUtils:
                     market_timezone=exchange_info["timezone"],
                     is_international=True,
                 )
-            else:
-                # Unknown suffix
-                return TickerInfo(
-                    base_ticker=base_ticker,
-                    exchange_suffix=suffix,
-                    exchange_name=f"Unknown Exchange (.{suffix})",
-                    country_code=None,
-                    default_currency=None,
-                    market_timezone=None,
-                    is_international=True,
-                )
-        else:
-            # Assume US ticker
+            # Unknown suffix
             return TickerInfo(
-                base_ticker=ticker,
-                exchange_suffix=None,
-                exchange_name="US Exchange (NYSE/NASDAQ)",
-                country_code="US",
-                default_currency="USD",
-                market_timezone="America/New_York",
-                is_international=False,
+                base_ticker=base_ticker,
+                exchange_suffix=suffix,
+                exchange_name=f"Unknown Exchange (.{suffix})",
+                country_code=None,
+                default_currency=None,
+                market_timezone=None,
+                is_international=True,
             )
+        # Assume US ticker
+        return TickerInfo(
+            base_ticker=ticker,
+            exchange_suffix=None,
+            exchange_name="US Exchange (NYSE/NASDAQ)",
+            country_code="US",
+            default_currency="USD",
+            market_timezone="America/New_York",
+            is_international=False,
+        )
 
     @classmethod
     def format_for_yfinance(cls, ticker: str) -> str:
@@ -294,9 +291,8 @@ class TickerUtils:
         if suffix_key in cls.EXCHANGE_INFO:
             exchange_info = cls.EXCHANGE_INFO[suffix_key]
             return exchange_info["yfinance_format"].format(base=ticker_info.base_ticker)
-        else:
-            # Return as-is for unknown suffixes
-            return ticker
+        # Return as-is for unknown suffixes
+        return ticker
 
     @classmethod
     def format_for_alpha_vantage(cls, ticker: str) -> str:
@@ -310,7 +306,7 @@ class TickerUtils:
         return ticker
 
     @classmethod
-    def validate_ticker_format(cls, ticker: str) -> Tuple[bool, Optional[str]]:
+    def validate_ticker_format(cls, ticker: str) -> tuple[bool, str | None]:
         """Validate a ticker format and return (is_valid, error_message)."""
         if not ticker or not ticker.strip():
             return False, "Ticker cannot be empty"
@@ -339,15 +335,14 @@ class TickerUtils:
 
             if len(suffix) < 1 or len(suffix) > 3:
                 return False, "Exchange suffix must be between 1 and 3 characters"
-        else:
-            # US ticker
-            if len(ticker) < 1 or len(ticker) > 10:
-                return False, "US ticker must be between 1 and 10 characters"
+        # US ticker
+        elif len(ticker) < 1 or len(ticker) > 10:
+            return False, "US ticker must be between 1 and 10 characters"
 
         return True, None
 
     @classmethod
-    def get_supported_exchanges(cls) -> Dict[str, Dict[str, str]]:
+    def get_supported_exchanges(cls) -> dict[str, dict[str, str]]:
         """Get list of all supported exchanges."""
         result = {}
 
@@ -372,7 +367,7 @@ class TickerUtils:
 
     @classmethod
     def suggest_ticker_format(
-        cls, ticker: str, exchange_hint: Optional[str] = None
+        cls, ticker: str, exchange_hint: str | None = None
     ) -> str:
         """Suggest proper ticker format based on exchange hint."""
         ticker = ticker.upper().strip()
@@ -452,7 +447,7 @@ class TickerUtils:
         return ticker_info.country_code in european_countries
 
     @classmethod
-    def get_market_hours_info(cls, ticker: str) -> Optional[Dict[str, str]]:
+    def get_market_hours_info(cls, ticker: str) -> dict[str, str] | None:
         """Get market hours information for a ticker's exchange."""
         ticker_info = cls.parse_ticker(ticker)
 

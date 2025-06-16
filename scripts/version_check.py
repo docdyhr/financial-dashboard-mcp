@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Simple Version Check Script for Financial Dashboard MCP
+"""Simple Version Check Script for Financial Dashboard MCP
 
 This script prevents confusion between Financial Dashboard application version
 and Python version specifications by validating and fixing version consistency.
@@ -15,7 +14,6 @@ import argparse
 import re
 import sys
 from pathlib import Path
-from typing import Dict, List, Tuple
 
 
 class VersionChecker:
@@ -27,7 +25,7 @@ class VersionChecker:
         self.python_version = "3.11"  # Python runtime version
         self.python_target = "py311"  # Python target for tools
 
-    def check_pyproject_toml(self) -> Dict[str, bool]:
+    def check_pyproject_toml(self) -> dict[str, bool]:
         """Check pyproject.toml for version consistency."""
         results = {}
         pyproject_path = self.project_root / "pyproject.toml"
@@ -70,7 +68,7 @@ class VersionChecker:
 
         return results
 
-    def check_backend_init(self) -> Dict[str, bool]:
+    def check_backend_init(self) -> dict[str, bool]:
         """Check backend/__init__.py version."""
         results = {}
         backend_init = self.project_root / "backend" / "__init__.py"
@@ -94,7 +92,7 @@ class VersionChecker:
 
         return results
 
-    def check_all_versions(self) -> Dict[str, Dict[str, bool]]:
+    def check_all_versions(self) -> dict[str, dict[str, bool]]:
         """Check all version specifications."""
         return {
             "pyproject_toml": self.check_pyproject_toml(),
@@ -146,9 +144,8 @@ class VersionChecker:
             pyproject_path.write_text(content)
             print("✅ Fixed pyproject.toml version specifications")
             return True
-        else:
-            print("✅ pyproject.toml already correct")
-            return False
+        print("✅ pyproject.toml already correct")
+        return False
 
     def fix_backend_init(self) -> bool:
         """Fix backend/__init__.py version."""
@@ -172,9 +169,8 @@ class VersionChecker:
             backend_init.write_text(content)
             print("✅ Fixed backend/__init__.py version")
             return True
-        else:
-            print("✅ backend/__init__.py already correct")
-            return False
+        print("✅ backend/__init__.py already correct")
+        return False
 
     def fix_all_versions(self) -> bool:
         """Fix all version issues."""

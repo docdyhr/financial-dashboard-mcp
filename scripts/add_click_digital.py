@@ -29,7 +29,7 @@ def add_click_digital_mapping():
         "currency": "EUR",
     }
 
-    print(f"Adding mapping:")
+    print("Adding mapping:")
     print(f"  ISIN: {click_data['isin']}")
     print(f"  Ticker: {click_data['ticker']}")
     print(f"  Exchange: {click_data['exchange_name']} ({click_data['exchange_code']})")
@@ -62,9 +62,8 @@ def add_click_digital_mapping():
             if success:
                 print("✅ Successfully added Click Digital mapping")
                 return True
-            else:
-                print("❌ Failed to add mapping")
-                return False
+            print("❌ Failed to add mapping")
+            return False
 
     except Exception as e:
         print(f"❌ Error adding mapping: {e}")
@@ -141,7 +140,7 @@ def test_click_digital_isin():
             result = market_data_service.fetch_quote(isin, db)
 
             if result.success:
-                print(f"   ✅ Market data found!")
+                print("   ✅ Market data found!")
                 print(f"   Price: €{result.current_price:.2f}")
                 print(f"   Source: {result.data_source}")
                 if result.day_change:
@@ -160,13 +159,13 @@ def test_click_digital_isin():
     # Test 5: Market Data Fetch (Direct Ticker)
     print("\n5. Market Data Fetch (via Direct Ticker)")
     try:
-        print(f"   Attempting to fetch market data for ticker: CLIQ.DE")
+        print("   Attempting to fetch market data for ticker: CLIQ.DE")
         time.sleep(2)  # Rate limiting
 
         result = market_data_service.fetch_quote("CLIQ.DE")
 
         if result.success:
-            print(f"   ✅ Market data found!")
+            print("   ✅ Market data found!")
             print(f"   Price: €{result.current_price:.2f}")
             print(f"   Source: {result.data_source}")
         else:
@@ -185,7 +184,7 @@ def test_click_digital_isin():
             asset_info = isin_service.get_asset_info(db, isin)
 
             if asset_info["success"]:
-                print(f"   ✅ Asset resolution successful")
+                print("   ✅ Asset resolution successful")
                 print(f"   Type: {asset_info['identifier_type']}")
                 print(f"   Resolved Ticker: {asset_info['resolved_ticker']}")
                 print(f"   Country: {asset_info.get('country_name', 'Unknown')}")
@@ -215,18 +214,18 @@ def test_ticker_suggestions():
     isin = "DE000A35JS40"
     base_ticker = "CLIQ"
 
-    print(f"Getting suggestions for:")
+    print("Getting suggestions for:")
     print(f"  ISIN: {isin}")
     print(f"  Base Ticker: {base_ticker}")
 
     try:
         suggestions = ISINUtils.suggest_ticker_formats(isin, base_ticker)
 
-        print(f"\n📋 Suggested ticker formats:")
+        print("\n📋 Suggested ticker formats:")
         for i, suggestion in enumerate(suggestions, 1):
             print(f"  {i:2d}. {suggestion}")
 
-        print(f"\n🎯 Most likely formats for German stock:")
+        print("\n🎯 Most likely formats for German stock:")
         german_formats = [
             s for s in suggestions if ".DE" in s or ".F" in s or s == base_ticker
         ]
@@ -263,19 +262,19 @@ def show_isin_implementation_status():
     for status, feature in features:
         print(f"  {status} {feature}")
 
-    print(f"\n🎯 Current Capabilities:")
-    print(f"  • Validate and parse any ISIN code")
-    print(f"  • Store and retrieve ISIN-to-ticker mappings")
-    print(f"  • Resolve ISIN to ticker symbol automatically")
-    print(f"  • Integrate ISIN support into market data fetching")
-    print(f"  • Suggest appropriate ticker formats by country")
-    print(f"  • Comprehensive API for ISIN operations")
+    print("\n🎯 Current Capabilities:")
+    print("  • Validate and parse any ISIN code")
+    print("  • Store and retrieve ISIN-to-ticker mappings")
+    print("  • Resolve ISIN to ticker symbol automatically")
+    print("  • Integrate ISIN support into market data fetching")
+    print("  • Suggest appropriate ticker formats by country")
+    print("  • Comprehensive API for ISIN operations")
 
-    print(f"\n⚠️  Current Limitations:")
-    print(f"  • Click Digital data not available from major providers")
-    print(f"  • Limited to manual mapping for small German stocks")
-    print(f"  • No real-time German market data feeds")
-    print(f"  • Frontend UI not yet updated")
+    print("\n⚠️  Current Limitations:")
+    print("  • Click Digital data not available from major providers")
+    print("  • Limited to manual mapping for small German stocks")
+    print("  • No real-time German market data feeds")
+    print("  • Frontend UI not yet updated")
 
 
 def main():
@@ -323,10 +322,10 @@ def main():
         else:
             print("⚠️  Some tests failed, but basic ISIN support is working")
 
-        print(f"\n💡 To test in the dashboard:")
-        print(f"  • Try adding an asset with ISIN: DE000A35JS40")
-        print(f"  • System should recognize it as Click Digital AG")
-        print(f"  • Price may not be available (expected for small stocks)")
+        print("\n💡 To test in the dashboard:")
+        print("  • Try adding an asset with ISIN: DE000A35JS40")
+        print("  • System should recognize it as Click Digital AG")
+        print("  • Price may not be available (expected for small stocks)")
 
     except KeyboardInterrupt:
         print("\n\n👋 Integration interrupted by user.")

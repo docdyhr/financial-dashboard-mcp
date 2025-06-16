@@ -9,7 +9,7 @@ import re
 import time
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from sqlalchemy import and_
 from sqlalchemy.orm import Session
@@ -19,8 +19,6 @@ logger = logging.getLogger(__name__)
 
 class ISINValidationError(Exception):
     """Exception raised for ISIN validation errors."""
-
-    pass
 
 
 @dataclass
@@ -33,7 +31,7 @@ class ISINInfo:
     check_digit: str
     country_name: str
     is_valid: bool
-    validation_error: Optional[str] = None
+    validation_error: str | None = None
 
 
 @dataclass
@@ -129,8 +127,7 @@ class ISINUtils:
 
     @classmethod
     def is_isin_format(cls, identifier: str) -> bool:
-        """
-        Check if a string matches ISIN format pattern.
+        """Check if a string matches ISIN format pattern.
 
         Args:
             identifier: String to check
@@ -146,9 +143,8 @@ class ISINUtils:
         return bool(re.match(pattern, identifier.upper()))
 
     @classmethod
-    def validate_isin_checksum(cls, isin: str) -> Tuple[bool, int]:
-        """
-        Validate ISIN checksum using the Luhn algorithm.
+    def validate_isin_checksum(cls, isin: str) -> tuple[bool, int]:
+        """Validate ISIN checksum using the Luhn algorithm.
 
         Args:
             isin: ISIN code to validate
@@ -182,8 +178,7 @@ class ISINUtils:
 
     @classmethod
     def parse_isin(cls, isin: str) -> ISINInfo:
-        """
-        Parse ISIN code and extract components.
+        """Parse ISIN code and extract components.
 
         Args:
             isin: ISIN code to parse
@@ -233,9 +228,8 @@ class ISINUtils:
     @classmethod
     def validate_isin(
         cls, isin: str, use_cache: bool = True
-    ) -> Tuple[bool, Optional[str]]:
-        """
-        Validate ISIN code completely with optional database caching.
+    ) -> tuple[bool, str | None]:
+        """Validate ISIN code completely with optional database caching.
 
         Args:
             isin: ISIN code to validate
@@ -313,9 +307,8 @@ class ISINUtils:
         return isin_info.is_valid, isin_info.validation_error
 
     @classmethod
-    def get_preferred_exchanges(cls, country_code: str) -> List[str]:
-        """
-        Get preferred exchange codes for a country.
+    def get_preferred_exchanges(cls, country_code: str) -> list[str]:
+        """Get preferred exchange codes for a country.
 
         Args:
             country_code: 2-letter country code
@@ -326,9 +319,8 @@ class ISINUtils:
         return cls.EXCHANGE_MAPPINGS.get(country_code, [])
 
     @classmethod
-    def suggest_ticker_formats(cls, isin: str, base_ticker: str) -> List[str]:
-        """
-        Suggest possible ticker formats based on ISIN country.
+    def suggest_ticker_formats(cls, isin: str, base_ticker: str) -> list[str]:
+        """Suggest possible ticker formats based on ISIN country.
 
         Args:
             isin: ISIN code
@@ -449,11 +441,10 @@ class ISINMappingService:
         self,
         db: Session,
         isin: str,
-        exchange_code: Optional[str] = None,
+        exchange_code: str | None = None,
         active_only: bool = True,
-    ) -> List[ISINMapping]:
-        """
-        Get ISIN mappings from database.
+    ) -> list[ISINMapping]:
+        """Get ISIN mappings from database.
 
         Args:
             db: Database session
@@ -507,8 +498,7 @@ class ISINMappingService:
     def save_mapping_to_db(
         self, db: Session, mapping: ISINMapping, update_existing: bool = True
     ) -> bool:
-        """
-        Save ISIN mapping to database.
+        """Save ISIN mapping to database.
 
         Args:
             db: Database session
@@ -578,10 +568,9 @@ class ISINMappingService:
             return False
 
     def get_best_ticker_for_exchange(
-        self, db: Session, isin: str, preferred_exchange: Optional[str] = None
-    ) -> Optional[str]:
-        """
-        Get the best ticker symbol for an ISIN, optionally preferring a specific exchange.
+        self, db: Session, isin: str, preferred_exchange: str | None = None
+    ) -> str | None:
+        """Get the best ticker symbol for an ISIN, optionally preferring a specific exchange.
 
         Args:
             db: Database session
@@ -616,10 +605,9 @@ class ISINMappingService:
         return best_mapping.ticker
 
     def resolve_isin_to_ticker(
-        self, db: Session, isin: str, preferred_country: Optional[str] = None
-    ) -> Optional[str]:
-        """
-        Resolve ISIN to the most appropriate ticker symbol.
+        self, db: Session, isin: str, preferred_country: str | None = None
+    ) -> str | None:
+        """Resolve ISIN to the most appropriate ticker symbol.
 
         Args:
             db: Database session
@@ -660,9 +648,8 @@ class ISINService:
 
     def resolve_identifier(
         self, db: Session, identifier: str
-    ) -> Tuple[str, str, Optional[ISINInfo]]:
-        """
-        Resolve an identifier that could be either a ticker or ISIN.
+    ) -> tuple[str, str, ISINInfo | None]:
+        """Resolve an identifier that could be either a ticker or ISIN.
 
         Args:
             db: Database session
@@ -685,12 +672,10 @@ class ISINService:
 
                 if ticker:
                     return ticker, "isin", isin_info
-                else:
-                    # Return the ISIN itself if no ticker mapping found
-                    # The calling code can decide how to handle this
-                    return identifier, "isin", isin_info
-            else:
-                raise ISINValidationError(f"Invalid ISIN: {error}")
+                # Return the ISIN itself if no ticker mapping found
+                # The calling code can decide how to handle this
+                return identifier, "isin", isin_info
+            raise ISINValidationError(f"Invalid ISIN: {error}")
 
         # Assume it's a ticker
         return identifier, "ticker", None
@@ -700,13 +685,12 @@ class ISINService:
         db: Session,
         isin: str,
         ticker: str,
-        exchange_code: Optional[str] = None,
-        exchange_name: Optional[str] = None,
-        security_name: Optional[str] = None,
-        currency: Optional[str] = None,
+        exchange_code: str | None = None,
+        exchange_name: str | None = None,
+        security_name: str | None = None,
+        currency: str | None = None,
     ) -> bool:
-        """
-        Manually add an ISIN to ticker mapping.
+        """Manually add an ISIN to ticker mapping.
 
         Args:
             db: Database session
@@ -740,9 +724,8 @@ class ISINService:
 
         return self.mapping_service.save_mapping_to_db(db, mapping)
 
-    def get_asset_info(self, db: Session, identifier: str) -> Dict[str, Any]:
-        """
-        Get comprehensive asset information from identifier.
+    def get_asset_info(self, db: Session, identifier: str) -> dict[str, Any]:
+        """Get comprehensive asset information from identifier.
 
         Args:
             db: Database session

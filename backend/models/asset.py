@@ -1,10 +1,9 @@
 """Asset model for tracking stocks, bonds, ETFs, and other financial instruments."""
 
 from enum import Enum
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING
 
-from sqlalchemy import Enum as SQLEnum
-from sqlalchemy import Numeric, String
+from sqlalchemy import Enum as SQLEnum, Numeric, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
 from backend.models.base import Base
@@ -102,13 +101,13 @@ class Asset(Base):
     )  # e.g., "yfinance", "alpha_vantage"
 
     # Relationships
-    positions: Mapped[List["Position"]] = relationship(
+    positions: Mapped[list["Position"]] = relationship(
         "Position", back_populates="asset", cascade="all, delete-orphan"
     )
-    transactions: Mapped[List["Transaction"]] = relationship(
+    transactions: Mapped[list["Transaction"]] = relationship(
         "Transaction", back_populates="asset", cascade="all, delete-orphan"
     )
-    price_history: Mapped[List["PriceHistory"]] = relationship(
+    price_history: Mapped[list["PriceHistory"]] = relationship(
         "PriceHistory", back_populates="asset", cascade="all, delete-orphan"
     )
 
@@ -131,7 +130,7 @@ class Asset(Base):
         return self.category == AssetCategory.FIXED_INCOME
 
     @validates("isin")
-    def validate_isin(self, key: str, isin: Optional[str]) -> Optional[str]:
+    def validate_isin(self, key: str, isin: str | None) -> str | None:
         """Validate ISIN format and checksum."""
         if isin is None or isin == "":
             return None

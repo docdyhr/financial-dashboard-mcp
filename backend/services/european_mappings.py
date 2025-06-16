@@ -9,7 +9,7 @@ import re
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Set
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -78,20 +78,20 @@ class EuropeanStockMapping:
     company_name: str = ""
 
     # Additional identifiers
-    wkn: Optional[str] = None  # German WKN
-    sedol: Optional[str] = None  # UK SEDOL
-    cusip: Optional[str] = None  # International CUSIP
-    lei: Optional[str] = None  # Legal Entity Identifier
+    wkn: str | None = None  # German WKN
+    sedol: str | None = None  # UK SEDOL
+    cusip: str | None = None  # International CUSIP
+    lei: str | None = None  # Legal Entity Identifier
 
     # Market data
     currency: str = "EUR"
-    sector: Optional[str] = None
-    industry: Optional[str] = None
-    market_cap: Optional[float] = None
+    sector: str | None = None
+    industry: str | None = None
+    market_cap: float | None = None
 
     # Trading information
     lot_size: int = 1
-    trading_hours: Optional[str] = None
+    trading_hours: str | None = None
     settlement_days: int = 2
 
     # Quality indicators
@@ -102,7 +102,7 @@ class EuropeanStockMapping:
 
     # Timestamps
     created_at: datetime = field(default_factory=datetime.now)
-    last_verified: Optional[datetime] = None
+    last_verified: datetime | None = None
 
     def __post_init__(self):
         """Post-initialization validation and setup."""
@@ -152,9 +152,9 @@ class EuropeanMappingService:
     """Service for managing European stock mappings."""
 
     def __init__(self):
-        self.mappings: Dict[str, List[EuropeanStockMapping]] = {}
-        self.ticker_to_isin: Dict[str, Set[str]] = {}
-        self.exchange_mappings: Dict[EuropeanExchange, Set[str]] = {}
+        self.mappings: dict[str, list[EuropeanStockMapping]] = {}
+        self.ticker_to_isin: dict[str, set[str]] = {}
+        self.exchange_mappings: dict[EuropeanExchange, set[str]] = {}
 
         # Initialize with known high-quality mappings
         self._load_default_mappings()
@@ -318,8 +318,7 @@ class EuropeanMappingService:
             self.add_mapping(mapping)
 
     def add_mapping(self, mapping: EuropeanStockMapping) -> bool:
-        """
-        Add a new mapping to the service.
+        """Add a new mapping to the service.
 
         Args:
             mapping: The mapping to add
@@ -353,13 +352,13 @@ class EuropeanMappingService:
             logger.error(f"Error adding mapping for {mapping.isin}: {e}")
             return False
 
-    def get_mappings_by_isin(self, isin: str) -> List[EuropeanStockMapping]:
+    def get_mappings_by_isin(self, isin: str) -> list[EuropeanStockMapping]:
         """Get all mappings for an ISIN."""
         return self.mappings.get(isin, [])
 
     def get_mappings_by_ticker(
-        self, ticker: str, exchange: Optional[EuropeanExchange] = None
-    ) -> List[EuropeanStockMapping]:
+        self, ticker: str, exchange: EuropeanExchange | None = None
+    ) -> list[EuropeanStockMapping]:
         """Get mappings by ticker, optionally filtered by exchange."""
         results = []
 
@@ -378,10 +377,9 @@ class EuropeanMappingService:
         return results
 
     def get_best_mapping(
-        self, isin: str, prefer_exchange: Optional[EuropeanExchange] = None
-    ) -> Optional[EuropeanStockMapping]:
-        """
-        Get the best mapping for an ISIN.
+        self, isin: str, prefer_exchange: EuropeanExchange | None = None
+    ) -> EuropeanStockMapping | None:
+        """Get the best mapping for an ISIN.
 
         Args:
             isin: The ISIN to look up
@@ -414,10 +412,9 @@ class EuropeanMappingService:
         return mappings[0]
 
     def suggest_ticker_for_isin(
-        self, isin: str, prefer_exchange: Optional[str] = None
-    ) -> Optional[str]:
-        """
-        Suggest a ticker symbol for an ISIN.
+        self, isin: str, prefer_exchange: str | None = None
+    ) -> str | None:
+        """Suggest a ticker symbol for an ISIN.
 
         Args:
             isin: The ISIN to suggest ticker for
@@ -435,8 +432,8 @@ class EuropeanMappingService:
         return self._generate_ticker_from_isin(isin, prefer_exchange)
 
     def _generate_ticker_from_isin(
-        self, isin: str, prefer_exchange: Optional[str] = None
-    ) -> Optional[str]:
+        self, isin: str, prefer_exchange: str | None = None
+    ) -> str | None:
         """Generate potential ticker from ISIN structure."""
         if len(isin) != 12:
             return None
@@ -469,7 +466,7 @@ class EuropeanMappingService:
 
         return None
 
-    def _extract_wkn_from_german_isin(self, isin: str) -> Optional[str]:
+    def _extract_wkn_from_german_isin(self, isin: str) -> str | None:
         """Extract WKN from German ISIN."""
         if not isin.startswith("DE") or len(isin) != 12:
             return None
@@ -484,7 +481,7 @@ class EuropeanMappingService:
         except Exception:
             return None
 
-    def get_exchange_coverage(self) -> Dict[str, Dict[str, Any]]:
+    def get_exchange_coverage(self) -> dict[str, dict[str, Any]]:
         """Get coverage statistics by exchange."""
         coverage = {}
 
@@ -509,9 +506,8 @@ class EuropeanMappingService:
 
     def search_mappings(
         self, query: str, limit: int = 20
-    ) -> List[EuropeanStockMapping]:
-        """
-        Search mappings by various criteria.
+    ) -> list[EuropeanStockMapping]:
+        """Search mappings by various criteria.
 
         Args:
             query: Search query (ISIN, ticker, company name)
@@ -552,9 +548,8 @@ class EuropeanMappingService:
 
         return results[:limit]
 
-    def validate_mapping_quality(self, mapping: EuropeanStockMapping) -> Dict[str, Any]:
-        """
-        Validate the quality of a mapping.
+    def validate_mapping_quality(self, mapping: EuropeanStockMapping) -> dict[str, Any]:
+        """Validate the quality of a mapping.
 
         Args:
             mapping: The mapping to validate
@@ -609,8 +604,8 @@ class EuropeanMappingService:
         }
 
     def export_mappings(
-        self, exchange: Optional[EuropeanExchange] = None
-    ) -> List[Dict[str, Any]]:
+        self, exchange: EuropeanExchange | None = None
+    ) -> list[dict[str, Any]]:
         """Export mappings to a list of dictionaries."""
         results = []
 
@@ -707,14 +702,14 @@ def is_european_isin(isin: str) -> bool:
     return isin[:2] in european_countries
 
 
-def get_country_exchanges(country_code: str) -> List[EuropeanExchange]:
+def get_country_exchanges(country_code: str) -> list[EuropeanExchange]:
     """Get all exchanges for a specific country."""
     return [
         exchange for exchange in EuropeanExchange if exchange.country == country_code
     ]
 
 
-def suggest_exchange_for_isin(isin: str) -> Optional[EuropeanExchange]:
+def suggest_exchange_for_isin(isin: str) -> EuropeanExchange | None:
     """Suggest the most appropriate exchange for an ISIN."""
     if len(isin) < 2:
         return None

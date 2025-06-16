@@ -7,10 +7,9 @@ for the ISIN validation, mapping, and sync services.
 import asyncio
 import gc
 import statistics
-import threading
 import time
+from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import Any, Callable, Dict, List
 from unittest.mock import Mock, patch
 
 import psutil
@@ -72,7 +71,7 @@ class TestISINValidationPerformance:
         avg_time_per_isin = elapsed / len(large_batch)
         throughput = len(large_batch) / elapsed
 
-        print(f"Performance metrics:")
+        print("Performance metrics:")
         print(f"  Total time: {elapsed:.3f}s")
         print(f"  Average time per ISIN: {avg_time_per_isin*1000:.2f}ms")
         print(f"  Throughput: {throughput:.0f} ISINs/second")
@@ -98,7 +97,7 @@ class TestISINValidationPerformance:
         memory_after = process.memory_info().rss / 1024 / 1024  # MB
         memory_growth = memory_after - memory_before
 
-        print(f"Memory usage:")
+        print("Memory usage:")
         print(f"  Before: {memory_before:.1f}MB")
         print(f"  After: {memory_after:.1f}MB")
         print(f"  Growth: {memory_growth:.1f}MB")
@@ -140,7 +139,7 @@ class TestISINValidationPerformance:
         sequential_estimate = len(medium_batch) * 0.001  # Estimate 1ms per ISIN
         speedup = sequential_estimate / elapsed
 
-        print(f"Concurrent validation:")
+        print("Concurrent validation:")
         print(f"  Time: {elapsed:.3f}s")
         print(f"  Estimated speedup: {speedup:.1f}x")
 
@@ -198,7 +197,7 @@ class TestISINMappingPerformance:
             end_time = time.time()
             elapsed = end_time - start_time
 
-            print(f"Bulk mapping lookup:")
+            print("Bulk mapping lookup:")
             print(f"  Total time: {elapsed:.3f}s")
             print(f"  Average per lookup: {elapsed/len(large_batch)*1000:.2f}ms")
             print(f"  Throughput: {len(large_batch)/elapsed:.0f} lookups/second")
@@ -250,7 +249,7 @@ class TestISINSyncServicePerformance:
         end_time = time.time()
 
         elapsed = end_time - start_time
-        print(f"Concurrent job creation:")
+        print("Concurrent job creation:")
         print(f"  Total time: {elapsed:.3f}s")
         print(f"  Jobs created: {len(job_ids)}")
         print(f"  Average per job: {elapsed/len(job_ids)*1000:.2f}ms")
@@ -344,7 +343,7 @@ class TestMarketDataPerformance:
                 end_time = time.time()
                 elapsed = end_time - start_time
 
-                print(f"Batch quote retrieval:")
+                print("Batch quote retrieval:")
                 print(f"  Total time: {elapsed:.3f}s")
                 print(f"  ISINs processed: {len(test_isins)}")
                 print(f"  Average per quote: {elapsed/len(test_isins)*1000:.2f}ms")
@@ -391,7 +390,7 @@ class TestSystemLoadTests:
         total_validations = num_threads * validations_per_thread
         throughput = total_validations / elapsed
 
-        print(f"High concurrency load test:")
+        print("High concurrency load test:")
         print(f"  Threads: {num_threads}")
         print(f"  Total validations: {total_validations}")
         print(f"  Total time: {elapsed:.3f}s")
@@ -423,7 +422,7 @@ class TestSystemLoadTests:
         memory_after = process.memory_info().rss / 1024 / 1024  # MB
         memory_growth = memory_after - memory_before
 
-        print(f"Memory stress test:")
+        print("Memory stress test:")
         print(f"  Memory before: {memory_before:.1f}MB")
         print(f"  Memory after: {memory_after:.1f}MB")
         print(f"  Memory growth: {memory_growth:.1f}MB")
@@ -451,7 +450,7 @@ class TestSystemLoadTests:
         end_time = time.time()
         elapsed = end_time - start_time
 
-        print(f"Async operations load test:")
+        print("Async operations load test:")
         print(f"  Operations: {num_operations}")
         print(f"  Total time: {elapsed:.3f}s")
         print(f"  Ops/second: {num_operations/elapsed:.0f}")
@@ -501,7 +500,7 @@ class TestPerformanceRegression:
 
 def measure_performance(
     func: Callable, *args, iterations: int = 100, **kwargs
-) -> Dict[str, float]:
+) -> dict[str, float]:
     """Utility function to measure performance metrics."""
     times = []
 
@@ -523,7 +522,7 @@ def measure_performance(
 
 
 def assert_performance_requirements(
-    metrics: Dict[str, float], max_mean: float, max_p95: float
+    metrics: dict[str, float], max_mean: float, max_p95: float
 ):
     """Assert performance requirements are met."""
     assert (

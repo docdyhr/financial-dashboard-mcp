@@ -1,7 +1,7 @@
 """Settings service for frontend to interact with backend API."""
 
 import logging
-from typing import Any, Dict, Optional
+from typing import Any
 
 import requests
 import streamlit as st
@@ -17,7 +17,7 @@ class SettingsService:
         self.user_id = user_id
         self.api_url = f"{backend_url}/api/v1/user-settings"
 
-    def get_settings(self) -> Dict[str, Any]:
+    def get_settings(self) -> dict[str, Any]:
         """Get user settings from backend API."""
         try:
             response = requests.get(
@@ -28,12 +28,10 @@ class SettingsService:
                 data = response.json()
                 if data.get("success"):
                     return data.get("data", {})
-                else:
-                    logger.error(f"API error: {data.get('message', 'Unknown error')}")
-                    return self._get_default_settings()
-            else:
-                logger.error(f"Failed to fetch settings: HTTP {response.status_code}")
+                logger.error(f"API error: {data.get('message', 'Unknown error')}")
                 return self._get_default_settings()
+            logger.error(f"Failed to fetch settings: HTTP {response.status_code}")
+            return self._get_default_settings()
 
         except requests.exceptions.RequestException as e:
             logger.error(f"Network error fetching settings: {e}")
@@ -42,7 +40,7 @@ class SettingsService:
             logger.error(f"Unexpected error fetching settings: {e}")
             return self._get_default_settings()
 
-    def save_settings(self, settings: Dict[str, Any]) -> bool:
+    def save_settings(self, settings: dict[str, Any]) -> bool:
         """Save user settings to backend API."""
         try:
             response = requests.put(
@@ -57,14 +55,12 @@ class SettingsService:
                 if data.get("success"):
                     logger.info("Settings saved successfully")
                     return True
-                else:
-                    logger.error(
-                        f"API error saving settings: {data.get('message', 'Unknown error')}"
-                    )
-                    return False
-            else:
-                logger.error(f"Failed to save settings: HTTP {response.status_code}")
+                logger.error(
+                    f"API error saving settings: {data.get('message', 'Unknown error')}"
+                )
                 return False
+            logger.error(f"Failed to save settings: HTTP {response.status_code}")
+            return False
 
         except requests.exceptions.RequestException as e:
             logger.error(f"Network error saving settings: {e}")
@@ -107,7 +103,7 @@ class SettingsService:
             logger.error(f"Error resetting settings: {e}")
             return False
 
-    def _get_default_settings(self) -> Dict[str, Any]:
+    def _get_default_settings(self) -> dict[str, Any]:
         """Get default settings as fallback."""
         return {
             "theme": "Light",
@@ -156,12 +152,10 @@ class StreamlitSettingsManager:
                 if success:
                     logger.info(f"Setting {key} updated and saved")
                     return True
-                else:
-                    logger.error(f"Failed to save setting {key}")
-                    return False
-            else:
-                logger.info(f"Setting {key} updated in session state")
-                return True
+                logger.error(f"Failed to save setting {key}")
+                return False
+            logger.info(f"Setting {key} updated in session state")
+            return True
 
         except Exception as e:
             logger.error(f"Error updating setting {key}: {e}")
@@ -174,9 +168,8 @@ class StreamlitSettingsManager:
             if success:
                 logger.info("All settings saved successfully")
                 return True
-            else:
-                logger.error("Failed to save settings")
-                return False
+            logger.error("Failed to save settings")
+            return False
 
         except Exception as e:
             logger.error(f"Error saving all settings: {e}")
@@ -203,9 +196,8 @@ class StreamlitSettingsManager:
                 self.reload_settings()
                 logger.info("Settings reset to defaults")
                 return True
-            else:
-                logger.error("Failed to reset settings")
-                return False
+            logger.error("Failed to reset settings")
+            return False
 
         except Exception as e:
             logger.error(f"Error resetting settings: {e}")
@@ -234,14 +226,13 @@ class StreamlitSettingsManager:
             if currency == "JPY":
                 # Japanese Yen doesn't use decimal places
                 return f"{symbol}{amount:,.0f}"
-            else:
-                return f"{symbol}{amount:,.2f}"
+            return f"{symbol}{amount:,.2f}"
 
         except Exception as e:
             logger.error(f"Error formatting currency: {e}")
             return f"${amount:,.2f}"  # Fallback to USD
 
-    def get_theme_config(self) -> Dict[str, Any]:
+    def get_theme_config(self) -> dict[str, Any]:
         """Get theme configuration for UI components."""
         theme = self.get_setting("theme", "Light")
 
@@ -252,16 +243,16 @@ class StreamlitSettingsManager:
                 "secondary_background_color": "#2e2e2e",
                 "text_color": "#ffffff",
             }
-        elif theme == "Auto":
+        if theme == "Auto":
             # Let Streamlit handle auto theme
             return {}
-        else:  # Light theme (default)
-            return {
-                "primary_color": "#1f77b4",
-                "background_color": "#ffffff",
-                "secondary_background_color": "#f0f2f6",
-                "text_color": "#000000",
-            }
+        # Light theme (default)
+        return {
+            "primary_color": "#1f77b4",
+            "background_color": "#ffffff",
+            "secondary_background_color": "#f0f2f6",
+            "text_color": "#000000",
+        }
 
 
 # Global instance for easy access

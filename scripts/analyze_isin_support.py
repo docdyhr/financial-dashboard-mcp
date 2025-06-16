@@ -118,20 +118,18 @@ def test_openfigi_api(isin: str) -> dict:
             if data and len(data) > 0 and "data" in data[0]:
                 results = data[0]["data"]
                 return {"success": True, "results": results, "count": len(results)}
-            else:
-                return {
-                    "success": False,
-                    "error": "No mapping data found",
-                    "response": data,
-                }
-        else:
             return {
                 "success": False,
-                "error": f"HTTP {response.status_code}: {response.text}",
+                "error": "No mapping data found",
+                "response": data,
             }
+        return {
+            "success": False,
+            "error": f"HTTP {response.status_code}: {response.text}",
+        }
 
     except Exception as e:
-        return {"success": False, "error": f"Exception: {str(e)}"}
+        return {"success": False, "error": f"Exception: {e!s}"}
 
 
 def test_isin_to_ticker_services(isin: str) -> dict:
@@ -169,12 +167,12 @@ def analyze_click_digital_case():
     wkn = "A35JS4"
     ticker = "CLIQ.DE"
 
-    print(f"Target Security:")
-    print(f"  Company: Click Digital")
+    print("Target Security:")
+    print("  Company: Click Digital")
     print(f"  ISIN: {isin}")
     print(f"  WKN: {wkn}")
     print(f"  Expected Ticker: {ticker}")
-    print(f"  Exchange: XETRA (Germany)")
+    print("  Exchange: XETRA (Germany)")
     print()
 
     # Step 1: Validate ISIN

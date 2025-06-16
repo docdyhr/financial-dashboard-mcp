@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Debug script specifically for investigating CLICK.DE ticker issues."""
 
-import asyncio
 import sys
 import time
 from pathlib import Path
@@ -175,8 +174,7 @@ def debug_click_ticker():
                 f"  ✓ {known_ticker}: ${known_result.current_price:.2f} from {known_result.data_source}"
             )
             break  # If we find one working, we know the system works
-        else:
-            print(f"  ✗ {known_ticker}: {known_result.error}")
+        print(f"  ✗ {known_ticker}: {known_result.error}")
 
     # Step 10: Final conclusions
     print("\n10. CONCLUSIONS AND RECOMMENDATIONS")

@@ -1,7 +1,7 @@
 """Position model for tracking user portfolio holdings."""
 
 from decimal import Decimal
-from typing import TYPE_CHECKING, Any, List  # Add List, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any  # Add List, TYPE_CHECKING
 
 from sqlalchemy import ForeignKey, Numeric, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -9,9 +9,9 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from backend.models.base import Base
 
 if TYPE_CHECKING:
-    from backend.models.asset import Asset  # noqa: F401
-    from backend.models.transaction import Transaction  # noqa: F401
-    from backend.models.user import User  # noqa: F401
+    from backend.models.asset import Asset
+    from backend.models.transaction import Transaction
+    from backend.models.user import User
 
 
 class Position(Base):
@@ -55,7 +55,7 @@ class Position(Base):
     # Relationships
     user: Mapped["User"] = relationship("User", back_populates="positions")
     asset: Mapped["Asset"] = relationship("Asset", back_populates="positions")
-    transactions: Mapped[List["Transaction"]] = relationship(
+    transactions: Mapped[list["Transaction"]] = relationship(
         "Transaction",
         back_populates="position",
         cascade="all, delete-orphan",

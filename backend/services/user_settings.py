@@ -2,7 +2,7 @@
 
 import logging
 from datetime import datetime
-from typing import Any, Dict, Optional
+from typing import Any
 
 from sqlalchemy.orm import Session
 
@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 class UserSettingsService:
     """Service for managing user settings."""
 
-    def get_user_settings(self, db: Session, user_id: int) -> Optional[UserSettings]:
+    def get_user_settings(self, db: Session, user_id: int) -> UserSettings | None:
         """Get user settings by user ID."""
         try:
             return (
@@ -55,7 +55,7 @@ class UserSettingsService:
 
     def update_user_settings(
         self, db: Session, user_id: int, settings_update: UserSettingsUpdate
-    ) -> Optional[UserSettings]:
+    ) -> UserSettings | None:
         """Update user settings."""
         try:
             settings = self.get_user_settings(db, user_id)
@@ -85,8 +85,8 @@ class UserSettingsService:
             raise
 
     def bulk_update_user_settings(
-        self, db: Session, user_id: int, settings_dict: Dict[str, Any]
-    ) -> Optional[UserSettings]:
+        self, db: Session, user_id: int, settings_dict: dict[str, Any]
+    ) -> UserSettings | None:
         """Bulk update multiple settings at once."""
         try:
             settings = self.get_user_settings(db, user_id)
@@ -195,9 +195,8 @@ class UserSettingsService:
 
                 logger.info(f"Updated setting {setting_name} for user {user_id}")
                 return True
-            else:
-                logger.warning(f"Setting {setting_name} does not exist")
-                return False
+            logger.warning(f"Setting {setting_name} does not exist")
+            return False
 
         except Exception as e:
             logger.error(
@@ -234,7 +233,7 @@ class UserSettingsService:
         """Check if email notifications are enabled for user."""
         return self.get_setting_value(db, user_id, "email_notifications_enabled", False)
 
-    def get_notification_email(self, db: Session, user_id: int) -> Optional[str]:
+    def get_notification_email(self, db: Session, user_id: int) -> str | None:
         """Get user's notification email address."""
         return self.get_setting_value(db, user_id, "notification_email", None)
 
@@ -242,13 +241,13 @@ class UserSettingsService:
         """Check if price alerts are enabled for user."""
         return self.get_setting_value(db, user_id, "price_alerts_enabled", False)
 
-    def get_price_change_threshold(self, db: Session, user_id: int) -> Optional[float]:
+    def get_price_change_threshold(self, db: Session, user_id: int) -> float | None:
         """Get user's price change alert threshold."""
         return self.get_setting_value(db, user_id, "price_change_threshold", 5.0)
 
     def get_portfolio_change_threshold(
         self, db: Session, user_id: int
-    ) -> Optional[float]:
+    ) -> float | None:
         """Get user's portfolio change alert threshold."""
         return self.get_setting_value(db, user_id, "portfolio_change_threshold", 2.0)
 
@@ -274,8 +273,7 @@ class UserSettingsService:
             if currency == "JPY":
                 # Japanese Yen doesn't use decimal places
                 return f"{symbol}{amount:,.0f}"
-            else:
-                return f"{symbol}{amount:,.2f}"
+            return f"{symbol}{amount:,.2f}"
 
         except Exception as e:
             logger.error(f"Error formatting currency for user {user_id}: {e}")
@@ -299,7 +297,7 @@ class UserSettingsService:
             logger.error(f"Error formatting date for user {user_id}: {e}")
             return date_obj.strftime("%m/%d/%Y")  # Fallback format
 
-    def get_dashboard_config(self, db: Session, user_id: int) -> Dict[str, Any]:
+    def get_dashboard_config(self, db: Session, user_id: int) -> dict[str, Any]:
         """Get dashboard configuration for user."""
         try:
             settings = self.get_user_settings(db, user_id)

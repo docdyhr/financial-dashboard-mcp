@@ -1,7 +1,6 @@
 """ISIN (International Securities Identification Number) API endpoints."""
 
 import logging
-from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import and_, desc, func
@@ -39,8 +38,7 @@ router = APIRouter(prefix="/isin", tags=["ISIN"])
 async def validate_isin(
     request: ISINValidationRequest, db: Session = Depends(get_db_session)
 ) -> ISINValidationResponse:
-    """
-    Validate an ISIN code.
+    """Validate an ISIN code.
 
     This endpoint validates the format and checksum of an ISIN code
     and returns detailed information about the ISIN structure.
@@ -59,15 +57,14 @@ async def validate_isin(
         )
     except Exception as e:
         logger.error(f"Error validating ISIN {request.isin}: {e}")
-        raise HTTPException(status_code=500, detail=f"Validation error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Validation error: {e!s}")
 
 
 @router.post("/resolve", response_model=ISINResolutionResponse)
 async def resolve_identifier(
     request: ISINResolutionRequest, db: Session = Depends(get_db_session)
 ) -> ISINResolutionResponse:
-    """
-    Resolve an identifier (ISIN or ticker) to get comprehensive asset information.
+    """Resolve an identifier (ISIN or ticker) to get comprehensive asset information.
 
     This endpoint can handle both ISIN codes and ticker symbols, automatically
     detecting the type and providing appropriate resolution.
@@ -99,15 +96,14 @@ async def resolve_identifier(
 
     except Exception as e:
         logger.error(f"Error resolving identifier {request.identifier}: {e}")
-        raise HTTPException(status_code=500, detail=f"Resolution error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Resolution error: {e!s}")
 
 
 @router.post("/lookup", response_model=ISINLookupResponse)
 async def lookup_isins(
     request: ISINLookupRequest, db: Session = Depends(get_db_session)
 ) -> ISINLookupResponse:
-    """
-    Bulk lookup of ISIN codes to find their ticker mappings.
+    """Bulk lookup of ISIN codes to find their ticker mappings.
 
     This endpoint allows efficient bulk lookup of multiple ISIN codes
     and returns all available ticker mappings for each.
@@ -169,15 +165,14 @@ async def lookup_isins(
 
     except Exception as e:
         logger.error(f"Error in bulk ISIN lookup: {e}")
-        raise HTTPException(status_code=500, detail=f"Lookup error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Lookup error: {e!s}")
 
 
 @router.post("/suggest", response_model=ISINSuggestionResponse)
 async def suggest_ticker_formats(
     request: ISINSuggestionRequest, db: Session = Depends(get_db_session)
 ) -> ISINSuggestionResponse:
-    """
-    Get suggested ticker formats based on ISIN country information.
+    """Get suggested ticker formats based on ISIN country information.
 
     This endpoint provides intelligent ticker format suggestions based on
     the country information embedded in the ISIN code.
@@ -254,10 +249,10 @@ async def suggest_ticker_formats(
         raise
     except Exception as e:
         logger.error(f"Error generating suggestions for ISIN {request.isin}: {e}")
-        raise HTTPException(status_code=500, detail=f"Suggestion error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Suggestion error: {e!s}")
 
 
-@router.get("/mappings", response_model=List[ISINMappingResponse])
+@router.get("/mappings", response_model=list[ISINMappingResponse])
 async def get_mappings(
     params: ISINMappingSearchParams = Depends(),
     db: Session = Depends(get_db_session),
@@ -265,9 +260,8 @@ async def get_mappings(
     limit: int = Query(
         100, ge=1, le=1000, description="Maximum number of records to return"
     ),
-) -> List[ISINMappingResponse]:
-    """
-    Search and retrieve ISIN ticker mappings.
+) -> list[ISINMappingResponse]:
+    """Search and retrieve ISIN ticker mappings.
 
     This endpoint allows searching for ISIN mappings with various filters
     and returns paginated results.
@@ -320,15 +314,14 @@ async def get_mappings(
 
     except Exception as e:
         logger.error(f"Error retrieving ISIN mappings: {e}")
-        raise HTTPException(status_code=500, detail=f"Retrieval error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Retrieval error: {e!s}")
 
 
 @router.post("/mappings", response_model=ISINMappingResponse)
 async def create_mapping(
     mapping: ISINMappingCreate, db: Session = Depends(get_db_session)
 ) -> ISINMappingResponse:
-    """
-    Create a new ISIN ticker mapping.
+    """Create a new ISIN ticker mapping.
 
     This endpoint allows manual creation of ISIN to ticker mappings,
     useful for adding custom or missing mappings.
@@ -397,7 +390,7 @@ async def create_mapping(
     except Exception as e:
         logger.error(f"Error creating ISIN mapping: {e}")
         db.rollback()
-        raise HTTPException(status_code=500, detail=f"Creation error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Creation error: {e!s}")
 
 
 @router.put("/mappings/{mapping_id}", response_model=ISINMappingResponse)
@@ -406,8 +399,7 @@ async def update_mapping(
     update_data: ISINMappingUpdate,
     db: Session = Depends(get_db_session),
 ) -> ISINMappingResponse:
-    """
-    Update an existing ISIN ticker mapping.
+    """Update an existing ISIN ticker mapping.
 
     This endpoint allows updating specific fields of an existing
     ISIN to ticker mapping.
@@ -467,15 +459,14 @@ async def update_mapping(
     except Exception as e:
         logger.error(f"Error updating ISIN mapping {mapping_id}: {e}")
         db.rollback()
-        raise HTTPException(status_code=500, detail=f"Update error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Update error: {e!s}")
 
 
 @router.delete("/mappings/{mapping_id}")
 async def delete_mapping(
     mapping_id: int, db: Session = Depends(get_db_session)
 ) -> dict:
-    """
-    Delete an ISIN ticker mapping.
+    """Delete an ISIN ticker mapping.
 
     This endpoint soft-deletes an ISIN mapping by setting it as inactive
     rather than removing it from the database.
@@ -506,13 +497,12 @@ async def delete_mapping(
     except Exception as e:
         logger.error(f"Error deleting ISIN mapping {mapping_id}: {e}")
         db.rollback()
-        raise HTTPException(status_code=500, detail=f"Deletion error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Deletion error: {e!s}")
 
 
 @router.get("/statistics", response_model=ISINStatistics)
 async def get_statistics(db: Session = Depends(get_db_session)) -> ISINStatistics:
-    """
-    Get statistics about ISIN mappings in the system.
+    """Get statistics about ISIN mappings in the system.
 
     This endpoint provides comprehensive statistics about the ISIN
     mappings database, including coverage and data source information.
@@ -521,9 +511,7 @@ async def get_statistics(db: Session = Depends(get_db_session)) -> ISINStatistic
         # Basic counts
         total_mappings = db.query(ISINTickerMapping).count()
         active_mappings = (
-            db.query(ISINTickerMapping)
-            .filter(ISINTickerMapping.is_active)
-            .count()
+            db.query(ISINTickerMapping).filter(ISINTickerMapping.is_active).count()
         )
 
         unique_isins = db.query(
@@ -595,15 +583,14 @@ async def get_statistics(db: Session = Depends(get_db_session)) -> ISINStatistic
 
     except Exception as e:
         logger.error(f"Error generating ISIN statistics: {e}")
-        raise HTTPException(status_code=500, detail=f"Statistics error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Statistics error: {e!s}")
 
 
 @router.post("/import", response_model=ISINImportResponse)
 async def import_mappings(
     request: ISINImportRequest, db: Session = Depends(get_db_session)
 ) -> ISINImportResponse:
-    """
-    Import ISIN mappings in bulk.
+    """Import ISIN mappings in bulk.
 
     This endpoint allows bulk import of ISIN to ticker mappings,
     with options for dry-run validation and updating existing mappings.
@@ -733,15 +720,14 @@ async def import_mappings(
     except Exception as e:
         logger.error(f"Error importing ISIN mappings: {e}")
         db.rollback()
-        raise HTTPException(status_code=500, detail=f"Import error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Import error: {e!s}")
 
 
 @router.get("/quote/{identifier}")
 async def get_quote_by_identifier(
     identifier: str, db: Session = Depends(get_db_session)
 ) -> dict:
-    """
-    Get market data quote by identifier (ISIN or ticker).
+    """Get market data quote by identifier (ISIN or ticker).
 
     This endpoint fetches real-time market data for a security
     identified by either its ISIN code or ticker symbol.
@@ -767,19 +753,18 @@ async def get_quote_by_identifier(
                 "data_source": result.data_source,
                 "success": True,
             }
-        else:
-            raise HTTPException(
-                status_code=404,
-                detail={
-                    "identifier": identifier,
-                    "error": result.error,
-                    "suggestions": getattr(result, "suggestions", []),
-                    "success": False,
-                },
-            )
+        raise HTTPException(
+            status_code=404,
+            detail={
+                "identifier": identifier,
+                "error": result.error,
+                "suggestions": getattr(result, "suggestions", []),
+                "success": False,
+            },
+        )
 
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Error getting quote for identifier {identifier}: {e}")
-        raise HTTPException(status_code=500, detail=f"Quote error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Quote error: {e!s}")

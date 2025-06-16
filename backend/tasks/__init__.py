@@ -33,8 +33,10 @@ celery_app.conf.update(
 celery_app.autodiscover_tasks(["backend.tasks"])
 
 # Explicitly import task modules to ensure registration
-from backend.tasks import market_data  # noqa: F401, E402
-from backend.tasks import portfolio  # noqa: F401, E402
+from backend.tasks import (
+    market_data,
+    portfolio,
+)
 
 # Import beat schedule
 try:

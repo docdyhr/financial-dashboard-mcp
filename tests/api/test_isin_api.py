@@ -4,16 +4,13 @@ This module tests all ISIN-related API endpoints including validation,
 lookup, mapping management, and statistics.
 """
 
-import json
 from datetime import datetime
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import pytest
 from fastapi.testclient import TestClient
 
 from backend.api.isin import router
-from backend.models.isin import ISINTickerMapping, ISINValidationCache
-from backend.services.isin_utils import ISINMapping, ISINUtils
 
 
 @pytest.fixture
@@ -668,7 +665,6 @@ class TestISINAPIRegression:
     def test_concurrent_request_handling(self, test_client):
         """Test handling of concurrent requests."""
         import threading
-        import time
 
         results = []
 

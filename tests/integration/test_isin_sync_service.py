@@ -4,8 +4,6 @@ This module tests the complete ISIN synchronization workflow including
 background tasks, conflict resolution, and API endpoints.
 """
 
-import asyncio
-import json
 from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, Mock, patch
 
@@ -13,15 +11,12 @@ import pytest
 from fastapi.testclient import TestClient
 
 from backend.api.isin_sync import router
-from backend.database import get_db_session
-from backend.models.isin import ISINTickerMapping, ISINValidationCache
 from backend.services.isin_sync_service import (
     ConflictResolution,
     ISINSyncService,
     MappingConflict,
     SyncJob,
     SyncStatus,
-    get_isin_sync_service,
 )
 
 
@@ -701,16 +696,13 @@ class TestISINSyncServiceIntegration:
         """Test complete sync workflow from start to finish."""
         # This would be a full integration test with real database
         # and external API calls (when --run-integration flag is used)
-        pass
 
     @pytest.mark.asyncio
     async def test_conflict_resolution_workflow(self, sync_service):
         """Test complete conflict resolution workflow."""
         # This would test the full conflict detection and resolution process
-        pass
 
     @pytest.mark.asyncio
     async def test_api_endpoint_integration(self, test_client):
         """Test API endpoints with real sync service."""
         # This would test the API endpoints with actual sync service
-        pass

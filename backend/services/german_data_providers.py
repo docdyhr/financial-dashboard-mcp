@@ -10,7 +10,7 @@ import re
 import time
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 import requests
 from bs4 import BeautifulSoup
@@ -23,15 +23,15 @@ class GermanSecurityInfo:
     """Information about a German security."""
 
     isin: str
-    wkn: Optional[str] = None  # Wertpapier-Kenn-Nummer
+    wkn: str | None = None  # Wertpapier-Kenn-Nummer
     name: str = ""
     ticker_symbol: str = ""
     exchange: str = ""
     currency: str = "EUR"
-    sector: Optional[str] = None
-    market_segment: Optional[str] = None
-    price: Optional[float] = None
-    last_updated: Optional[datetime] = None
+    sector: str | None = None
+    market_segment: str | None = None
+    price: float | None = None
+    last_updated: datetime | None = None
     source: str = ""
 
 
@@ -42,14 +42,14 @@ class MarketData:
     symbol: str
     price: float
     currency: str
-    change: Optional[float] = None
-    change_percent: Optional[float] = None
-    volume: Optional[int] = None
-    bid: Optional[float] = None
-    ask: Optional[float] = None
-    high_52w: Optional[float] = None
-    low_52w: Optional[float] = None
-    last_updated: Optional[datetime] = None
+    change: float | None = None
+    change_percent: float | None = None
+    volume: int | None = None
+    bid: float | None = None
+    ask: float | None = None
+    high_52w: float | None = None
+    low_52w: float | None = None
+    last_updated: datetime | None = None
     source: str = ""
 
 
@@ -76,9 +76,8 @@ class DeutscheBorseProvider:
             time.sleep(self.rate_limit_delay - elapsed)
         self.last_request_time = time.time()
 
-    def search_by_isin(self, isin: str) -> Optional[GermanSecurityInfo]:
-        """
-        Search for security by ISIN on Deutsche Börse.
+    def search_by_isin(self, isin: str) -> GermanSecurityInfo | None:
+        """Search for security by ISIN on Deutsche Börse.
 
         Args:
             isin: The ISIN to search for
@@ -98,10 +97,9 @@ class DeutscheBorseProvider:
 
             if response.status_code == 200:
                 return self._parse_search_response(response.text, isin)
-            else:
-                logger.warning(
-                    f"Deutsche Börse search failed for {isin}: {response.status_code}"
-                )
+            logger.warning(
+                f"Deutsche Börse search failed for {isin}: {response.status_code}"
+            )
 
         except Exception as e:
             logger.error(f"Error searching Deutsche Börse for {isin}: {e}")
@@ -110,7 +108,7 @@ class DeutscheBorseProvider:
 
     def _parse_search_response(
         self, html: str, isin: str
-    ) -> Optional[GermanSecurityInfo]:
+    ) -> GermanSecurityInfo | None:
         """Parse search response HTML."""
         try:
             soup = BeautifulSoup(html, "html.parser")
@@ -166,9 +164,8 @@ class BoerseFrankfurtProvider:
             time.sleep(self.rate_limit_delay - elapsed)
         self.last_request_time = time.time()
 
-    def get_quote_by_isin(self, isin: str) -> Optional[MarketData]:
-        """
-        Get current quote for security by ISIN.
+    def get_quote_by_isin(self, isin: str) -> MarketData | None:
+        """Get current quote for security by ISIN.
 
         Args:
             isin: The ISIN to get quote for
@@ -186,17 +183,16 @@ class BoerseFrankfurtProvider:
 
             if response.status_code == 200:
                 return self._parse_quote_response(response.text, isin)
-            else:
-                logger.warning(
-                    f"Börse Frankfurt quote failed for {isin}: {response.status_code}"
-                )
+            logger.warning(
+                f"Börse Frankfurt quote failed for {isin}: {response.status_code}"
+            )
 
         except Exception as e:
             logger.error(f"Error getting Börse Frankfurt quote for {isin}: {e}")
 
         return None
 
-    def _parse_quote_response(self, html: str, isin: str) -> Optional[MarketData]:
+    def _parse_quote_response(self, html: str, isin: str) -> MarketData | None:
         """Parse quote response HTML."""
         try:
             soup = BeautifulSoup(html, "html.parser")
@@ -273,9 +269,8 @@ class EuropeanDataAggregator:
             "XMAD": "BME Spanish Exchanges",
         }
 
-    async def get_comprehensive_data(self, isin: str) -> Dict[str, Any]:
-        """
-        Get comprehensive data for an ISIN from multiple sources.
+    async def get_comprehensive_data(self, isin: str) -> dict[str, Any]:
+        """Get comprehensive data for an ISIN from multiple sources.
 
         Args:
             isin: The ISIN to search for
@@ -311,10 +306,9 @@ class EuropeanDataAggregator:
         return results
 
     def get_ticker_for_isin(
-        self, isin: str, prefer_exchange: Optional[str] = None
-    ) -> Optional[str]:
-        """
-        Get ticker symbol for ISIN, optionally preferring a specific exchange.
+        self, isin: str, prefer_exchange: str | None = None
+    ) -> str | None:
+        """Get ticker symbol for ISIN, optionally preferring a specific exchange.
 
         Args:
             isin: The ISIN to look up
@@ -351,9 +345,8 @@ class EuropeanDataAggregator:
 
         return None
 
-    def suggest_ticker_formats(self, isin: str) -> List[Dict[str, str]]:
-        """
-        Suggest possible ticker formats for an ISIN.
+    def suggest_ticker_formats(self, isin: str) -> list[dict[str, str]]:
+        """Suggest possible ticker formats for an ISIN.
 
         Args:
             isin: The ISIN to suggest tickers for
@@ -421,9 +414,8 @@ class EuropeanDataAggregator:
 
         return suggestions[:10]  # Limit to top 10 suggestions
 
-    def validate_german_isin(self, isin: str) -> Tuple[bool, Dict[str, Any]]:
-        """
-        Validate a German ISIN and extract detailed information.
+    def validate_german_isin(self, isin: str) -> tuple[bool, dict[str, Any]]:
+        """Validate a German ISIN and extract detailed information.
 
         Args:
             isin: The ISIN to validate
@@ -483,9 +475,8 @@ def get_german_data_service() -> EuropeanDataAggregator:
     return german_data_service
 
 
-async def bulk_lookup_german_isins(isins: List[str]) -> Dict[str, Dict[str, Any]]:
-    """
-    Perform bulk lookup for German ISINs.
+async def bulk_lookup_german_isins(isins: list[str]) -> dict[str, dict[str, Any]]:
+    """Perform bulk lookup for German ISINs.
 
     Args:
         isins: List of ISINs to look up
@@ -499,7 +490,7 @@ async def bulk_lookup_german_isins(isins: List[str]) -> Dict[str, Dict[str, Any]
     # Limit concurrent requests to avoid overwhelming servers
     semaphore = asyncio.Semaphore(3)
 
-    async def lookup_single(isin: str) -> Tuple[str, Dict[str, Any]]:
+    async def lookup_single(isin: str) -> tuple[str, dict[str, Any]]:
         async with semaphore:
             try:
                 data = await service.get_comprehensive_data(isin)
@@ -524,9 +515,8 @@ async def bulk_lookup_german_isins(isins: List[str]) -> Dict[str, Dict[str, Any]
     return results
 
 
-def extract_wkn_from_isin(isin: str) -> Optional[str]:
-    """
-    Extract WKN (Wertpapier-Kenn-Nummer) from German ISIN.
+def extract_wkn_from_isin(isin: str) -> str | None:
+    """Extract WKN (Wertpapier-Kenn-Nummer) from German ISIN.
 
     Args:
         isin: German ISIN
@@ -556,8 +546,7 @@ def extract_wkn_from_isin(isin: str) -> Optional[str]:
 
 
 def format_german_ticker(ticker: str, exchange: str = "XETR") -> str:
-    """
-    Format a ticker symbol for German exchanges.
+    """Format a ticker symbol for German exchanges.
 
     Args:
         ticker: Base ticker symbol

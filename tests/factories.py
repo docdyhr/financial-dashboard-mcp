@@ -6,12 +6,11 @@ test data for the ISIN system and financial dashboard components.
 
 import random
 from dataclasses import dataclass
-from datetime import date, datetime, timedelta
+from datetime import datetime
 from decimal import Decimal
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 import factory
-from factory import fuzzy
 from faker import Faker
 
 fake = Faker()
@@ -58,7 +57,7 @@ class ISINFactory:
     ]
 
     @classmethod
-    def create_valid_isin(cls, country_code: Optional[str] = None) -> str:
+    def create_valid_isin(cls, country_code: str | None = None) -> str:
         """Create a valid ISIN with proper check digit."""
         if country_code is None:
             country_code = random.choice(cls.COUNTRY_CODES)
@@ -77,29 +76,28 @@ class ISINFactory:
         """Create an invalid ISIN for testing error handling."""
         if error_type == "too_short":
             return "US037833100"  # 11 characters instead of 12
-        elif error_type == "too_long":
+        if error_type == "too_long":
             return "US03783310055"  # 13 characters instead of 12
-        elif error_type == "invalid_country":
+        if error_type == "invalid_country":
             return "XY0378331005"  # Non-existent country code
-        elif error_type == "invalid_check_digit":
+        if error_type == "invalid_check_digit":
             return "US0378331006"  # Wrong check digit
-        elif error_type == "invalid_characters":
+        if error_type == "invalid_characters":
             return "US03783310@5"  # Invalid character
-        elif error_type == "empty":
+        if error_type == "empty":
             return ""
-        else:
-            # Random invalid format
-            return random.choice(
-                [
-                    "US037833100",
-                    "US03783310055",
-                    "XY0378331005",
-                    "US0378331006",
-                    "US03783310@5",
-                    "",
-                    "INVALIDFORMAT",
-                ]
-            )
+        # Random invalid format
+        return random.choice(
+            [
+                "US037833100",
+                "US03783310055",
+                "XY0378331005",
+                "US0378331006",
+                "US03783310@5",
+                "",
+                "INVALIDFORMAT",
+            ]
+        )
 
     @classmethod
     def get_known_valid_isin(cls) -> str:
@@ -152,8 +150,8 @@ class ExchangeFactory:
 
     @classmethod
     def create_exchange_data(
-        cls, exchange_code: Optional[str] = None
-    ) -> Dict[str, str]:
+        cls, exchange_code: str | None = None
+    ) -> dict[str, str]:
         """Create exchange data for testing."""
         if exchange_code is None:
             exchange_code = random.choice(list(cls.EXCHANGES.keys()))
@@ -194,11 +192,11 @@ class ISINMappingData:
     source: str
     confidence: float
     is_active: bool = True
-    wkn: Optional[str] = None
-    sedol: Optional[str] = None
-    sector: Optional[str] = None
+    wkn: str | None = None
+    sedol: str | None = None
+    sector: str | None = None
     created_at: datetime = factory.LazyFunction(datetime.now)
-    last_updated: Optional[datetime] = None
+    last_updated: datetime | None = None
 
 
 class ISINMappingFactory:
@@ -234,10 +232,10 @@ class ISINMappingFactory:
     @classmethod
     def create_mapping(
         cls,
-        isin: Optional[str] = None,
-        ticker: Optional[str] = None,
-        exchange_code: Optional[str] = None,
-        confidence: Optional[float] = None,
+        isin: str | None = None,
+        ticker: str | None = None,
+        exchange_code: str | None = None,
+        confidence: float | None = None,
     ) -> ISINMappingData:
         """Create ISIN mapping test data."""
 
@@ -281,12 +279,12 @@ class ISINMappingFactory:
         )
 
     @classmethod
-    def create_batch(cls, count: int, **kwargs) -> List[ISINMappingData]:
+    def create_batch(cls, count: int, **kwargs) -> list[ISINMappingData]:
         """Create a batch of ISIN mappings."""
         return [cls.create_mapping(**kwargs) for _ in range(count)]
 
     @classmethod
-    def create_high_quality_mappings(cls, count: int) -> List[ISINMappingData]:
+    def create_high_quality_mappings(cls, count: int) -> list[ISINMappingData]:
         """Create high-quality mappings with good confidence scores."""
         mappings = []
         for _ in range(count):
@@ -296,7 +294,7 @@ class ISINMappingFactory:
         return mappings
 
     @classmethod
-    def create_conflicting_mappings(cls, isin: str) -> List[ISINMappingData]:
+    def create_conflicting_mappings(cls, isin: str) -> list[ISINMappingData]:
         """Create conflicting mappings for the same ISIN."""
         base_ticker = fake.lexify("????", letters="ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
@@ -318,19 +316,19 @@ class MarketQuoteData:
     """Data structure for market quote test data."""
 
     symbol: str
-    isin: Optional[str]
+    isin: str | None
     price: float
     currency: str
-    change: Optional[float] = None
-    change_percent: Optional[float] = None
-    volume: Optional[int] = None
-    bid: Optional[float] = None
-    ask: Optional[float] = None
-    high_52w: Optional[float] = None
-    low_52w: Optional[float] = None
-    market_cap: Optional[float] = None
-    pe_ratio: Optional[float] = None
-    dividend_yield: Optional[float] = None
+    change: float | None = None
+    change_percent: float | None = None
+    volume: int | None = None
+    bid: float | None = None
+    ask: float | None = None
+    high_52w: float | None = None
+    low_52w: float | None = None
+    market_cap: float | None = None
+    pe_ratio: float | None = None
+    dividend_yield: float | None = None
     timestamp: datetime = factory.LazyFunction(datetime.now)
     source: str = "yahoo_finance"
 
@@ -344,10 +342,10 @@ class MarketQuoteFactory:
     @classmethod
     def create_quote(
         cls,
-        symbol: Optional[str] = None,
-        isin: Optional[str] = None,
-        base_price: Optional[float] = None,
-        currency: Optional[str] = None,
+        symbol: str | None = None,
+        isin: str | None = None,
+        base_price: float | None = None,
+        currency: str | None = None,
     ) -> MarketQuoteData:
         """Create market quote test data."""
 
@@ -396,7 +394,7 @@ class MarketQuoteFactory:
         )
 
     @classmethod
-    def create_batch(cls, count: int, **kwargs) -> List[MarketQuoteData]:
+    def create_batch(cls, count: int, **kwargs) -> list[MarketQuoteData]:
         """Create a batch of market quotes."""
         return [cls.create_quote(**kwargs) for _ in range(count)]
 
@@ -408,7 +406,7 @@ class PortfolioData:
     id: int
     user_id: int
     name: str
-    positions: List[Dict[str, Any]]
+    positions: list[dict[str, Any]]
     total_value: Decimal
     total_cost: Decimal
     created_at: datetime = factory.LazyFunction(datetime.now)
@@ -421,12 +419,12 @@ class PortfolioFactory:
     @classmethod
     def create_position(
         cls,
-        ticker: Optional[str] = None,
-        isin: Optional[str] = None,
-        quantity: Optional[Decimal] = None,
-        purchase_price: Optional[Decimal] = None,
-        current_price: Optional[Decimal] = None,
-    ) -> Dict[str, Any]:
+        ticker: str | None = None,
+        isin: str | None = None,
+        quantity: Decimal | None = None,
+        purchase_price: Decimal | None = None,
+        current_price: Decimal | None = None,
+    ) -> dict[str, Any]:
         """Create a single portfolio position."""
 
         if ticker is None:
@@ -471,9 +469,9 @@ class PortfolioFactory:
     @classmethod
     def create_portfolio(
         cls,
-        user_id: Optional[int] = None,
+        user_id: int | None = None,
         position_count: int = 5,
-        name: Optional[str] = None,
+        name: str | None = None,
     ) -> PortfolioData:
         """Create a complete portfolio with positions."""
 
@@ -512,7 +510,7 @@ class PortfolioFactory:
         )
 
     @classmethod
-    def create_diverse_portfolio(cls, user_id: Optional[int] = None) -> PortfolioData:
+    def create_diverse_portfolio(cls, user_id: int | None = None) -> PortfolioData:
         """Create a diverse portfolio with various asset types."""
 
         # Create positions across different regions and sectors
@@ -568,11 +566,11 @@ class SyncJobFactory:
     @classmethod
     def create_sync_job_data(
         cls,
-        job_id: Optional[str] = None,
-        isins: Optional[List[str]] = None,
+        job_id: str | None = None,
+        isins: list[str] | None = None,
         source: str = "test",
         status: str = "pending",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Create sync job test data."""
 
         if job_id is None:
@@ -616,7 +614,7 @@ class SyncJobFactory:
         }
 
     @classmethod
-    def create_conflict_data(cls, isin: Optional[str] = None) -> Dict[str, Any]:
+    def create_conflict_data(cls, isin: str | None = None) -> dict[str, Any]:
         """Create conflict data for testing."""
 
         if isin is None:
@@ -650,7 +648,7 @@ class TestDataGenerator:
     """Utility class for generating comprehensive test datasets."""
 
     @classmethod
-    def generate_isin_test_dataset(cls) -> Dict[str, List[str]]:
+    def generate_isin_test_dataset(cls) -> dict[str, list[str]]:
         """Generate a comprehensive ISIN test dataset."""
         return {
             "valid_isins": [ISINFactory.create_valid_isin() for _ in range(20)]
@@ -671,7 +669,7 @@ class TestDataGenerator:
         }
 
     @classmethod
-    def generate_mapping_test_dataset(cls, count: int = 50) -> List[ISINMappingData]:
+    def generate_mapping_test_dataset(cls, count: int = 50) -> list[ISINMappingData]:
         """Generate a dataset of ISIN mappings for testing."""
         mappings = []
 
@@ -703,7 +701,7 @@ class TestDataGenerator:
     @classmethod
     def generate_market_data_dataset(
         cls, symbol_count: int = 30
-    ) -> List[MarketQuoteData]:
+    ) -> list[MarketQuoteData]:
         """Generate market data for testing."""
         quotes = []
 
@@ -726,7 +724,7 @@ class TestDataGenerator:
         return quotes
 
     @classmethod
-    def generate_performance_test_data(cls) -> Dict[str, Any]:
+    def generate_performance_test_data(cls) -> dict[str, Any]:
         """Generate data for performance testing."""
         return {
             "small_batch": [ISINFactory.create_valid_isin() for _ in range(10)],
@@ -737,7 +735,7 @@ class TestDataGenerator:
         }
 
     @classmethod
-    def generate_integration_test_data(cls) -> Dict[str, Any]:
+    def generate_integration_test_data(cls) -> dict[str, Any]:
         """Generate data for integration testing."""
         return {
             "portfolios": [

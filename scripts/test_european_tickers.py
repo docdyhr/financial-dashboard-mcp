@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Test script for European ticker support in the Financial Dashboard."""
 
-import asyncio
 import sys
 from pathlib import Path
 
@@ -9,8 +8,7 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from backend.config import get_settings
-from backend.services.market_data import AlphaVantageProvider, YFinanceProvider
+from backend.services.market_data import YFinanceProvider
 from backend.services.ticker_utils import TickerUtils
 
 # Sample European tickers for testing
@@ -116,7 +114,7 @@ def test_market_data_fetching():
             result = yf_provider.fetch_quote(ticker)
 
             if result.success:
-                print(f"✓ Success!")
+                print("✓ Success!")
                 print(f"  Current Price: ${result.current_price:.2f}")
                 if result.day_change:
                     print(

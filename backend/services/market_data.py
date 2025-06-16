@@ -5,7 +5,7 @@ import time
 from dataclasses import dataclass
 from datetime import date, datetime
 from decimal import Decimal
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import requests
 import yfinance as yf
@@ -26,18 +26,18 @@ class MarketDataResult:
     """Result from market data fetch operation."""
 
     ticker: str
-    current_price: Optional[float] = None
-    open_price: Optional[float] = None
-    high_price: Optional[float] = None
-    low_price: Optional[float] = None
-    volume: Optional[int] = None
-    previous_close: Optional[float] = None
-    day_change: Optional[float] = None
-    day_change_percent: Optional[float] = None
-    data_source: Optional[str] = None
+    current_price: float | None = None
+    open_price: float | None = None
+    high_price: float | None = None
+    low_price: float | None = None
+    volume: int | None = None
+    previous_close: float | None = None
+    day_change: float | None = None
+    day_change_percent: float | None = None
+    data_source: str | None = None
     success: bool = False
-    error: Optional[str] = None
-    suggestions: Optional[List[str]] = None
+    error: str | None = None
+    suggestions: list[str] | None = None
 
 
 class MarketDataProvider:
@@ -50,7 +50,7 @@ class MarketDataProvider:
         """Fetch current quote for a ticker."""
         raise NotImplementedError
 
-    def fetch_multiple_quotes(self, tickers: List[str]) -> List[MarketDataResult]:
+    def fetch_multiple_quotes(self, tickers: list[str]) -> list[MarketDataResult]:
         """Fetch quotes for multiple tickers."""
         results = []
         for ticker in tickers:
@@ -469,7 +469,7 @@ class MultiProviderMarketDataService:
         logger.info(f"Initialized {len(self.providers)} market data providers")
 
     def fetch_quote(
-        self, ticker: str, db: Optional[Session] = None
+        self, ticker: str, db: Session | None = None
     ) -> MarketDataResult:
         """Fetch quote with fallback across providers and ISIN support."""
         # First, try to resolve ISIN to ticker if needed
@@ -501,11 +501,10 @@ class MultiProviderMarketDataService:
                     f"Successfully fetched {ticker} from {provider.name}: ${result.current_price}"
                 )
                 return result
-            else:
-                logger.warning(
-                    f"{provider.name} failed for {resolved_ticker}: {result.error}"
-                )
-                last_error = result.error
+            logger.warning(
+                f"{provider.name} failed for {resolved_ticker}: {result.error}"
+            )
+            last_error = result.error
 
         # All providers failed
         logger.error(f"All providers failed for {ticker}. Last error: {last_error}")
@@ -560,8 +559,8 @@ class MultiProviderMarketDataService:
             )
 
     def fetch_multiple_quotes(
-        self, tickers: List[str], db: Optional[Session] = None
-    ) -> List[MarketDataResult]:
+        self, tickers: list[str], db: Session | None = None
+    ) -> list[MarketDataResult]:
         """Fetch quotes for multiple tickers with intelligent provider selection and ISIN support."""
         results = []
         provider_stats = {
@@ -588,7 +587,7 @@ class MultiProviderMarketDataService:
 
         return results
 
-    def update_asset_prices(self, db: Session, tickers: List[str]) -> Dict[str, Any]:
+    def update_asset_prices(self, db: Session, tickers: list[str]) -> dict[str, Any]:
         """Update asset prices in the database with ISIN support."""
         logger.info(f"Updating prices for {len(tickers)} assets")
 

@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Comprehensive ISIN integration test script for Financial Dashboard."""
 
-import asyncio
 import sys
 import time
 from pathlib import Path
@@ -86,7 +85,7 @@ def test_isin_parsing():
         isin_info = ISINUtils.parse_isin(isin)
 
         if isin_info.is_valid:
-            print(f"✅ Valid ISIN")
+            print("✅ Valid ISIN")
             print(f"   Country: {isin_info.country_name} ({isin_info.country_code})")
             print(f"   National Code: {isin_info.national_code}")
             print(f"   Check Digit: {isin_info.check_digit}")
@@ -263,7 +262,7 @@ def test_identifier_resolution():
                 asset_info = isin_service.get_asset_info(db, identifier)
 
                 if asset_info["success"]:
-                    print(f"✅ Success")
+                    print("✅ Success")
                     print(f"   Type: {asset_info['identifier_type']}")
                     print(f"   Resolved: {asset_info['resolved_ticker']}")
 
@@ -290,10 +289,10 @@ def test_click_digital_specific():
     click_isin = "DE000A35JS40"
     click_wkn = "A35JS4"
 
-    print(f"Testing Click Digital:")
+    print("Testing Click Digital:")
     print(f"  ISIN: {click_isin}")
     print(f"  WKN: {click_wkn}")
-    print(f"  Expected Ticker: CLIQ.DE")
+    print("  Expected Ticker: CLIQ.DE")
     print()
 
     # Validate ISIN
@@ -308,13 +307,13 @@ def test_click_digital_specific():
 
         # Test ticker suggestions
         suggestions = ISINUtils.suggest_ticker_formats(click_isin, "CLIQ")
-        print(f"Suggested ticker formats:")
+        print("Suggested ticker formats:")
         for i, suggestion in enumerate(suggestions[:5], 1):
             print(f"  {i}. {suggestion}")
 
         # Test with market data
         with get_db_session() as db:
-            print(f"\nTesting market data fetch...")
+            print("\nTesting market data fetch...")
 
             # Add manual mapping
             try:
@@ -388,7 +387,7 @@ def run_performance_tests():
     )
 
     # Test caching performance
-    print(f"\nTesting cached validation...")
+    print("\nTesting cached validation...")
     start_time = time.time()
     for isin in test_isins:
         ISINUtils.validate_isin(isin, use_cache=True)

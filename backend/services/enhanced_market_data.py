@@ -11,7 +11,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -51,51 +51,51 @@ class MarketQuote:
     """Enhanced market quote with metadata."""
 
     symbol: str
-    isin: Optional[str] = None
-    price: Optional[float] = None
+    isin: str | None = None
+    price: float | None = None
     currency: str = "EUR"
 
     # Price data
-    open_price: Optional[float] = None
-    high_price: Optional[float] = None
-    low_price: Optional[float] = None
-    close_price: Optional[float] = None
-    previous_close: Optional[float] = None
+    open_price: float | None = None
+    high_price: float | None = None
+    low_price: float | None = None
+    close_price: float | None = None
+    previous_close: float | None = None
 
     # Volume and trading
-    volume: Optional[int] = None
-    avg_volume: Optional[int] = None
+    volume: int | None = None
+    avg_volume: int | None = None
 
     # Change metrics
-    change: Optional[float] = None
-    change_percent: Optional[float] = None
+    change: float | None = None
+    change_percent: float | None = None
 
     # Bid/Ask
-    bid: Optional[float] = None
-    ask: Optional[float] = None
-    bid_size: Optional[int] = None
-    ask_size: Optional[int] = None
+    bid: float | None = None
+    ask: float | None = None
+    bid_size: int | None = None
+    ask_size: int | None = None
 
     # 52-week range
-    week_52_high: Optional[float] = None
-    week_52_low: Optional[float] = None
+    week_52_high: float | None = None
+    week_52_low: float | None = None
 
     # Market data
-    market_cap: Optional[float] = None
-    pe_ratio: Optional[float] = None
-    dividend_yield: Optional[float] = None
+    market_cap: float | None = None
+    pe_ratio: float | None = None
+    dividend_yield: float | None = None
 
     # Metadata
     source: DataSource = DataSource.YAHOO_FINANCE
     quote_type: QuoteType = QuoteType.DELAYED
     timestamp: datetime = field(default_factory=datetime.now)
-    exchange: Optional[str] = None
-    exchange_timezone: Optional[str] = None
+    exchange: str | None = None
+    exchange_timezone: str | None = None
 
     # Quality indicators
     confidence: float = 1.0
     is_tradeable: bool = True
-    market_state: Optional[str] = None  # REGULAR, CLOSED, PRE, POST
+    market_state: str | None = None  # REGULAR, CLOSED, PRE, POST
 
     @property
     def is_fresh(self, max_age_minutes: int = 15) -> bool:
@@ -123,7 +123,7 @@ class HistoricalData:
     """Historical market data."""
 
     symbol: str
-    isin: Optional[str] = None
+    isin: str | None = None
     data: pd.DataFrame = field(default_factory=pd.DataFrame)
     period: str = "1y"
     interval: str = "1d"
@@ -131,14 +131,14 @@ class HistoricalData:
     retrieved_at: datetime = field(default_factory=datetime.now)
 
     @property
-    def latest_price(self) -> Optional[float]:
+    def latest_price(self) -> float | None:
         """Get latest closing price."""
         if self.data.empty:
             return None
         return float(self.data["Close"].iloc[-1])
 
     @property
-    def price_change_1d(self) -> Optional[Tuple[float, float]]:
+    def price_change_1d(self) -> tuple[float, float] | None:
         """Get 1-day price change (absolute, percent)."""
         if len(self.data) < 2:
             return None
@@ -152,7 +152,7 @@ class HistoricalData:
         return change, change_percent
 
     @property
-    def volatility(self) -> Optional[float]:
+    def volatility(self) -> float | None:
         """Calculate annualized volatility."""
         if self.data.empty or "Close" not in self.data.columns:
             return None
@@ -177,7 +177,7 @@ class EnhancedMarketDataService:
         self.isin_service = get_isin_service()
 
         # Caching
-        self.quote_cache: Dict[str, MarketQuote] = {}
+        self.quote_cache: dict[str, MarketQuote] = {}
         self.cache_ttl = 300  # 5 minutes
 
         # Rate limiting
@@ -187,7 +187,7 @@ class EnhancedMarketDataService:
             DataSource.DEUTSCHE_BORSE: 2.0,
             DataSource.BOERSE_FRANKFURT: 1.5,
         }
-        self.last_request_times: Dict[DataSource, float] = {}
+        self.last_request_times: dict[DataSource, float] = {}
 
         # Thread pool for concurrent requests
         self.executor = ThreadPoolExecutor(max_workers=5)
@@ -209,11 +209,10 @@ class EnhancedMarketDataService:
     async def get_quote_by_isin(
         self,
         isin: str,
-        prefer_source: Optional[DataSource] = None,
+        prefer_source: DataSource | None = None,
         use_cache: bool = True,
-    ) -> Optional[MarketQuote]:
-        """
-        Get market quote for an ISIN.
+    ) -> MarketQuote | None:
+        """Get market quote for an ISIN.
 
         Args:
             isin: The ISIN to get quote for
@@ -268,10 +267,9 @@ class EnhancedMarketDataService:
         return None
 
     async def get_quotes_batch(
-        self, isins: List[str], max_concurrent: int = 5
-    ) -> Dict[str, Optional[MarketQuote]]:
-        """
-        Get quotes for multiple ISINs concurrently.
+        self, isins: list[str], max_concurrent: int = 5
+    ) -> dict[str, MarketQuote | None]:
+        """Get quotes for multiple ISINs concurrently.
 
         Args:
             isins: List of ISINs to get quotes for
@@ -284,7 +282,7 @@ class EnhancedMarketDataService:
 
         async def get_quote_with_semaphore(
             isin: str,
-        ) -> Tuple[str, Optional[MarketQuote]]:
+        ) -> tuple[str, MarketQuote | None]:
             async with semaphore:
                 quote = await self.get_quote_by_isin(isin)
                 return isin, quote
@@ -311,9 +309,8 @@ class EnhancedMarketDataService:
         period: str = "1y",
         interval: str = "1d",
         source: DataSource = DataSource.YAHOO_FINANCE,
-    ) -> Optional[HistoricalData]:
-        """
-        Get historical data for an ISIN.
+    ) -> HistoricalData | None:
+        """Get historical data for an ISIN.
 
         Args:
             isin: The ISIN to get data for
@@ -334,16 +331,15 @@ class EnhancedMarketDataService:
                 return await self._fetch_yahoo_historical(
                     ticker, isin, period, interval
                 )
-            else:
-                logger.warning(
-                    f"Historical data not supported for source {source.value}"
-                )
-                return None
+            logger.warning(
+                f"Historical data not supported for source {source.value}"
+            )
+            return None
         except Exception as e:
             logger.error(f"Error fetching historical data for {isin}: {e}")
             return None
 
-    async def _resolve_isin_to_ticker(self, isin: str) -> Optional[str]:
+    async def _resolve_isin_to_ticker(self, isin: str) -> str | None:
         """Resolve ISIN to ticker symbol."""
         try:
             # First check our ISIN mapping service
@@ -384,22 +380,21 @@ class EnhancedMarketDataService:
             return None
 
     async def _fetch_quote_from_source(
-        self, ticker: str, source: DataSource, isin: Optional[str] = None
-    ) -> Optional[MarketQuote]:
+        self, ticker: str, source: DataSource, isin: str | None = None
+    ) -> MarketQuote | None:
         """Fetch quote from specific data source."""
         if source == DataSource.YAHOO_FINANCE:
             return await self._fetch_yahoo_quote(ticker, isin)
-        elif source == DataSource.DEUTSCHE_BORSE:
+        if source == DataSource.DEUTSCHE_BORSE:
             return await self._fetch_deutsche_borse_quote(ticker, isin)
-        elif source == DataSource.BOERSE_FRANKFURT:
+        if source == DataSource.BOERSE_FRANKFURT:
             return await self._fetch_boerse_frankfurt_quote(ticker, isin)
-        else:
-            logger.warning(f"Data source {source.value} not implemented")
-            return None
+        logger.warning(f"Data source {source.value} not implemented")
+        return None
 
     async def _fetch_yahoo_quote(
-        self, ticker: str, isin: Optional[str] = None
-    ) -> Optional[MarketQuote]:
+        self, ticker: str, isin: str | None = None
+    ) -> MarketQuote | None:
         """Fetch quote from Yahoo Finance."""
         try:
             self._rate_limit(DataSource.YAHOO_FINANCE)
@@ -450,8 +445,8 @@ class EnhancedMarketDataService:
             return None
 
     async def _fetch_deutsche_borse_quote(
-        self, ticker: str, isin: Optional[str] = None
-    ) -> Optional[MarketQuote]:
+        self, ticker: str, isin: str | None = None
+    ) -> MarketQuote | None:
         """Fetch quote from Deutsche Börse."""
         try:
             if not isin:
@@ -486,8 +481,8 @@ class EnhancedMarketDataService:
             return None
 
     async def _fetch_boerse_frankfurt_quote(
-        self, ticker: str, isin: Optional[str] = None
-    ) -> Optional[MarketQuote]:
+        self, ticker: str, isin: str | None = None
+    ) -> MarketQuote | None:
         """Fetch quote from Börse Frankfurt."""
         try:
             if not isin:
@@ -507,8 +502,8 @@ class EnhancedMarketDataService:
             return None
 
     async def _fetch_yahoo_historical(
-        self, ticker: str, isin: Optional[str], period: str, interval: str
-    ) -> Optional[HistoricalData]:
+        self, ticker: str, isin: str | None, period: str, interval: str
+    ) -> HistoricalData | None:
         """Fetch historical data from Yahoo Finance."""
         try:
             self._rate_limit(DataSource.YAHOO_FINANCE)
@@ -537,7 +532,7 @@ class EnhancedMarketDataService:
             logger.error(f"Error fetching Yahoo historical data for {ticker}: {e}")
             return None
 
-    def get_cache_stats(self) -> Dict[str, Any]:
+    def get_cache_stats(self) -> dict[str, Any]:
         """Get cache statistics."""
         total_entries = len(self.quote_cache)
         fresh_entries = sum(
@@ -555,7 +550,7 @@ class EnhancedMarketDataService:
             },
         }
 
-    def clear_cache(self, older_than_minutes: Optional[int] = None):
+    def clear_cache(self, older_than_minutes: int | None = None):
         """Clear quote cache."""
         if older_than_minutes is None:
             self.quote_cache.clear()
@@ -573,7 +568,7 @@ class EnhancedMarketDataService:
 
             logger.info(f"Removed {len(to_remove)} stale quotes from cache")
 
-    async def get_market_status(self, exchange: str = "XETR") -> Dict[str, Any]:
+    async def get_market_status(self, exchange: str = "XETR") -> dict[str, Any]:
         """Get market status for an exchange."""
         try:
             # This would typically call exchange-specific APIs
@@ -622,9 +617,8 @@ def get_enhanced_market_data_service() -> EnhancedMarketDataService:
     return enhanced_market_data_service
 
 
-async def get_portfolio_quotes(portfolio_isins: List[str]) -> Dict[str, MarketQuote]:
-    """
-    Get quotes for all ISINs in a portfolio.
+async def get_portfolio_quotes(portfolio_isins: list[str]) -> dict[str, MarketQuote]:
+    """Get quotes for all ISINs in a portfolio.
 
     Args:
         portfolio_isins: List of ISINs in the portfolio
@@ -636,9 +630,8 @@ async def get_portfolio_quotes(portfolio_isins: List[str]) -> Dict[str, MarketQu
     return await service.get_quotes_batch(portfolio_isins)
 
 
-async def get_market_summary(region: str = "europe") -> Dict[str, Any]:
-    """
-    Get market summary for a region.
+async def get_market_summary(region: str = "europe") -> dict[str, Any]:
+    """Get market summary for a region.
 
     Args:
         region: Market region (europe, germany, uk, etc.)

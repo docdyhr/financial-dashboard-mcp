@@ -1,36 +1,35 @@
-"""Market data fetching tasks with multi-provider fallback."""
+"""Market data fetching tasks."""
 
 import logging
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from decimal import Decimal
+from typing import Any
 
+import yfinance as yf
 from celery import current_task
 
 from backend.database import get_db_session
 from backend.models.asset import Asset
 from backend.models.position import Position
-from backend.services.market_data import market_data_service
+from backend.models.price_history import PriceHistory
 from backend.tasks import celery_app
 
 logger = logging.getLogger(__name__)
 
 
 @celery_app.task(bind=True, name="fetch_market_data")  # type: ignore[misc]
-def fetch_market_data(self, symbols: List[str], period: str = "1d") -> Dict[str, Any]:
-    """
-    Fetch market data for given symbols using multi-provider service.
+def fetch_market_data(self, symbols: list[str], period: str = "1d") -> dict[str, Any]:
+    """Fetch market data for given symbols.
 
     Args:
         symbols: List of ticker symbols to fetch
-        period: Period for data (currently not used in multi-provider service)
+        period: Period for data (1d, 5d, 1mo, 3mo, 6mo, 1y, 2y, 5y, 10y, ytd, max)
 
     Returns:
         Dict with status and results
     """
     try:
-        logger.info(
-            f"Fetching market data for {len(symbols)} symbols using multi-provider service"
-        )
+        logger.info(f"Fetching market data for symbols: {symbols}")
 
         # Update task state
         current_task.update_state(
@@ -38,55 +37,52 @@ def fetch_market_data(self, symbols: List[str], period: str = "1d") -> Dict[str,
             meta={
                 "current": 0,
                 "total": len(symbols),
-                "status": "Starting multi-provider data fetch...",
+                "status": "Starting data fetch...",
             },
         )
 
-        # Use the multi-provider service
-        results = market_data_service.fetch_multiple_quotes(symbols)
-
-        # Process results
-        successful_results = {}
+        results = {}
         failed_symbols = []
 
-        for i, result in enumerate(results):
-            if result.success and result.current_price:
-                successful_results[result.ticker] = {
-                    "current_price": result.current_price,
-                    "open_price": result.open_price,
-                    "high_price": result.high_price,
-                    "low_price": result.low_price,
-                    "volume": result.volume,
-                    "previous_close": result.previous_close,
-                    "day_change": result.day_change,
-                    "day_change_percent": result.day_change_percent,
-                    "data_source": result.data_source,
+        for i, symbol in enumerate(symbols):
+            try:
+                ticker = yf.Ticker(symbol)
+                hist = ticker.history(period=period)
+
+                if hist.empty:
+                    logger.warning(f"No data found for symbol: {symbol}")
+                    failed_symbols.append(symbol)
+                    continue
+
+                # Convert to dict for JSON serialization
+                results[symbol] = {
+                    "data": hist.to_dict("records"),
+                    "info": ticker.info,
                     "last_updated": datetime.now().isoformat(),
                 }
-                logger.info(
-                    f"Successfully fetched {result.ticker} from {result.data_source}: ${result.current_price}"
-                )
-            else:
-                failed_symbols.append(result.ticker)
-                logger.warning(f"Failed to fetch {result.ticker}: {result.error}")
 
-            # Update progress
-            current_task.update_state(
-                state="PROGRESS",
-                meta={
-                    "current": i + 1,
-                    "total": len(symbols),
-                    "status": f"Processed {result.ticker} via {result.data_source or 'unknown'}",
-                },
-            )
+                # Update progress
+                current_task.update_state(
+                    state="PROGRESS",
+                    meta={
+                        "current": i + 1,
+                        "total": len(symbols),
+                        "status": f"Processed {symbol}",
+                    },
+                )
+
+                logger.info(f"Successfully fetched data for {symbol}")
+
+            except Exception as e:
+                logger.error(f"Error fetching data for {symbol}: {e!s}")
+                failed_symbols.append(symbol)
 
         return {
             "status": "completed",
-            "results": successful_results,
+            "results": results,
             "failed_symbols": failed_symbols,
-            "total_processed": len(successful_results),
+            "total_processed": len(results),
             "total_failed": len(failed_symbols),
-            "provider_info": "Multi-provider service (yFinance -> Alpha Vantage -> Finnhub)",
         }
 
     except Exception as e:
@@ -96,9 +92,8 @@ def fetch_market_data(self, symbols: List[str], period: str = "1d") -> Dict[str,
 
 
 @celery_app.task(bind=True, name="update_portfolio_prices")  # type: ignore[misc]
-def update_portfolio_prices(self, user_id: Optional[int] = None) -> Dict[str, Any]:
-    """
-    Update prices for all assets in user portfolio(s) using multi-provider service.
+def update_portfolio_prices(self, user_id: int | None = None) -> dict[str, Any]:
+    """Update prices for all assets in user portfolio(s).
 
     Args:
         user_id: Specific user ID to update, or None for all users
@@ -107,9 +102,7 @@ def update_portfolio_prices(self, user_id: Optional[int] = None) -> Dict[str, An
         Dict with update status
     """
     try:
-        logger.info(
-            f"Updating portfolio prices for user_id: {user_id} using multi-provider service"
-        )
+        logger.info(f"Updating portfolio prices for user_id: {user_id}")
 
         with get_db_session() as db:
             # Get all unique asset tickers from positions
@@ -133,31 +126,91 @@ def update_portfolio_prices(self, user_id: Optional[int] = None) -> Dict[str, An
                 meta={
                     "current": 0,
                     "total": len(tickers),
-                    "status": "Starting multi-provider price updates...",
+                    "status": "Starting price updates...",
                 },
             )
 
-            # Use the multi-provider service to update prices
-            result = market_data_service.update_asset_prices(db, tickers)
+            updated_count = 0
+            failed_count = 0
 
-            # Update task progress to completion
-            current_task.update_state(
-                state="PROGRESS",
-                meta={
-                    "current": len(tickers),
-                    "total": len(tickers),
-                    "status": f"Completed: {result['updated_count']} updated, {result['failed_count']} failed",
-                },
-            )
+            for i, ticker in enumerate(tickers):
+                try:
+                    yf_ticker = yf.Ticker(ticker)
+                    hist = yf_ticker.history(period="2d")  # Get last 2 days
+
+                    if hist.empty:
+                        logger.warning(f"No recent data for {ticker}")
+                        failed_count += 1
+                        continue
+
+                    # Get the most recent price
+                    latest_price = hist["Close"].iloc[-1]
+                    latest_date = hist.index[-1].date()
+
+                    # Update asset current price
+                    asset = db.query(Asset).filter(Asset.ticker == ticker).first()
+                    if asset:
+                        asset.current_price = Decimal(str(latest_price))
+                        asset.updated_at = datetime.now()
+
+                    # Update or create price history record
+                    price_record = (
+                        db.query(PriceHistory)
+                        .filter(
+                            PriceHistory.asset_id == asset.id,
+                            PriceHistory.price_date == latest_date,
+                        )
+                        .first()
+                    )
+
+                    if price_record:
+                        price_record.close_price = Decimal(str(latest_price))
+                        price_record.updated_at = datetime.now()
+                    else:
+                        price_record = PriceHistory(
+                            asset_id=asset.id,
+                            price_date=latest_date,
+                            open_price=Decimal(str(hist["Open"].iloc[-1])),
+                            high_price=Decimal(str(hist["High"].iloc[-1])),
+                            low_price=Decimal(str(hist["Low"].iloc[-1])),
+                            close_price=Decimal(str(latest_price)),
+                            volume=(
+                                int(hist["Volume"].iloc[-1])
+                                if "Volume" in hist
+                                else None
+                            ),
+                        )  # type: ignore[call-arg]
+                        db.add(price_record)
+
+                    updated_count += 1
+
+                    current_task.update_state(
+                        state="PROGRESS",
+                        meta={
+                            "current": i + 1,
+                            "total": len(tickers),
+                            "status": f"Updated {ticker}: ${latest_price:.2f}",
+                        },
+                    )
+
+                except Exception as e:
+                    logger.error(f"Error updating price for {ticker}: {e!s}")
+                    failed_count += 1
+
+            # Commit all changes
+            db.commit()
 
             logger.info(
-                f"Multi-provider price update completed. "
-                f"Updated: {result['updated_count']}, Failed: {result['failed_count']}"
+                f"Price update completed. Updated: {updated_count}, Failed: {failed_count}"
             )
 
-            # Add user_id to result
-            result["user_id"] = user_id
-            return result
+            return {
+                "status": "completed",
+                "updated_count": updated_count,
+                "failed_count": failed_count,
+                "total_tickers": len(tickers),
+                "user_id": user_id,
+            }
 
     except Exception as e:
         logger.error(f"Error in update_portfolio_prices task: {e!s}")
@@ -166,9 +219,8 @@ def update_portfolio_prices(self, user_id: Optional[int] = None) -> Dict[str, An
 
 
 @celery_app.task(bind=True, name="fetch_asset_info")  # type: ignore[misc]
-def fetch_asset_info(self, ticker: str) -> Dict[str, Any]:
-    """
-    Fetch detailed information for a single asset using multi-provider service.
+def fetch_asset_info(self, ticker: str) -> dict[str, Any]:
+    """Fetch detailed information for a single asset.
 
     Args:
         ticker: Ticker symbol
@@ -177,40 +229,49 @@ def fetch_asset_info(self, ticker: str) -> Dict[str, Any]:
         Dict with asset information
     """
     try:
-        logger.info(f"Fetching asset info for: {ticker} using multi-provider service")
+        logger.info(f"Fetching asset info for: {ticker}")
 
-        # Use the multi-provider service to get current quote
-        result = market_data_service.fetch_quote(ticker)
+        yf_ticker = yf.Ticker(ticker)
+        info = yf_ticker.info
 
-        if not result.success:
-            logger.error(f"Failed to fetch asset info for {ticker}: {result.error}")
-            return {
-                "ticker": ticker,
-                "error": result.error,
-                "success": False,
-                "last_updated": datetime.now().isoformat(),
-            }
+        # Get recent price history
+        hist = yf_ticker.history(period="1mo")
 
-        # Format the response
-        response = {
+        result = {
             "ticker": ticker,
-            "current_price": result.current_price,
-            "open_price": result.open_price,
-            "high_price": result.high_price,
-            "low_price": result.low_price,
-            "volume": result.volume,
-            "previous_close": result.previous_close,
-            "day_change": result.day_change,
-            "day_change_percent": result.day_change_percent,
-            "data_source": result.data_source,
-            "success": True,
+            "info": info,
+            "current_price": float(hist["Close"].iloc[-1]) if not hist.empty else None,
+            "price_change_1d": None,
+            "price_change_1w": None,
+            "price_change_1m": None,
             "last_updated": datetime.now().isoformat(),
         }
 
-        logger.info(
-            f"Successfully fetched asset info for {ticker} from {result.data_source}"
-        )
-        return response
+        # Calculate price changes
+        if not hist.empty and len(hist) > 1:
+            current_price = hist["Close"].iloc[-1]
+
+            # 1 day change
+            if len(hist) >= 2:
+                prev_price = hist["Close"].iloc[-2]
+                result["price_change_1d"] = float(
+                    (current_price - prev_price) / prev_price * 100
+                )
+
+            # 1 week change (5 trading days)
+            if len(hist) >= 6:
+                week_ago_price = hist["Close"].iloc[-6]
+                result["price_change_1w"] = float(
+                    (current_price - week_ago_price) / week_ago_price * 100
+                )
+
+            # 1 month change
+            month_ago_price = hist["Close"].iloc[0]
+            result["price_change_1m"] = float(
+                (current_price - month_ago_price) / month_ago_price * 100
+            )
+
+        return result
 
     except Exception as e:
         logger.error(f"Error fetching asset info for {ticker}: {e!s}")

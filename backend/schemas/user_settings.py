@@ -1,8 +1,8 @@
 """User settings schemas for API requests and responses."""
 
-from typing import Any, Optional
+from typing import Any
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import Field, field_validator
 
 from backend.schemas.base import BaseSchema, TimestampMixin
 
@@ -40,7 +40,7 @@ class UserSettingsBase(BaseSchema):
     email_notifications_enabled: bool = Field(
         default=False, description="Enable email notifications"
     )
-    notification_email: Optional[str] = Field(
+    notification_email: str | None = Field(
         None, description="Notification email address"
     )
     price_alerts_enabled: bool = Field(default=False, description="Enable price alerts")
@@ -53,10 +53,10 @@ class UserSettingsBase(BaseSchema):
     )
 
     # Alert Thresholds
-    price_change_threshold: Optional[float] = Field(
+    price_change_threshold: float | None = Field(
         None, ge=0, le=100, description="Price change threshold percentage"
     )
-    portfolio_change_threshold: Optional[float] = Field(
+    portfolio_change_threshold: float | None = Field(
         None, ge=0, le=100, description="Portfolio change threshold percentage"
     )
 
@@ -81,13 +81,13 @@ class UserSettingsBase(BaseSchema):
     )
 
     # Custom Settings
-    custom_dashboard_layout: Optional[str] = Field(
+    custom_dashboard_layout: str | None = Field(
         None, description="Custom dashboard layout JSON"
     )
-    watchlist_settings: Optional[str] = Field(
+    watchlist_settings: str | None = Field(
         None, description="Watchlist settings JSON"
     )
-    alert_preferences: Optional[str] = Field(None, description="Alert preferences JSON")
+    alert_preferences: str | None = Field(None, description="Alert preferences JSON")
 
     @field_validator("theme")
     @classmethod
@@ -154,7 +154,7 @@ class UserSettingsBase(BaseSchema):
 
     @field_validator("notification_email")
     @classmethod
-    def validate_email(cls, v: Optional[str]) -> Optional[str]:
+    def validate_email(cls, v: str | None) -> str | None:
         """Validate email format."""
         if v is not None and v.strip():
             import re
@@ -175,52 +175,52 @@ class UserSettingsUpdate(BaseSchema):
     """Schema for updating user settings (all fields optional)."""
 
     # General Settings
-    theme: Optional[str] = None
-    preferred_currency: Optional[str] = None
-    date_format: Optional[str] = None
-    timezone: Optional[str] = None
+    theme: str | None = None
+    preferred_currency: str | None = None
+    date_format: str | None = None
+    timezone: str | None = None
 
     # Data Source Settings
-    preferred_data_provider: Optional[str] = None
-    price_update_frequency: Optional[int] = Field(None, ge=1, le=60)
-    enable_real_time_updates: Optional[bool] = None
+    preferred_data_provider: str | None = None
+    price_update_frequency: int | None = Field(None, ge=1, le=60)
+    enable_real_time_updates: bool | None = None
 
     # Dashboard Settings
-    default_dashboard_view: Optional[str] = None
-    items_per_page: Optional[int] = Field(None, ge=10, le=100)
-    show_advanced_metrics: Optional[bool] = None
+    default_dashboard_view: str | None = None
+    items_per_page: int | None = Field(None, ge=10, le=100)
+    show_advanced_metrics: bool | None = None
 
     # Notification Settings
-    email_notifications_enabled: Optional[bool] = None
-    notification_email: Optional[str] = None
-    price_alerts_enabled: Optional[bool] = None
-    performance_alerts_enabled: Optional[bool] = None
-    news_alerts_enabled: Optional[bool] = None
-    daily_summary_enabled: Optional[bool] = None
+    email_notifications_enabled: bool | None = None
+    notification_email: str | None = None
+    price_alerts_enabled: bool | None = None
+    performance_alerts_enabled: bool | None = None
+    news_alerts_enabled: bool | None = None
+    daily_summary_enabled: bool | None = None
 
     # Alert Thresholds
-    price_change_threshold: Optional[float] = Field(None, ge=0, le=100)
-    portfolio_change_threshold: Optional[float] = Field(None, ge=0, le=100)
+    price_change_threshold: float | None = Field(None, ge=0, le=100)
+    portfolio_change_threshold: float | None = Field(None, ge=0, le=100)
 
     # Privacy Settings
-    share_portfolio_data: Optional[bool] = None
-    enable_analytics_tracking: Optional[bool] = None
+    share_portfolio_data: bool | None = None
+    enable_analytics_tracking: bool | None = None
 
     # Chart and Display Settings
-    chart_theme: Optional[str] = None
-    default_chart_period: Optional[str] = None
-    show_percentage_changes: Optional[bool] = None
-    show_market_hours_only: Optional[bool] = None
+    chart_theme: str | None = None
+    default_chart_period: str | None = None
+    show_percentage_changes: bool | None = None
+    show_market_hours_only: bool | None = None
 
     # Custom Settings
-    custom_dashboard_layout: Optional[str] = None
-    watchlist_settings: Optional[str] = None
-    alert_preferences: Optional[str] = None
+    custom_dashboard_layout: str | None = None
+    watchlist_settings: str | None = None
+    alert_preferences: str | None = None
 
     # Apply the same validators for non-None values
     @field_validator("theme")
     @classmethod
-    def validate_theme(cls, v: Optional[str]) -> Optional[str]:
+    def validate_theme(cls, v: str | None) -> str | None:
         if v is not None:
             allowed_themes = ["Light", "Dark", "Auto"]
             if v not in allowed_themes:
@@ -229,7 +229,7 @@ class UserSettingsUpdate(BaseSchema):
 
     @field_validator("preferred_currency")
     @classmethod
-    def validate_currency(cls, v: Optional[str]) -> Optional[str]:
+    def validate_currency(cls, v: str | None) -> str | None:
         if v is not None:
             allowed_currencies = ["USD", "EUR", "GBP", "JPY", "CAD", "AUD", "CHF"]
             if v not in allowed_currencies:
@@ -238,7 +238,7 @@ class UserSettingsUpdate(BaseSchema):
 
     @field_validator("date_format")
     @classmethod
-    def validate_date_format(cls, v: Optional[str]) -> Optional[str]:
+    def validate_date_format(cls, v: str | None) -> str | None:
         if v is not None:
             allowed_formats = ["MM/DD/YYYY", "DD/MM/YYYY", "YYYY-MM-DD"]
             if v not in allowed_formats:
@@ -247,7 +247,7 @@ class UserSettingsUpdate(BaseSchema):
 
     @field_validator("preferred_data_provider")
     @classmethod
-    def validate_data_provider(cls, v: Optional[str]) -> Optional[str]:
+    def validate_data_provider(cls, v: str | None) -> str | None:
         if v is not None:
             allowed_providers = ["auto", "yfinance", "alpha_vantage", "finnhub"]
             if v not in allowed_providers:
@@ -256,7 +256,7 @@ class UserSettingsUpdate(BaseSchema):
 
     @field_validator("default_dashboard_view")
     @classmethod
-    def validate_dashboard_view(cls, v: Optional[str]) -> Optional[str]:
+    def validate_dashboard_view(cls, v: str | None) -> str | None:
         if v is not None:
             allowed_views = ["overview", "positions", "analytics", "tasks"]
             if v not in allowed_views:
@@ -265,7 +265,7 @@ class UserSettingsUpdate(BaseSchema):
 
     @field_validator("chart_theme")
     @classmethod
-    def validate_chart_theme(cls, v: Optional[str]) -> Optional[str]:
+    def validate_chart_theme(cls, v: str | None) -> str | None:
         if v is not None:
             allowed_themes = ["plotly", "seaborn", "custom"]
             if v not in allowed_themes:
@@ -274,7 +274,7 @@ class UserSettingsUpdate(BaseSchema):
 
     @field_validator("default_chart_period")
     @classmethod
-    def validate_chart_period(cls, v: Optional[str]) -> Optional[str]:
+    def validate_chart_period(cls, v: str | None) -> str | None:
         if v is not None:
             allowed_periods = ["1D", "1W", "1M", "3M", "6M", "1Y", "YTD", "MAX"]
             if v not in allowed_periods:
@@ -283,7 +283,7 @@ class UserSettingsUpdate(BaseSchema):
 
     @field_validator("notification_email")
     @classmethod
-    def validate_email(cls, v: Optional[str]) -> Optional[str]:
+    def validate_email(cls, v: str | None) -> str | None:
         if v is not None and v.strip():
             import re
 
@@ -356,7 +356,7 @@ class UserSettingsPreferences(BaseSchema):
     provider: str = "auto"
     frequency: int = 15
     email_enabled: bool = False
-    email: Optional[str] = None
+    email: str | None = None
     price_alerts: bool = False
     performance_alerts: bool = False
     news_alerts: bool = False

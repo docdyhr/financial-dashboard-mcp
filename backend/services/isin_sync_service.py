@@ -7,11 +7,10 @@ data sources, automatic conflict resolution, and background sync tasks.
 import asyncio
 import logging
 import time
-from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
@@ -52,15 +51,15 @@ class SyncJob:
 
     job_id: str
     source: str
-    isins: List[str]
+    isins: list[str]
     status: SyncStatus = SyncStatus.PENDING
     created_at: datetime = field(default_factory=datetime.now)
-    started_at: Optional[datetime] = None
-    completed_at: Optional[datetime] = None
+    started_at: datetime | None = None
+    completed_at: datetime | None = None
     progress: int = 0
     total: int = 0
-    results: Dict[str, Any] = field(default_factory=dict)
-    errors: List[str] = field(default_factory=list)
+    results: dict[str, Any] = field(default_factory=dict)
+    errors: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -69,19 +68,19 @@ class MappingConflict:
 
     isin: str
     existing_mapping: ISINTickerMapping
-    new_mapping: Dict[str, Any]
+    new_mapping: dict[str, Any]
     conflict_type: str
-    resolution: Optional[ConflictResolution] = None
-    resolved_at: Optional[datetime] = None
+    resolution: ConflictResolution | None = None
+    resolved_at: datetime | None = None
 
 
 class ISINSyncService:
     """Service for real-time ISIN mapping synchronization."""
 
     def __init__(self):
-        self.active_jobs: Dict[str, SyncJob] = {}
+        self.active_jobs: dict[str, SyncJob] = {}
         self.sync_queue: asyncio.Queue = asyncio.Queue()
-        self.conflicts: Dict[str, List[MappingConflict]] = {}
+        self.conflicts: dict[str, list[MappingConflict]] = {}
 
         # Sync configuration
         self.batch_size = 50
@@ -168,7 +167,7 @@ class ISINSyncService:
                 job = await asyncio.wait_for(self.sync_queue.get(), timeout=1.0)
                 await self._execute_sync_job(job)
                 active_count += 1
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 break
 
     async def _execute_sync_job(self, job: SyncJob):
@@ -201,7 +200,7 @@ class ISINSyncService:
             job.status = SyncStatus.FAILED
             job.errors.append(str(e))
 
-    async def _sync_batch(self, job: SyncJob, isins: List[str]):
+    async def _sync_batch(self, job: SyncJob, isins: list[str]):
         """Sync a batch of ISINs."""
         with get_db_session() as db:
             for isin in isins:
@@ -209,7 +208,7 @@ class ISINSyncService:
                     await self._sync_single_isin(db, job, isin)
                 except Exception as e:
                     logger.error(f"Error syncing ISIN {isin}: {e}")
-                    job.errors.append(f"{isin}: {str(e)}")
+                    job.errors.append(f"{isin}: {e!s}")
 
     async def _sync_single_isin(self, db: Session, job: SyncJob, isin: str):
         """Sync a single ISIN."""
@@ -238,14 +237,14 @@ class ISINSyncService:
 
     async def _fetch_external_data(
         self, isin: str, source: str
-    ) -> Optional[Dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         """Fetch ISIN data from external sources."""
         try:
             if source == "german_data_providers":
                 data = await self.german_service.get_comprehensive_data(isin)
                 return self._normalize_german_data(data)
 
-            elif source == "european_mappings":
+            if source == "european_mappings":
                 mappings = self.european_service.get_mappings_by_isin(isin)
                 if mappings:
                     return self._normalize_european_data(mappings[0])
@@ -257,7 +256,7 @@ class ISINSyncService:
 
         return None
 
-    def _normalize_german_data(self, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    def _normalize_german_data(self, data: dict[str, Any]) -> dict[str, Any] | None:
         """Normalize German data provider response."""
         if not data or not data.get("security_info"):
             return None
@@ -276,7 +275,7 @@ class ISINSyncService:
             "last_updated": datetime.now(),
         }
 
-    def _normalize_european_data(self, mapping: EuropeanStockMapping) -> Dict[str, Any]:
+    def _normalize_european_data(self, mapping: EuropeanStockMapping) -> dict[str, Any]:
         """Normalize European mapping data."""
         return {
             "ticker": mapping.ticker,
@@ -290,8 +289,8 @@ class ISINSyncService:
         }
 
     def _detect_conflict(
-        self, existing: ISINTickerMapping, new_data: Dict[str, Any]
-    ) -> Optional[MappingConflict]:
+        self, existing: ISINTickerMapping, new_data: dict[str, Any]
+    ) -> MappingConflict | None:
         """Detect conflicts between existing and new mappings."""
         conflicts = []
 
@@ -340,7 +339,7 @@ class ISINSyncService:
 
     def _auto_resolve_conflict(
         self, conflict: MappingConflict
-    ) -> Optional[ConflictResolution]:
+    ) -> ConflictResolution | None:
         """Attempt automatic conflict resolution."""
         existing = conflict.existing_mapping
         new_data = conflict.new_mapping
@@ -433,7 +432,7 @@ class ISINSyncService:
         db.commit()
 
     async def _create_or_update_mapping(
-        self, db: Session, isin: str, data: Dict[str, Any]
+        self, db: Session, isin: str, data: dict[str, Any]
     ):
         """Create or update ISIN mapping."""
         try:
@@ -524,7 +523,7 @@ class ISINSyncService:
         for job_id in to_remove:
             del self.active_jobs[job_id]
 
-    async def queue_sync_job(self, isins: List[str], source: str = "manual") -> str:
+    async def queue_sync_job(self, isins: list[str], source: str = "manual") -> str:
         """Queue a new sync job."""
         job_id = f"sync_{int(time.time())}_{len(isins)}"
 
@@ -536,7 +535,7 @@ class ISINSyncService:
         logger.info(f"Queued sync job {job_id} for {len(isins)} ISINs")
         return job_id
 
-    def get_job_status(self, job_id: str) -> Optional[Dict[str, Any]]:
+    def get_job_status(self, job_id: str) -> dict[str, Any] | None:
         """Get status of a sync job."""
         job = self.active_jobs.get(job_id)
         if not job:
@@ -555,7 +554,7 @@ class ISINSyncService:
             "results": job.results,
         }
 
-    def get_pending_conflicts(self, limit: int = 50) -> List[Dict[str, Any]]:
+    def get_pending_conflicts(self, limit: int = 50) -> list[dict[str, Any]]:
         """Get pending conflicts that need manual resolution."""
         conflicts = []
 
@@ -599,7 +598,7 @@ class ISINSyncService:
             logger.error(f"Error manually resolving conflict for {isin}: {e}")
             return False
 
-    def get_sync_statistics(self) -> Dict[str, Any]:
+    def get_sync_statistics(self) -> dict[str, Any]:
         """Get sync service statistics."""
         total_jobs = len(self.active_jobs)
         running_jobs = len(

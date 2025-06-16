@@ -8,7 +8,6 @@ service health monitoring.
 import logging
 import time
 from datetime import datetime
-from typing import Dict, Optional
 
 import pandas as pd
 import requests
@@ -20,10 +19,9 @@ BACKEND_URL = "http://localhost:8000"
 
 
 def call_sync_api(
-    endpoint: str, method: str = "GET", data: Dict = None
-) -> Optional[Dict]:
-    """
-    Call ISIN sync API endpoint with error handling.
+    endpoint: str, method: str = "GET", data: dict = None
+) -> dict | None:
+    """Call ISIN sync API endpoint with error handling.
 
     Args:
         endpoint: API endpoint path
@@ -48,9 +46,8 @@ def call_sync_api(
 
         if response.status_code == 200:
             return response.json()
-        else:
-            st.error(f"API Error {response.status_code}: {response.text}")
-            return None
+        st.error(f"API Error {response.status_code}: {response.text}")
+        return None
     except requests.exceptions.RequestException as e:
         st.error(f"Connection error: {e}")
         return None

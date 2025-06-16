@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
-"""
-Safe Claude Desktop MCP Server Configuration Updater
+"""Safe Claude Desktop MCP Server Configuration Updater
 Adds or updates the financial-dashboard MCP server while preserving all other existing servers.
 """
 
 import json
 import sys
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 
 # Colors for output
@@ -90,14 +89,14 @@ class ClaudeConfigUpdater:
             log_error(f"MCP server test failed: {e}")
             return False
 
-    def load_existing_config(self) -> Dict[str, Any]:
+    def load_existing_config(self) -> dict[str, Any]:
         """Load existing Claude Desktop configuration."""
         if not self.claude_config_file.exists():
             log_info("No existing configuration found, will create new one")
             return {}
 
         try:
-            with open(self.claude_config_file, "r") as f:
+            with open(self.claude_config_file) as f:
                 config = json.load(f)
             log_info("Loaded existing configuration")
             return config
@@ -112,7 +111,7 @@ class ClaudeConfigUpdater:
         """Create backup of existing configuration."""
         if self.claude_config_file.exists():
             try:
-                with open(self.claude_config_file, "r") as src:
+                with open(self.claude_config_file) as src:
                     config = json.load(src)
 
                 with open(self.backup_file, "w") as dst:
@@ -140,7 +139,7 @@ class ClaudeConfigUpdater:
         else:
             log_info("No existing configuration to backup")
 
-    def create_financial_dashboard_config(self) -> Dict[str, Any]:
+    def create_financial_dashboard_config(self) -> dict[str, Any]:
         """Create the financial-dashboard MCP server configuration."""
         return {
             "command": str(self.project_root / ".venv" / "bin" / "python"),
@@ -189,7 +188,7 @@ class ClaudeConfigUpdater:
         log_info("Validating updated configuration...")
 
         try:
-            with open(self.claude_config_file, "r") as f:
+            with open(self.claude_config_file) as f:
                 config = json.load(f)
 
             # Check structure
@@ -223,7 +222,7 @@ class ClaudeConfigUpdater:
     def show_summary(self) -> None:
         """Show summary of the configuration update."""
         try:
-            with open(self.claude_config_file, "r") as f:
+            with open(self.claude_config_file) as f:
                 config = json.load(f)
 
             servers = config.get("mcpServers", {})
@@ -260,7 +259,7 @@ class ClaudeConfigUpdater:
             return False
 
         try:
-            with open(self.backup_file, "r") as src:
+            with open(self.backup_file) as src:
                 config = json.load(src)
 
             with open(self.claude_config_file, "w") as dst:
@@ -372,12 +371,11 @@ Examples:
             sys.exit(0)
         else:
             sys.exit(1)
+    # Update mode
+    elif updater.run():
+        sys.exit(0)
     else:
-        # Update mode
-        if updater.run():
-            sys.exit(0)
-        else:
-            sys.exit(1)
+        sys.exit(1)
 
 
 if __name__ == "__main__":

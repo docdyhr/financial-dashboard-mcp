@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
-"""
-Startup script for Financial Dashboard services.
+"""Startup script for Financial Dashboard services.
 This script starts both the backend (FastAPI) and frontend (Streamlit) services.
 """
 
-import os
 import signal
 import subprocess
 import sys
@@ -57,7 +55,7 @@ def check_dependencies():
             [str(PYTHON_PATH), "-c", "import uvicorn, streamlit, fastapi"],
             capture_output=True,
             text=True,
-            cwd=PROJECT_ROOT,
+            cwd=PROJECT_ROOT, check=False,
         )
         return result.returncode == 0
     except Exception as e:

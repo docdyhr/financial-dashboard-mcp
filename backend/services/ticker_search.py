@@ -1,9 +1,7 @@
 """Ticker search and validation utilities for finding correct European ticker symbols."""
 
 import logging
-import re
 import time
-from typing import Dict, List, Optional, Tuple
 
 import requests
 import yfinance as yf
@@ -30,10 +28,9 @@ class TickerSearchService:
         self.last_call_time = time.time()
 
     def search_ticker(
-        self, query: str, country_hint: Optional[str] = None
-    ) -> List[Dict[str, str]]:
-        """
-        Search for ticker symbols using Yahoo Finance search.
+        self, query: str, country_hint: str | None = None
+    ) -> list[dict[str, str]]:
+        """Search for ticker symbols using Yahoo Finance search.
 
         Args:
             query: Company name or partial ticker
@@ -105,9 +102,8 @@ class TickerSearchService:
 
     def validate_ticker(
         self, ticker: str
-    ) -> Tuple[bool, Optional[str], Optional[Dict[str, str]]]:
-        """
-        Validate if a ticker symbol exists and can be fetched.
+    ) -> tuple[bool, str | None, dict[str, str] | None]:
+        """Validate if a ticker symbol exists and can be fetched.
 
         Args:
             ticker: Ticker symbol to validate
@@ -172,11 +168,10 @@ class TickerSearchService:
             )
 
         except Exception as e:
-            return False, f"Error validating ticker {ticker}: {str(e)}", None
+            return False, f"Error validating ticker {ticker}: {e!s}", None
 
-    def suggest_alternatives(self, failed_ticker: str) -> List[Dict[str, str]]:
-        """
-        Suggest alternative ticker symbols when one fails.
+    def suggest_alternatives(self, failed_ticker: str) -> list[dict[str, str]]:
+        """Suggest alternative ticker symbols when one fails.
 
         Args:
             failed_ticker: The ticker that failed to fetch
@@ -241,10 +236,9 @@ class TickerSearchService:
         return suggestions
 
     def find_european_ticker(
-        self, company_name: str, country: Optional[str] = None
-    ) -> List[Dict[str, str]]:
-        """
-        Find European ticker symbols for a company name.
+        self, company_name: str, country: str | None = None
+    ) -> list[dict[str, str]]:
+        """Find European ticker symbols for a company name.
 
         Args:
             company_name: Name of the company to search for
@@ -262,9 +256,8 @@ class TickerSearchService:
 
         return european_results
 
-    def get_ticker_recommendations(self, user_input: str) -> Dict[str, any]:
-        """
-        Get comprehensive ticker recommendations based on user input.
+    def get_ticker_recommendations(self, user_input: str) -> dict[str, any]:
+        """Get comprehensive ticker recommendations based on user input.
 
         Args:
             user_input: User's ticker or company name input

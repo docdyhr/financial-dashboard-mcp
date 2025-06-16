@@ -1,7 +1,7 @@
 """User model for authentication and user management."""
 
 from datetime import datetime
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING
 
 from sqlalchemy import Boolean, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -45,13 +45,13 @@ class User(Base):
     email_verified_at: Mapped[datetime | None] = mapped_column(nullable=True)
 
     # Relationships
-    positions: Mapped[List["Position"]] = relationship(
+    positions: Mapped[list["Position"]] = relationship(
         "Position", back_populates="user", cascade="all, delete-orphan"
     )
-    transactions: Mapped[List["Transaction"]] = relationship(
+    transactions: Mapped[list["Transaction"]] = relationship(
         "Transaction", back_populates="user", cascade="all, delete-orphan"
     )
-    portfolio_snapshots: Mapped[List["PortfolioSnapshot"]] = relationship(
+    portfolio_snapshots: Mapped[list["PortfolioSnapshot"]] = relationship(
         "PortfolioSnapshot", back_populates="user", cascade="all, delete-orphan"
     )
 

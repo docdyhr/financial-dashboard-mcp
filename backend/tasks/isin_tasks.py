@@ -4,14 +4,12 @@ This module provides background task functionality for ISIN-related operations
 including validation, mapping synchronization, and data enrichment.
 """
 
-import asyncio
 import logging
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from celery import shared_task
-from sqlalchemy import and_, desc, func, or_
-from sqlalchemy.orm import Session
+from sqlalchemy import func, or_
 
 from backend.database import get_db_session
 from backend.models.asset import Asset
@@ -19,16 +17,14 @@ from backend.models.isin import ISINTickerMapping, ISINValidationCache
 from backend.services.enhanced_market_data import get_enhanced_market_data_service
 from backend.services.european_mappings import get_european_mapping_service
 from backend.services.german_data_providers import get_german_data_service
-from backend.services.isin_sync_service import get_isin_sync_service
-from backend.services.isin_utils import ISINUtils, get_isin_service
+from backend.services.isin_utils import ISINUtils
 
 logger = logging.getLogger(__name__)
 
 
 @shared_task(bind=True, max_retries=3, default_retry_delay=60)
-def validate_isin_batch(self, isins: List[str]) -> Dict[str, Any]:
-    """
-    Validate a batch of ISINs in the background.
+def validate_isin_batch(self, isins: list[str]) -> dict[str, Any]:
+    """Validate a batch of ISINs in the background.
 
     Args:
         isins: List of ISINs to validate
@@ -129,7 +125,7 @@ def validate_isin_batch(self, isins: List[str]) -> Dict[str, Any]:
                     results["processed"] += 1
 
                 except Exception as e:
-                    error_msg = f"Error validating ISIN {isin}: {str(e)}"
+                    error_msg = f"Error validating ISIN {isin}: {e!s}"
                     logger.error(error_msg)
                     results["errors"].append(error_msg)
                     results["details"][isin] = {"valid": False, "error": str(e)}
@@ -145,9 +141,8 @@ def validate_isin_batch(self, isins: List[str]) -> Dict[str, Any]:
 
 
 @shared_task(bind=True, max_retries=3, default_retry_delay=120)
-def sync_isin_mappings(self, isins: List[str], source: str = "auto") -> Dict[str, Any]:
-    """
-    Synchronize ISIN mappings from external sources.
+def sync_isin_mappings(self, isins: list[str], source: str = "auto") -> dict[str, Any]:
+    """Synchronize ISIN mappings from external sources.
 
     Args:
         isins: List of ISINs to sync
@@ -328,7 +323,7 @@ def sync_isin_mappings(self, isins: List[str], source: str = "auto") -> Dict[str
 
                 except Exception as e:
                     results["errors"] += 1
-                    error_msg = f"Error syncing ISIN {isin}: {str(e)}"
+                    error_msg = f"Error syncing ISIN {isin}: {e!s}"
                     logger.error(error_msg)
                     results["details"][isin] = {"status": "error", "error": str(e)}
 
@@ -343,9 +338,8 @@ def sync_isin_mappings(self, isins: List[str], source: str = "auto") -> Dict[str
 
 
 @shared_task(bind=True)
-def enrich_asset_data(self, asset_ids: List[int]) -> Dict[str, Any]:
-    """
-    Enrich asset data with ISIN-based information.
+def enrich_asset_data(self, asset_ids: list[int]) -> dict[str, Any]:
+    """Enrich asset data with ISIN-based information.
 
     Args:
         asset_ids: List of asset IDs to enrich
@@ -488,7 +482,7 @@ def enrich_asset_data(self, asset_ids: List[int]) -> Dict[str, Any]:
 
                 except Exception as e:
                     results["errors"] += 1
-                    error_msg = f"Error enriching asset {asset_id}: {str(e)}"
+                    error_msg = f"Error enriching asset {asset_id}: {e!s}"
                     logger.error(error_msg)
                     results["details"][asset_id] = {"status": "error", "error": str(e)}
 
@@ -503,9 +497,8 @@ def enrich_asset_data(self, asset_ids: List[int]) -> Dict[str, Any]:
 
 
 @shared_task
-def cleanup_old_cache_entries() -> Dict[str, int]:
-    """
-    Clean up old ISIN validation cache entries.
+def cleanup_old_cache_entries() -> dict[str, int]:
+    """Clean up old ISIN validation cache entries.
 
     Returns:
         Cleanup statistics
@@ -536,9 +529,8 @@ def cleanup_old_cache_entries() -> Dict[str, int]:
 
                 logger.info(f"Cleaned up {deleted} old ISIN cache entries")
                 return {"cleaned": deleted, "cutoff_date": cutoff_date.isoformat()}
-            else:
-                logger.info("No old cache entries to clean up")
-                return {"cleaned": 0, "cutoff_date": cutoff_date.isoformat()}
+            logger.info("No old cache entries to clean up")
+            return {"cleaned": 0, "cutoff_date": cutoff_date.isoformat()}
 
     except Exception as e:
         logger.error(f"Error in cache cleanup task: {e}")
@@ -546,9 +538,8 @@ def cleanup_old_cache_entries() -> Dict[str, int]:
 
 
 @shared_task(bind=True)
-def update_market_data_for_isins(self, isins: List[str]) -> Dict[str, Any]:
-    """
-    Update market data for a list of ISINs.
+def update_market_data_for_isins(self, isins: list[str]) -> dict[str, Any]:
+    """Update market data for a list of ISINs.
 
     Args:
         isins: List of ISINs to update market data for
@@ -621,9 +612,8 @@ def update_market_data_for_isins(self, isins: List[str]) -> Dict[str, Any]:
 
 
 @shared_task
-def generate_isin_report() -> Dict[str, Any]:
-    """
-    Generate comprehensive ISIN coverage and quality report.
+def generate_isin_report() -> dict[str, Any]:
+    """Generate comprehensive ISIN coverage and quality report.
 
     Returns:
         Report data
@@ -743,8 +733,7 @@ def generate_isin_report() -> Dict[str, Any]:
 # Periodic task setup
 @shared_task
 def daily_isin_maintenance():
-    """
-    Daily maintenance tasks for ISIN system.
+    """Daily maintenance tasks for ISIN system.
     """
     try:
         logger.info("Starting daily ISIN maintenance")
