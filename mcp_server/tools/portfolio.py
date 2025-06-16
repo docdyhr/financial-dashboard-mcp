@@ -134,8 +134,9 @@ class PortfolioTools:
     async def _get_positions(self, arguments: dict[str, Any]) -> list[TextContent]:
         """Get current portfolio positions."""
         try:
+            # Use correct API v1 path with default user_id=5
             response = await self.http_client.get(
-                f"{self.backend_url}/api/portfolio/positions"
+                f"{self.backend_url}/api/v1/positions/?user_id=5"
             )
             response.raise_for_status()
             data = response.json()
@@ -143,7 +144,18 @@ class PortfolioTools:
             positions_text = "**Current Portfolio Positions:**\n\n"
             total_value = 0.0
 
-            for position in data.get("positions", []):
+            # Handle the paginated response structure
+            positions = data.get("data", []) if data.get("success") else []
+
+            if not positions:
+                return [
+                    TextContent(
+                        type="text",
+                        text="**No positions found in your portfolio.**\n\nTo get started, use the `add_position` tool to add your first investment!",
+                    )
+                ]
+
+            for position in positions:
                 ticker = position.get("ticker", "N/A")
                 name = position.get("name", "Unknown")
                 quantity = position.get("quantity", 0)
@@ -191,7 +203,7 @@ class PortfolioTools:
         try:
             # Get summary data
             summary_response = await self.http_client.get(
-                f"{self.backend_url}/api/portfolio/summary"
+                f"{self.backend_url}/api/v1/portfolio/summary/5"
             )
             summary_response.raise_for_status()
             summary_data = summary_response.json()
@@ -201,7 +213,7 @@ class PortfolioTools:
             if arguments.get("include_performance", True):
                 try:
                     perf_response = await self.http_client.get(
-                        f"{self.backend_url}/api/portfolio/performance"
+                        f"{self.backend_url}/api/v1/portfolio/performance/5"
                     )
                     if perf_response.status_code == 200:
                         perf_data = perf_response.json()
@@ -249,10 +261,11 @@ class PortfolioTools:
             return [TextContent(type="text", text=f"Error retrieving summary: {e!s}")]
 
     async def _get_allocation(self, arguments: dict[str, Any]) -> list[TextContent]:
-        """Get portfolio allocation."""
+        """Get portfolio allocation breakdown."""
         try:
+            # Use correct API v1 path with default user_id=5
             response = await self.http_client.get(
-                f"{self.backend_url}/api/portfolio/allocation"
+                f"{self.backend_url}/api/v1/portfolio/allocation/5"
             )
             response.raise_for_status()
             data = response.json()
@@ -290,8 +303,11 @@ class PortfolioTools:
             if "purchase_date" in arguments:
                 position_data["purchase_date"] = arguments["purchase_date"]
 
+            # Add user_id to position data and use correct API v1 path
+            position_data["user_id"] = 5
+
             response = await self.http_client.post(
-                f"{self.backend_url}/api/portfolio/positions", json=position_data
+                f"{self.backend_url}/api/v1/positions/", json=position_data
             )
             response.raise_for_status()
 
@@ -341,7 +357,7 @@ The position has been added to your portfolio and will be included in future cal
                 update_data["notes"] = arguments["notes"]
 
             response = await self.http_client.put(
-                f"{self.backend_url}/api/portfolio/positions/{position_id}",
+                f"{self.backend_url}/api/v1/positions/{position_id}",
                 json=update_data,
             )
             response.raise_for_status()
