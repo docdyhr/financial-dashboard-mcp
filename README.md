@@ -51,6 +51,7 @@ This project provides a single-user financial dashboard to track and analyze pos
 
 ### Core Documentation
 - **[Quick Start Guide](docs/QUICK_START.md)** - Get running in under 5 minutes
+- **[Claude Desktop Usage Guide](docs/CLAUDE_DESKTOP_USAGE.md)** - Complete portfolio management with natural language
 - **[Authentication Guide](docs/AUTHENTICATION.md)** - Comprehensive authentication and authorization implementation
 - **[MCP Setup Guide](docs/MCP_SETUP.md)** - AI integration with Claude Desktop
 - **[Task Queue Documentation](docs/TASK_QUEUE.md)** - Background processing setup
@@ -336,6 +337,8 @@ Once configured, you can ask Claude natural language questions like:
 - "Add 100 shares of MSFT at $380 per share"
 
 For detailed setup instructions, see [docs/MCP_SETUP.md](docs/MCP_SETUP.md).
+
+📖 **Complete Usage Guide**: See [docs/CLAUDE_DESKTOP_USAGE.md](docs/CLAUDE_DESKTOP_USAGE.md) for comprehensive examples of managing your portfolio through natural language conversations with Claude Desktop.
 
 ## API Documentation
 
