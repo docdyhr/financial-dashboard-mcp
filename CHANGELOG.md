@@ -2,6 +2,69 @@
 
 
 
+## v1.5.1 (2025-06-15)
+
+### Chore
+
+* chore: bump version to 1.5.0 [skip ci] ([`e731a89`](https://github.com/docdyhr/financial-dashboard-mcp/commit/e731a89744891410ac04eedf427f5b5764ced2e5))
+
+### Documentation
+
+* docs: add comprehensive Claude Desktop usage guide
+
+- Create detailed CLAUDE_DESKTOP_USAGE.md guide with complete examples
+- Show how to add ticker symbols and positions through natural language
+- Include elaborate conversation examples for portfolio management
+- Cover all 13 MCP tools with practical use cases:
+  * Portfolio management (add_position, update_position, get_positions, etc.)
+  * Market data analysis (get_asset_price, calculate_performance, etc.)
+  * AI-powered insights (recommend_allocation, analyze_opportunity, etc.)
+- Provide natural language command examples
+- Add troubleshooting and best practices
+- Link from README.md for easy discovery
+
+Complete guide for users to understand the full power of AI-driven
+portfolio management through Claude Desktop conversations. ([`039a851`](https://github.com/docdyhr/financial-dashboard-mcp/commit/039a851a1d03e443b71650836c2b39a1de3996d3))
+
+### Fix
+
+* fix: resolve MCP server API integration issues
+
+- Fix API endpoint paths from /api/portfolio/* to /api/v1/*/
+- Update MCP server to use correct user_id (5) for API calls
+- Create default user creation script for MCP integration
+- Fix portfolio tools to use proper API v1 endpoints:
+  * get_positions: /api/v1/positions/?user_id=5
+  * get_portfolio_summary: /api/v1/portfolio/summary/5
+  * get_allocation: /api/v1/portfolio/allocation/5
+  * add_position: /api/v1/positions/ (with user_id in payload)
+  * update_position: /api/v1/positions/{id}
+- Handle paginated API responses correctly
+- Add proper error handling for empty portfolios
+- Fix pyproject.toml ruff target-version configuration
+- Add proper linting suppressions for script imports
+
+This resolves the 404 errors in Claude Desktop MCP integration.
+Users can now successfully use portfolio management tools. ([`c59e5b4`](https://github.com/docdyhr/financial-dashboard-mcp/commit/c59e5b4f45c710d5aa685ad64948911f23f59225))
+
+### Refactor
+
+* refactor: configure bandit to ignore false positive security warnings
+
+- Configure bandit to skip B101, B601, B404, B603, B607, B104 warnings
+- These are false positives for development tooling and service management
+- Remove individual # nosec comments throughout codebase
+- Cleaner approach than scattered suppression comments
+- Maintains security scanning for legitimate issues
+
+This properly addresses low-severity bandit warnings that don&#39;t represent
+actual security risks in the context of development service management. ([`61c6ac3`](https://github.com/docdyhr/financial-dashboard-mcp/commit/61c6ac35dd1c5404bda9bae0f36920e71e102a00))
+
+### Unknown
+
+* Merge branch &#39;main&#39; of https://github.com/docdyhr/financial-dashboard-mcp ([`4f3232c`](https://github.com/docdyhr/financial-dashboard-mcp/commit/4f3232cfcb935aa67532b1b3b9ff2e86e51118b3))
+
+
 ## v1.5.0 (2025-06-15)
 
 ### Chore
