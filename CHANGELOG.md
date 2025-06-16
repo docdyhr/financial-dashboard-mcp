@@ -2,6 +2,83 @@
 
 
 
+## v1.7.1 (2025-06-16)
+
+### Chore
+
+* chore: bump version to 1.7.0 [skip ci] ([`4d6aeda`](https://github.com/docdyhr/financial-dashboard-mcp/commit/4d6aeda13364ab279ca789f6758dbeefd2023f3c))
+
+### Fix
+
+* fix: resolve merge conflicts and maintain version consistency
+
+✅ Resolved merge conflicts and updated files:
+
+📝 Files automatically formatted and improved by pre-commit hooks:
+- pyproject.toml (version specs corrected + formatting)
+- frontend/app.py (formatted + transaction history features)
+- frontend/components/portfolio.py (formatted + position management)
+- backend/main.py (formatted + transaction API routes)
+- backend/api/positions.py (formatted + fixed delete functionality)
+- backend/services/transaction.py (formatted + business logic)
+- backend/api/transactions.py (formatted + CRUD operations)
+- backend/api/__init__.py (formatted + new imports)
+- start_services.py (formatted + service startup script)
+- backend/__init__.py (correct app version 1.5.1)
+- scripts/version_check.py (version management tool)
+
+🔧 Version Management Fixes:
+- Fixed confusion between Financial Dashboard app version (1.5.1) and Python version (3.11)
+- Ensured permanent separation of app vs runtime version specifications
+- Removed problematic pre-commit hook references
+
+✅ All Features Functional:
+- Position management (edit/delete/view) working correctly
+- Transaction history fully implemented
+- Quantity formatting shows whole numbers for stocks
+- Delete API 500 error resolved
+- Code quality improved with automatic formatting
+
+All files maintain their functionality with improved code quality standards. ([`09ce050`](https://github.com/docdyhr/financial-dashboard-mcp/commit/09ce0501a11fabea6a2f79e3f67e3ba5688a0c25))
+
+* fix: resolve version consistency issues and improve code quality
+
+🔧 Version Management Fixes:
+✅ Fixed confusion between Financial Dashboard app version (1.5.1) and Python version (3.11)
+✅ Ensured backend/__init__.py uses correct app version 1.5.1
+✅ Created version management tools to prevent future confusion
+✅ Added version validation and checking capabilities
+
+📝 Code Quality Improvements (via pre-commit hooks):
+✅ Automatically formatted all Python files with black and isort
+✅ Fixed linting issues detected by ruff and flake8
+✅ Improved code consistency and readability
+✅ Enhanced import organization
+
+🛠️ Version Management Tools:
+✅ scripts/version_check.py - Check and fix version consistency
+✅ Permanent separation of app version from Python version specs
+
+✅ Files Updated (formatted + functional):
+- frontend/app.py (formatted + working transaction history)
+- frontend/components/portfolio.py (formatted + position management)
+- backend/main.py (formatted + transaction API routes)
+- backend/api/positions.py (formatted + fixed delete API)
+- backend/services/transaction.py (formatted + business logic)
+- backend/api/transactions.py (formatted + CRUD operations)
+- backend/api/__init__.py (formatted + new imports)
+- start_services.py (formatted + service startup)
+- scripts/version_check.py (version management tool)
+- pyproject.toml (version specifications corrected)
+- .pre-commit-config.yaml (version validation hook added)
+
+This ensures permanent separation of:
+- Financial Dashboard version: 1.5.1 (application)
+- Python version specs: 3.11/py311 (runtime/tools)
+
+All position management and transaction history features remain fully functional with improved code quality. ([`4d527e5`](https://github.com/docdyhr/financial-dashboard-mcp/commit/4d527e549567e8bfb41eb6cc2adb8d1f1a224c56))
+
+
 ## v1.7.0 (2025-06-16)
 
 ### Chore
