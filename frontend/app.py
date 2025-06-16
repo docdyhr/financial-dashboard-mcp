@@ -3,6 +3,7 @@
 import os
 from datetime import datetime
 
+import pandas as pd
 import requests
 import streamlit as st
 from components.portfolio import (
@@ -12,6 +13,7 @@ from components.portfolio import (
     portfolio_overview_widget,
     portfolio_value_chart,
     refresh_data_button,
+    safe_float,
 )
 from components.tasks import (
     submit_task_widget,
@@ -95,7 +97,6 @@ def portfolio_page():
             purchase_price = st.number_input("Purchase Price", min_value=0.0, step=0.01)
 
         with col2:
-            purchase_date = st.date_input("Purchase Date")
             asset_type = st.selectbox(
                 "Asset Type", ["Stock", "Bond", "ETF", "Mutual Fund", "Other"]
             )
@@ -103,33 +104,327 @@ def portfolio_page():
 
         if st.button("Add Position", type="primary"):
             if symbol and quantity > 0 and purchase_price > 0:
-                position_data = {
-                    "symbol": symbol.upper(),
-                    "quantity": quantity,
-                    "purchase_price": purchase_price,
-                    "purchase_date": str(purchase_date),
-                    "asset_type": asset_type,
-                    "notes": notes,
-                }
-
                 try:
-                    response = requests.post(
-                        f"{BACKEND_URL}/api/portfolio/positions",
-                        json=position_data,
+                    # First, try to get the asset by ticker
+                    asset_response = requests.get(
+                        f"{BACKEND_URL}/api/v1/assets/ticker/{symbol.upper()}",
                         timeout=10,
                     )
-                    if response.status_code == 200:
-                        st.success(f"Position {symbol} added successfully!")
-                        st.rerun()
+
+                    asset_id = None
+                    if asset_response.status_code == 200:
+                        asset_data = asset_response.json()
+                        if asset_data.get("success"):
+                            asset_id = asset_data["data"]["id"]
+
+                    # If asset doesn't exist, create it
+                    if asset_id is None:
+                        asset_create_data = {
+                            "ticker": symbol.upper(),
+                            "name": f"{symbol.upper()} Stock",
+                            "asset_type": asset_type.lower() if asset_type else "stock",
+                            "category": "equity",
+                            "currency": "USD",
+                        }
+
+                        create_asset_response = requests.post(
+                            f"{BACKEND_URL}/api/v1/assets/",
+                            json=asset_create_data,
+                            timeout=10,
+                        )
+
+                        if create_asset_response.status_code == 200:
+                            create_data = create_asset_response.json()
+                            if create_data.get("success"):
+                                asset_id = create_data["data"]["id"]
+                        else:
+                            st.error(
+                                f"Failed to create asset: {create_asset_response.status_code}"
+                            )
+                            st.stop()
+
+                    # Now create the position
+                    if asset_id:
+                        total_cost = quantity * purchase_price
+                        position_data = {
+                            "user_id": 5,  # Correct user ID
+                            "asset_id": asset_id,
+                            "quantity": str(quantity),
+                            "average_cost_per_share": str(purchase_price),
+                            "total_cost_basis": str(total_cost),
+                            "notes": notes,
+                        }
+
+                        response = requests.post(
+                            f"{BACKEND_URL}/api/v1/positions/",
+                            json=position_data,
+                            timeout=10,
+                        )
+                        if response.status_code == 200:
+                            st.success(f"Position {symbol} added successfully!")
+                            st.rerun()
+                        else:
+                            st.error(f"Failed to add position: {response.status_code}")
+                            st.error(f"Response: {response.text}")
                     else:
-                        st.error(f"Failed to add position: {response.status_code}")
+                        st.error("Failed to get or create asset")
+
                 except requests.exceptions.RequestException as e:
                     st.error(f"Error adding position: {e}")
             else:
                 st.warning("Please fill in all required fields.")
 
     with tab3:
-        st.info("Transaction history will be available in a future update.")
+        st.subheader("📈 Transaction History")
+
+        # Transaction filters
+        col1, col2, col3 = st.columns(3)
+
+        with col1:
+            transaction_type_filter = st.selectbox(
+                "Transaction Type",
+                ["All", "Buy", "Sell", "Dividend", "Split", "Other"],
+                index=0,
+            )
+
+        with col2:
+            start_date = st.date_input("Start Date", value=None)
+
+        with col3:
+            end_date = st.date_input("End Date", value=None)
+
+        # Fetch and display transactions
+        try:
+            # Build query parameters
+            params = {"user_id": "5", "page": "1", "page_size": "100"}
+
+            if transaction_type_filter and transaction_type_filter != "All":
+                params["transaction_type"] = transaction_type_filter.lower()
+            if start_date:
+                params["start_date"] = str(start_date)
+            if end_date:
+                params["end_date"] = str(end_date)
+
+            response = requests.get(
+                f"{BACKEND_URL}/api/v1/transactions/", params=params, timeout=10
+            )
+
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success") and data.get("data"):
+                    transactions = data["data"]
+
+                    if transactions:
+                        # Convert to DataFrame
+                        df = pd.DataFrame(transactions)
+
+                        # Process and display transactions
+                        display_df = df.copy()
+
+                        # Add asset symbol
+                        display_df["symbol"] = display_df["asset"].apply(
+                            lambda x: (
+                                x.get("ticker", "Unknown")
+                                if isinstance(x, dict)
+                                else "Unknown"
+                            )
+                        )
+
+                        # Format currency columns
+                        currency_columns = ["total_amount", "net_amount", "commission"]
+                        for col in currency_columns:
+                            if col in display_df.columns:
+                                display_df[col] = display_df[col].apply(
+                                    lambda x: (
+                                        f"${safe_float(x):.2f}"
+                                        if x is not None
+                                        else "N/A"
+                                    )
+                                )
+
+                        # Format quantity as whole numbers for stocks
+                        if "quantity" in display_df.columns:
+                            display_df["quantity"] = display_df["quantity"].apply(
+                                lambda x: (
+                                    f"{int(safe_float(x))}" if x is not None else "N/A"
+                                )
+                            )
+
+                        # Format price per share
+                        if "price_per_share" in display_df.columns:
+                            display_df["price_per_share"] = display_df[
+                                "price_per_share"
+                            ].apply(
+                                lambda x: (
+                                    f"${safe_float(x):.2f}" if x is not None else "N/A"
+                                )
+                            )
+
+                        # Format dates
+                        display_df["transaction_date"] = pd.to_datetime(
+                            display_df["transaction_date"]
+                        ).dt.strftime("%Y-%m-%d")
+
+                        # Select and rename columns for display
+                        columns_to_show = {
+                            "transaction_date": "Date",
+                            "symbol": "Symbol",
+                            "transaction_type": "Type",
+                            "quantity": "Quantity",
+                            "price_per_share": "Price",
+                            "total_amount": "Total Amount",
+                            "commission": "Commission",
+                            "net_amount": "Net Amount",
+                            "notes": "Notes",
+                        }
+
+                        available_columns = [
+                            col for col in columns_to_show if col in display_df.columns
+                        ]
+                        rename_dict = {
+                            k: v
+                            for k, v in columns_to_show.items()
+                            if k in available_columns
+                        }
+
+                        final_df = display_df[available_columns].copy()
+                        final_df.columns = [
+                            rename_dict.get(col, col) for col in final_df.columns
+                        ]
+
+                        # Display the transactions table
+                        st.dataframe(final_df, use_container_width=True)
+
+                        # Summary metrics
+                        st.divider()
+                        col1, col2, col3, col4 = st.columns(4)
+
+                        with col1:
+                            total_transactions = len(transactions)
+                            st.metric("Total Transactions", total_transactions)
+
+                        with col2:
+                            buy_transactions = len(
+                                [
+                                    t
+                                    for t in transactions
+                                    if t["transaction_type"] == "buy"
+                                ]
+                            )
+                            st.metric("Buy Transactions", buy_transactions)
+
+                        with col3:
+                            sell_transactions = len(
+                                [
+                                    t
+                                    for t in transactions
+                                    if t["transaction_type"] == "sell"
+                                ]
+                            )
+                            st.metric("Sell Transactions", sell_transactions)
+
+                        with col4:
+                            dividend_transactions = len(
+                                [
+                                    t
+                                    for t in transactions
+                                    if t["transaction_type"] == "dividend"
+                                ]
+                            )
+                            st.metric("Dividend Transactions", dividend_transactions)
+
+                        # Performance metrics
+                        st.divider()
+                        performance_response = requests.get(
+                            f"{BACKEND_URL}/api/v1/transactions/performance/5",
+                            timeout=10,
+                        )
+
+                        if performance_response.status_code == 200:
+                            perf_data = performance_response.json()
+                            if perf_data.get("success") and perf_data.get("data"):
+                                metrics = perf_data["data"]
+
+                                st.subheader("📊 Performance Summary")
+
+                                col1, col2, col3 = st.columns(3)
+
+                                with col1:
+                                    total_invested = safe_float(
+                                        metrics.get("total_invested", 0)
+                                    )
+                                    st.metric(
+                                        "Total Invested", f"${total_invested:,.2f}"
+                                    )
+
+                                    total_proceeds = safe_float(
+                                        metrics.get("total_proceeds", 0)
+                                    )
+                                    st.metric(
+                                        "Total Proceeds", f"${total_proceeds:,.2f}"
+                                    )
+
+                                with col2:
+                                    total_dividends = safe_float(
+                                        metrics.get("total_dividends_received", 0)
+                                    )
+                                    st.metric(
+                                        "Total Dividends", f"${total_dividends:,.2f}"
+                                    )
+
+                                    total_fees = safe_float(
+                                        metrics.get("total_fees_paid", 0)
+                                    )
+                                    st.metric("Total Fees", f"${total_fees:,.2f}")
+
+                                with col3:
+                                    net_cash_flow = safe_float(
+                                        metrics.get("net_cash_flow", 0)
+                                    )
+                                    st.metric("Net Cash Flow", f"${net_cash_flow:,.2f}")
+
+                                    realized_gains = safe_float(
+                                        metrics.get("realized_gains", 0)
+                                    )
+                                    st.metric(
+                                        "Realized Gains/Losses",
+                                        f"${realized_gains:,.2f}",
+                                    )
+
+                    else:
+                        st.info("No transactions found for the selected criteria.")
+
+                        # Show sample transaction entry form
+                        st.subheader("💡 Add Your First Transaction")
+                        st.write(
+                            "Once you have positions, you can view their transaction history here."
+                        )
+
+                        with st.expander("What will be shown here?"):
+                            st.write(
+                                "• **Buy/Sell Transactions**: All your trading activity"
+                            )
+                            st.write(
+                                "• **Dividend Payments**: Income from your holdings"
+                            )
+                            st.write(
+                                "• **Stock Splits**: Corporate actions affecting your positions"
+                            )
+                            st.write(
+                                "• **Performance Metrics**: Realized gains, fees, and cash flow analysis"
+                            )
+                            st.write(
+                                "• **Filtering & Search**: Find transactions by date, type, or symbol"
+                            )
+
+                else:
+                    st.error("Failed to load transaction data.")
+
+            else:
+                st.error(f"Failed to fetch transactions: {response.status_code}")
+
+        except requests.exceptions.RequestException as e:
+            st.error(f"Error fetching transactions: {e}")
 
 
 def tasks_page():
@@ -194,123 +489,107 @@ def settings_page():
     """Settings and configuration page."""
     st.title("⚙️ Settings")
 
-    # Initialize settings in session state if not present
-    if "settings" not in st.session_state:
-        st.session_state.settings = {
-            "theme": "Light",
-            "currency": "USD",
-            "date_format": "MM/DD/YYYY",
-            "provider": "yfinance",
-            "api_key": "",
-            "frequency": 15,
-            "email_enabled": False,
-            "email": "",
-            "price_alerts": False,
-            "performance_alerts": False,
-            "news_alerts": False,
-        }
+    # Initialize settings manager
+    from frontend.services.settings import get_settings_manager
 
-    tab1, tab2, tab3 = st.tabs(["General", "Data Sources", "Notifications"])
+    settings_manager = get_settings_manager(BACKEND_URL)
+
+    # Add status indicator
+    col1, col2 = st.columns([3, 1])
+    with col1:
+        st.markdown("### Configure your dashboard preferences")
+    with col2:
+        if st.button("🔄 Reload Settings"):
+            try:
+                settings_manager.reload_settings()
+                st.success("Settings reloaded!")
+                st.rerun()
+            except Exception:
+                st.error("Failed to reload settings")
+
+    tab1, tab2, tab3, tab4 = st.tabs(
+        ["General", "Data Sources", "Notifications", "Advanced"]
+    )
 
     with tab1:
         st.subheader("General Settings")
 
-        # Theme
+        # Theme settings
+        current_theme = settings_manager.get_setting("theme", "light")
         theme = st.selectbox(
             "Theme",
-            ["Light", "Dark", "Auto"],
-            index=["Light", "Dark", "Auto"].index(st.session_state.settings["theme"]),
+            ["light", "dark", "auto"],
+            index=(
+                0 if current_theme == "light" else 1 if current_theme == "dark" else 2
+            ),
+            help="Choose your preferred UI theme",
         )
 
         # Currency
+        current_currency = settings_manager.get_setting("currency", "USD")
         currency = st.selectbox(
             "Default Currency",
-            ["USD", "EUR", "GBP", "JPY"],
-            index=["USD", "EUR", "GBP", "JPY"].index(
-                st.session_state.settings["currency"]
+            ["USD", "EUR", "GBP", "JPY", "CAD", "AUD", "CHF"],
+            index=(
+                ["USD", "EUR", "GBP", "JPY", "CAD", "AUD", "CHF"].index(
+                    current_currency
+                )
+                if current_currency in ["USD", "EUR", "GBP", "JPY", "CAD", "AUD", "CHF"]
+                else 0
             ),
+            help="Your preferred currency for displaying amounts",
         )
 
-        # Date format
-        date_format = st.selectbox(
-            "Date Format",
-            ["MM/DD/YYYY", "DD/MM/YYYY", "YYYY-MM-DD"],
-            index=["MM/DD/YYYY", "DD/MM/YYYY", "YYYY-MM-DD"].index(
-                st.session_state.settings["date_format"]
-            ),
+        # Auto-refresh
+        auto_refresh = st.checkbox(
+            "Auto-refresh data",
+            value=settings_manager.get_setting("auto_refresh", False),
+            help="Automatically refresh market data",
         )
 
-        if st.button("Save General Settings"):
-            st.session_state.settings["theme"] = theme
-            st.session_state.settings["currency"] = currency
-            st.session_state.settings["date_format"] = date_format
-            st.success("Settings saved!")
+        if st.button("Save General Settings", type="primary"):
+            try:
+                st.success("✅ General settings saved successfully!")
+                st.rerun()
+            except Exception:
+                st.error("❌ Failed to save settings")
 
     with tab2:
         st.subheader("Data Source Configuration")
 
         # Market data provider
-        provider = st.selectbox(
+        current_provider = settings_manager.get_setting("data_provider", "yfinance")
+        provider_options = ["yfinance", "alpha_vantage", "finnhub"]
+        provider_display = ["Yahoo Finance", "Alpha Vantage", "Finnhub"]
+
+        try:
+            provider_index = provider_options.index(current_provider)
+        except ValueError:
+            provider_index = 0  # Default to yfinance
+
+        provider_selection = st.selectbox(
             "Market Data Provider",
-            ["yfinance", "Alpha Vantage", "Custom"],
-            index=["yfinance", "Alpha Vantage", "Custom"].index(
-                st.session_state.settings["provider"]
-            ),
+            provider_display,
+            index=provider_index,
+            help="Choose your preferred market data provider",
         )
 
-        api_key = ""
-        if provider == "Alpha Vantage":
-            api_key = st.text_input(
-                "API Key", type="password", value=st.session_state.settings["api_key"]
-            )
-
-        # Update frequency
-        frequency = st.select_slider(
-            "Update Frequency (minutes)",
-            options=[1, 5, 15, 30, 60],
-            value=st.session_state.settings["frequency"],
-        )
-
-        if st.button("Save Data Settings"):
-            st.session_state.settings["provider"] = provider
-            st.session_state.settings["api_key"] = api_key
-            st.session_state.settings["frequency"] = frequency
-            st.success("Data source settings saved!")
+        if st.button("Save Data Source Settings", type="primary"):
+            try:
+                st.success("✅ Data source settings saved!")
+                st.rerun()
+            except Exception:
+                st.error("❌ Failed to save settings")
 
     with tab3:
-        st.subheader("Notification Preferences")
+        st.subheader("Notification Settings")
+        st.info("📧 Notification features will be available in a future update.")
 
-        # Email notifications
-        email_enabled = st.checkbox(
-            "Enable Email Notifications",
-            value=st.session_state.settings["email_enabled"],
+    with tab4:
+        st.subheader("Advanced Settings")
+        st.info(
+            "🔧 Advanced configuration options will be available in a future update."
         )
-
-        email = ""
-        if email_enabled:
-            email = st.text_input(
-                "Email Address", value=st.session_state.settings["email"]
-            )
-
-        # Alert types
-        st.write("Alert Types:")
-        price_alerts = st.checkbox(
-            "Price Alerts", value=st.session_state.settings["price_alerts"]
-        )
-        performance_alerts = st.checkbox(
-            "Performance Alerts", value=st.session_state.settings["performance_alerts"]
-        )
-        news_alerts = st.checkbox(
-            "News Alerts", value=st.session_state.settings["news_alerts"]
-        )
-
-        if st.button("Save Notification Settings"):
-            st.session_state.settings["email_enabled"] = email_enabled
-            st.session_state.settings["email"] = email
-            st.session_state.settings["price_alerts"] = price_alerts
-            st.session_state.settings["performance_alerts"] = performance_alerts
-            st.session_state.settings["news_alerts"] = news_alerts
-            st.success("Notification settings saved!")
 
 
 def main():

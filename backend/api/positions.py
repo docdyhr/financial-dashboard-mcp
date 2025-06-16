@@ -187,9 +187,9 @@ async def delete_position(
     """Delete a position."""
     try:
         if soft_delete:
-            _ = position_service.soft_delete(db, id=position_id)  # type: ignore
+            _ = position_service.soft_delete(db, obj_id=position_id)  # type: ignore
         else:
-            _ = position_service.delete(db, id=position_id)  # type: ignore
+            _ = position_service.delete(db, obj_id=position_id)  # type: ignore
 
         return BaseResponse(
             success=True,

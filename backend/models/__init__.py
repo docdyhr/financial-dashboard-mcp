@@ -7,6 +7,7 @@ from backend.models.position import Position
 from backend.models.price_history import PriceHistory
 from backend.models.transaction import Transaction, TransactionType
 from backend.models.user import User
+from backend.models.user_settings import UserSettings
 
 # All models are now exported with their relationships defined inline
 __all__ = [
@@ -20,6 +21,7 @@ __all__ = [
     "Transaction",
     "TransactionType",
     "User",
+    "UserSettings",
     "drop_db",
     "get_db",
     "init_db",
