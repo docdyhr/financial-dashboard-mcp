@@ -2,6 +2,68 @@
 
 
 
+## v1.7.0 (2025-06-16)
+
+### Chore
+
+* chore: bump version to 1.6.0 [skip ci] ([`711d705`](https://github.com/docdyhr/financial-dashboard-mcp/commit/711d705a5c48f57ffc730303718fb5fc6db56d74))
+
+### Feature
+
+* feat: Add comprehensive position management and transaction history
+
+✅ Complete Transaction History System
+- New transaction API with full CRUD operations (/api/v1/transactions/)
+- Transaction schemas and services for buy/sell/dividend tracking
+- Position-specific and portfolio-wide transaction views
+- Performance metrics and filtering capabilities
+
+✅ Enhanced Position Management
+- Delete positions with soft/hard delete options and confirmation dialogs
+- Edit position details (quantity, cost basis, notes, account)
+- View detailed position information and performance metrics
+- Improved position selection UI with dropdown management
+
+✅ Data Display Improvements
+- Fixed quantity formatting to show whole numbers for stocks (no decimals)
+- Proper currency formatting for prices and amounts
+- Enhanced error handling and user feedback
+- Clean, consistent UI throughout the application
+
+✅ Backend API Enhancements
+- New transaction service with comprehensive business logic
+- Fixed position deletion API parameter issues (500 error resolved)
+- Enhanced user settings persistence and management
+- Improved market data service with multi-provider fallback
+
+✅ Frontend UI/UX Improvements
+- Streamlit compatibility fixes (removed unsupported parameters)
+- Better session state management for position actions
+- Responsive design with proper button interactions
+- Real-time data updates and proper state cleanup
+
+✅ Technical Improvements
+- Database migrations for user settings and transaction tracking
+- Service startup script for easier development workflow
+- Enhanced error handling and validation throughout
+- Improved type safety and code organization
+
+Fixes:
+- Position deletion 500 error resolved
+- Quantity display now shows whole numbers consistently
+- Session state management for position actions
+- Streamlit compatibility issues resolved
+
+Files modified/added:
+- backend/api/transactions.py (new)
+- backend/services/transaction.py (new)
+- backend/api/user_settings.py (new)
+- backend/models/user_settings.py (new)
+- frontend/services/ (new directory)
+- Database migrations for user settings
+- Enhanced position management throughout ([`7ab2f88`](https://github.com/docdyhr/financial-dashboard-mcp/commit/7ab2f887a8e008b630e8d300efa1f8374838fa60))
+
+
 ## v1.6.0 (2025-06-15)
 
 ### Chore
