@@ -24,7 +24,7 @@ ensure_newline_before_comments = true
 skip_glob = ["*/migrations/*", "*/venv/*"]
 
 [tool.mypy]
-python_version = "2.0.4"
+python_version = "3.11"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
@@ -46,7 +46,7 @@ disallow_untyped_defs = false
 disallow_incomplete_defs = false
 
 [tool.pytest.ini_options]
-minversion = "2.0.4"
+minversion = "7.0"
 testpaths = ["tests"]
 python_files = "test_*.py"
 python_classes = "Test*"
@@ -94,7 +94,7 @@ exclude_lines = [
 line-length = 88
 
 # Python 3.11
-target-version = "2.0.4"
+target-version = "py311"
 
 # Exclude directories
 exclude = [
@@ -286,14 +286,12 @@ dependencies = [
     "sqlalchemy>=2.0.25",
     "celery>=5.3.4",
     "redis>=5.0.1",
-    "flower>=2.0.1",
     "yfinance>=0.2.18",
     "psycopg2-binary>=2.9.9",
     "alembic>=1.13.1",
     "uvicorn>=0.25.0",
     "pydantic>=2.5.3",
     "python-multipart>=0.0.6",
-    "mcp>=1.0.0",
 ]
 
 [project.optional-dependencies]
@@ -304,6 +302,12 @@ dev = [
     "ruff>=0.1.0",
     "mypy>=1.8.0",
     "pre-commit>=3.6.0",
+]
+monitoring = [
+    "flower>=2.0.1",  # Celery monitoring dashboard
+]
+ai = [
+    "mcp>=1.0.0",  # Model Context Protocol for AI integration (Phase 3)
 ]
 
 [project.scripts]
@@ -445,7 +449,7 @@ commit_args = ""
 [[tool.bumpversion.files]]
 filename = "pyproject.toml"
 search = 'version = "2.0.4"'
-replace = 'version = "2.0.4"'
+replace = 'version = "{new_version}"'
 
 [[tool.bumpversion.files]]
 filename = "backend/__init__.py"

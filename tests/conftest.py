@@ -13,6 +13,46 @@ from sqlalchemy.orm import sessionmaker
 from backend.models import Base
 
 
+def pytest_configure(config):
+    """Configure pytest with custom markers."""
+    config.addinivalue_line(
+        "markers", "unit: Unit tests that test individual components in isolation"
+    )
+    config.addinivalue_line(
+        "markers",
+        "integration: Integration tests that test multiple components together",
+    )
+    config.addinivalue_line("markers", "api: API endpoint tests")
+    config.addinivalue_line("markers", "frontend: Frontend component tests")
+    config.addinivalue_line(
+        "markers", "slow: Tests that take more than 5 seconds to run"
+    )
+    config.addinivalue_line("markers", "fast: Tests that run quickly (under 1 second)")
+    config.addinivalue_line("markers", "database: Tests that require database access")
+    config.addinivalue_line("markers", "external: Tests that make external API calls")
+    config.addinivalue_line("markers", "benchmark: Performance benchmark tests")
+    config.addinivalue_line(
+        "markers", "smoke: Basic smoke tests for critical functionality"
+    )
+    config.addinivalue_line(
+        "markers", "financial: Tests for financial calculations and data tests"
+    )
+    config.addinivalue_line("markers", "security: Security-related tests")
+    config.addinivalue_line(
+        "markers", "isin: Tests specifically for ISIN functionality"
+    )
+    config.addinivalue_line("markers", "portfolio: Tests for portfolio functionality")
+    config.addinivalue_line(
+        "markers", "market_data: Tests for market data functionality"
+    )
+    config.addinivalue_line("markers", "auth: Authentication and authorization tests")
+    config.addinivalue_line("markers", "performance: Performance and load tests")
+    config.addinivalue_line("markers", "celery: Tests for Celery background tasks")
+    config.addinivalue_line("markers", "redis: Tests that require Redis")
+    config.addinivalue_line("markers", "cash: Tests for cash account functionality")
+    config.addinivalue_line("markers", "e2e: End-to-end integration tests")
+
+
 def pytest_addoption(parser):
     """Add custom command line options for pytest."""
     parser.addoption(

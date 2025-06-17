@@ -12,6 +12,7 @@ sys.path.insert(0, str(project_root))
 import pandas as pd
 import requests
 import streamlit as st
+
 from frontend.components.enhanced_portfolio import enhanced_portfolio_page
 from frontend.components.isin_analytics_dashboard import isin_analytics_dashboard
 from frontend.components.isin_input import isin_management_page
