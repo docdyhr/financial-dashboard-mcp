@@ -2,6 +2,38 @@
 
 
 
+## v2.0.2 (2025-06-17)
+
+### Chore
+
+* chore: bump version to 2.0.1 [skip ci] ([`ec517f9`](https://github.com/docdyhr/financial-dashboard-mcp/commit/ec517f929fdabaeea551f4f50b5630216b476777))
+
+### Fix
+
+* fix: resolve compatibility issues and modernize codebase
+
+Critical Fixes:
+- Fix SQLAlchemy 2.0 compatibility issue in ISINTickerMapping model
+- Add missing logger import in start_services.py to prevent runtime errors
+- Remove duplicate TOML configuration causing parser errors
+
+Code Modernization:
+- Replace deprecated as_declarative() with modern DeclarativeBase
+- Update Pydantic class Config to model_config with ConfigDict
+- Clean up pytest configuration conflicts
+
+These fixes resolve test collection errors and ensure compatibility
+with modern versions of SQLAlchemy and Pydantic.
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude &lt;noreply@anthropic.com&gt; ([`7e0e972`](https://github.com/docdyhr/financial-dashboard-mcp/commit/7e0e972823eab01fd7f3de484ffab9abafd45a73))
+
+### Unknown
+
+* Merge branch &#39;main&#39; of https://github.com/docdyhr/financial-dashboard-mcp ([`1ad469f`](https://github.com/docdyhr/financial-dashboard-mcp/commit/1ad469fadeeb1e6e31696cdfda98a8d881e72bc5))
+
+
 ## v2.0.1 (2025-06-17)
 
 ### Chore
