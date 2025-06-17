@@ -2,6 +2,48 @@
 
 
 
+## v2.0.1 (2025-06-17)
+
+### Chore
+
+* chore: bump version to 2.0.0 [skip ci] ([`60f6d78`](https://github.com/docdyhr/financial-dashboard-mcp/commit/60f6d785c020bcf07774b3cd2aa96bfe38960c1a))
+
+### Fix
+
+* fix: address critical technical debt and implement missing features
+
+Security Improvements:
+- Replace hardcoded passwords with secure generation using secrets module
+- Fix database migration with non-existent auth imports
+- Add proper authentication infrastructure with JWT support
+
+Feature Implementations:
+- Implement cash account tracking in portfolio snapshots
+- Add real benchmark data fetching using market data service
+- Implement position filtering by value with SQL joins
+- Add comprehensive ticker validation with exchange-specific rules
+
+Code Quality:
+- Replace all bare exception handling with specific error types
+- Add proper logging throughout error handling paths
+- Fix parameter ordering issues in API endpoints
+- Add missing logger instances where needed
+- Remove redundant empty migration files
+
+Infrastructure:
+- Add production deployment configuration
+- Update pyproject.toml with correct Python version target
+- Add setup script for production secrets
+
+This commit resolves all high and medium priority technical debt items
+identified in the codebase audit, significantly improving security,
+reliability, and maintainability.
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude &lt;noreply@anthropic.com&gt; ([`e71d421`](https://github.com/docdyhr/financial-dashboard-mcp/commit/e71d421e49c2281332b36be4262f6d0c4e4153fd))
+
+
 ## v2.0.0 (2025-06-16)
 
 ### Breaking
