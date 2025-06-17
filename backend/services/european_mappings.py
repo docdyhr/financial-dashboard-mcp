@@ -61,9 +61,9 @@ class EuropeanExchange(Enum):
     # Portuguese Exchanges
     XLIS = ("XLIS", "Euronext Lisbon", "PT", "EUR")
 
-    def __init__(self, code: str, name: str, country: str, currency: str):
+    def __init__(self, code: str, display_name: str, country: str, currency: str):
         self.code = code
-        self.name = name
+        self.display_name = display_name
         self.country = country
         self.currency = currency
 
@@ -488,7 +488,7 @@ class EuropeanMappingService:
         for exchange in EuropeanExchange:
             exchange_isins = self.exchange_mappings.get(exchange, set())
             coverage[exchange.code] = {
-                "name": exchange.name,
+                "name": exchange.display_name,
                 "country": exchange.country,
                 "currency": exchange.currency,
                 "mapped_securities": len(exchange_isins),
@@ -617,7 +617,7 @@ class EuropeanMappingService:
                             "isin": mapping.isin,
                             "ticker": mapping.ticker,
                             "exchange_code": mapping.exchange.code,
-                            "exchange_name": mapping.exchange.name,
+                            "exchange_name": mapping.exchange.display_name,
                             "company_name": mapping.company_name,
                             "currency": mapping.currency,
                             "sector": mapping.sector,

@@ -118,9 +118,9 @@ class YFinanceProvider(MarketDataProvider):
                             data_source=self.name,
                             success=True,
                         )
-                except Exception:
-                    # Silently continue to try alternative data sources
-                    pass
+                except Exception as e:
+                    # Continue to try alternative data sources, but log the error
+                    logger.debug(f"Failed to get basic info for {yf_ticker}: {e}")
 
                 error_msg = "No historical data available"
                 if ticker_info.is_international:

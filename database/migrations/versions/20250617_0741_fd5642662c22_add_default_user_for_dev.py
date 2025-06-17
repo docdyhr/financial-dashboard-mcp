@@ -27,8 +27,11 @@ def upgrade() -> None:
 
     # Check if this is development environment
     if os.getenv("ENVIRONMENT", "production") != "production":
-        # Simple password hashing (matching create_default_user.py approach)
-        password = "password123"
+        # Get password from environment or skip user creation
+        password = os.getenv("DEFAULT_USER_PASSWORD")
+        if not password:
+            print("Skipping default user creation - no DEFAULT_USER_PASSWORD set")
+            return
         hashed_password = hashlib.sha256(password.encode()).hexdigest()
 
         op.execute(

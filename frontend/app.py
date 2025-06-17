@@ -1,16 +1,22 @@
 """Enhanced Streamlit application for Financial Dashboard with complete UI."""
 
 import os
+import sys
 from datetime import datetime
+from pathlib import Path
+
+# Add project root to Python path
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
 
 import pandas as pd
 import requests
 import streamlit as st
-from components.enhanced_portfolio import enhanced_portfolio_page
-from components.isin_analytics_dashboard import isin_analytics_dashboard
-from components.isin_input import isin_management_page
-from components.isin_sync_monitor import isin_sync_monitor_page
-from components.portfolio import (
+from frontend.components.enhanced_portfolio import enhanced_portfolio_page
+from frontend.components.isin_analytics_dashboard import isin_analytics_dashboard
+from frontend.components.isin_input import isin_management_page
+from frontend.components.isin_sync_monitor import isin_sync_monitor_page
+from frontend.components.portfolio import (
     asset_allocation_chart,
     holdings_table,
     performance_metrics_widget,
@@ -19,7 +25,7 @@ from components.portfolio import (
     refresh_data_button,
     safe_float,
 )
-from components.tasks import (
+from frontend.components.tasks import (
     submit_task_widget,
     system_status_widget,
     task_history_widget,
