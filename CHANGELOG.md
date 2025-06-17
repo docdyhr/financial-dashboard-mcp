@@ -23,6 +23,41 @@
 - Improved error handling with specific exception types and logging
 - Modernized codebase to be compatible with SQLAlchemy 2.0 and Pydantic V2
 
+## v2.0.3 (2025-06-17)
+
+### Chore
+
+* chore: bump version to 2.0.2 [skip ci] ([`eb35ee1`](https://github.com/docdyhr/financial-dashboard-mcp/commit/eb35ee11312f41651c4dd8935df2b3c6e68c8364))
+
+### Fix
+
+* fix: resolve critical blocking issues and modernize codebase
+
+Critical Blocking Issues Fixed:
+- Fix EuropeanExchange enum error by renaming reserved &#39;name&#39; attribute to &#39;display_name&#39;
+- Fix frontend import errors by adding proper Python path handling
+- Fix invalid version numbers in pyproject.toml (Python 3.11, pytest 6.0, ruff py311)
+
+Security &amp; Quality Improvements:
+- Remove hardcoded password from migration - now uses environment variable
+- Add proper logging to silent exception handling in market data service
+- Remove obsolete Docker Compose version attribute
+
+Documentation:
+- Update SYSTEM_STATUS.md to reflect actual development state
+
+These fixes resolve all blocking issues that prevented system startup
+and testing, ensuring the codebase is functional and secure.
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude &lt;noreply@anthropic.com&gt; ([`d5376be`](https://github.com/docdyhr/financial-dashboard-mcp/commit/d5376be0c83337de4f293ab4c8c3be26f98555b1))
+
+### Unknown
+
+* resolve merge conflict: keep correct version numbers in pyproject.toml ([`b32a7ae`](https://github.com/docdyhr/financial-dashboard-mcp/commit/b32a7ae6109ea0cad990490106e827f78c366b85))
+
+
 ## v2.0.2 (2025-06-17)
 
 ### Chore
