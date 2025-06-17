@@ -573,8 +573,9 @@ def settings_page():
                 settings_manager.reload_settings()
                 st.success("Settings reloaded!")
                 st.rerun()
-            except Exception:
-                st.error("Failed to reload settings")
+            except Exception as e:
+                logger.error(f"Failed to reload settings: {e}")
+                st.error(f"Failed to reload settings: {e}")
 
     tab1, tab2, tab3, tab4 = st.tabs(
         ["General", "Data Sources", "Notifications", "Advanced"]

@@ -288,9 +288,7 @@ async def main():
                     status = (
                         "✅ PASS"
                         if result
-                        else "⏭️ SKIPPED"
-                        if result is None
-                        else "❌ FAIL"
+                        else "⏭️ SKIPPED" if result is None else "❌ FAIL"
                     )
                     f.write(f"- {test_name.replace('_', ' ').title()}: {status}\n")
                 f.write(f"\n**Last Updated**: {time.strftime('%Y-%m-%d %H:%M:%S')}\n")

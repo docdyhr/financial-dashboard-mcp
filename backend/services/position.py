@@ -1,6 +1,7 @@
 """Position service for position management operations."""
 
 import datetime
+import logging
 from decimal import Decimal
 from typing import Any, cast
 
@@ -19,6 +20,8 @@ from backend.schemas.position import (
     PositionUpdate,
 )
 from backend.services.base import BaseService
+
+logger = logging.getLogger(__name__)
 
 
 class PositionService(BaseService[Position, PositionCreate, PositionUpdate]):
@@ -59,11 +62,15 @@ class PositionService(BaseService[Position, PositionCreate, PositionUpdate]):
             if filters.account_name:
                 query = query.filter(Position.account_name == filters.account_name)
             if filters.min_value:
-                # This would need to be calculated with current prices
-                pass
+                # Filter by minimum position value (quantity * current_price)
+                query = query.join(Asset).filter(
+                    (Position.quantity * Asset.current_price) >= filters.min_value
+                )
             if filters.max_value:
-                # This would need to be calculated with current prices
-                pass
+                # Filter by maximum position value (quantity * current_price)
+                query = query.join(Asset).filter(
+                    (Position.quantity * Asset.current_price) <= filters.max_value
+                )
 
             query = query.filter(Position.is_active == filters.is_active)
 
@@ -104,11 +111,37 @@ class PositionService(BaseService[Position, PositionCreate, PositionUpdate]):
                 current_value=position.current_value,
                 unrealized_gain_loss=position.unrealized_gain_loss,
                 unrealized_gain_loss_percent=position.unrealized_gain_loss_percent,
-                weight_in_portfolio=None,  # TODO: Calculate if needed
+                weight_in_portfolio=self._calculate_position_weight(
+                    position, positions
+                ),
             )
             position_responses.append(position_response)
 
         return position_responses
+
+    def _calculate_position_weight(
+        self, position: Position, all_positions: list[Position]
+    ) -> Decimal | None:
+        """Calculate the weight of a position in the portfolio."""
+        try:
+            if not position.current_value:
+                return None
+
+            # Calculate total portfolio value
+            total_value = sum(
+                pos.current_value for pos in all_positions if pos.current_value
+            )
+
+            if total_value == 0:
+                return Decimal("0")
+
+            # Calculate weight as percentage
+            weight = (position.current_value / total_value) * 100
+            return weight.quantize(Decimal("0.01"))  # Round to 2 decimal places
+
+        except Exception as e:
+            logger.warning(f"Error calculating weight for position {position.id}: {e}")
+            return None
 
     def get_position_by_asset(
         self, db: Session, user_id: int, asset_id: int

@@ -49,7 +49,7 @@ def tables(engine):
     Base.metadata.drop_all(engine)
 
 
-@pytest.fixture()
+@pytest.fixture
 def db_session(engine, tables):
     """Create a database session for testing."""
     connection = engine.connect()
@@ -65,7 +65,7 @@ def db_session(engine, tables):
     connection.close()
 
 
-@pytest.fixture()
+@pytest.fixture
 def fake() -> Faker:
     """Faker instance for generating test data."""
     fake = Faker()
@@ -73,7 +73,7 @@ def fake() -> Faker:
     return fake
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_database():
     """Mock database connection for tests."""
     mock_db = MagicMock()
@@ -84,7 +84,7 @@ def mock_database():
     return mock_db
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_redis():
     """Mock Redis connection for tests."""
     mock_redis = MagicMock()
@@ -96,7 +96,7 @@ def mock_redis():
     return mock_redis
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_celery_task():
     """Mock Celery task for testing."""
     mock_task = MagicMock()
@@ -106,7 +106,7 @@ def mock_celery_task():
     return mock_task
 
 
-@pytest.fixture()
+@pytest.fixture
 def sample_portfolio_data() -> dict[str, Any]:
     """Sample portfolio data for testing financial calculations."""
     return {
@@ -146,7 +146,7 @@ def sample_portfolio_data() -> dict[str, Any]:
     }
 
 
-@pytest.fixture()
+@pytest.fixture
 def sample_asset_prices() -> dict[str, dict[str, Any]]:
     """Sample asset price data for testing market data functionality."""
     return {
@@ -177,7 +177,7 @@ def sample_asset_prices() -> dict[str, dict[str, Any]]:
     }
 
 
-@pytest.fixture()
+@pytest.fixture
 def sample_user_data(fake: Faker) -> dict[str, Any]:
     """Sample user data for testing authentication and authorization."""
     return {
@@ -193,7 +193,7 @@ def sample_user_data(fake: Faker) -> dict[str, Any]:
     }
 
 
-@pytest.fixture()
+@pytest.fixture
 def sample_market_data_response() -> dict[str, Any]:
     """Sample market data API response for testing external integrations."""
     return {
@@ -215,7 +215,7 @@ def sample_market_data_response() -> dict[str, Any]:
     }
 
 
-@pytest.fixture()
+@pytest.fixture
 def financial_calculation_test_cases() -> list[tuple[float, float, int, float]]:
     """Test cases for financial calculations with edge cases."""
     return [
@@ -231,7 +231,7 @@ def financial_calculation_test_cases() -> list[tuple[float, float, int, float]]:
     ]
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_yfinance_response() -> MagicMock:
     """Mock yfinance API response for testing market data integration."""
     mock_ticker = MagicMock()
@@ -247,7 +247,7 @@ def mock_yfinance_response() -> MagicMock:
     return mock_ticker
 
 
-@pytest.fixture()
+@pytest.fixture
 def error_test_cases() -> dict[str, dict[str, Any]]:
     """Test cases for error handling scenarios."""
     return {
@@ -270,7 +270,7 @@ def error_test_cases() -> dict[str, dict[str, Any]]:
     }
 
 
-@pytest.fixture()
+@pytest.fixture
 def sample_isin_data() -> dict[str, Any]:
     """Sample ISIN data for testing ISIN functionality."""
     return {
@@ -316,7 +316,7 @@ def sample_isin_data() -> dict[str, Any]:
     }
 
 
-@pytest.fixture()
+@pytest.fixture
 def sample_european_exchanges() -> list[dict[str, Any]]:
     """Sample European exchange data for testing."""
     return [
@@ -358,7 +358,7 @@ def sample_european_exchanges() -> list[dict[str, Any]]:
     ]
 
 
-@pytest.fixture()
+@pytest.fixture
 def sample_sync_job_data() -> dict[str, Any]:
     """Sample sync job data for testing sync functionality."""
     return {
@@ -374,7 +374,7 @@ def sample_sync_job_data() -> dict[str, Any]:
     }
 
 
-@pytest.fixture()
+@pytest.fixture
 def sample_market_quotes() -> dict[str, dict[str, Any]]:
     """Sample market quote data for testing market data services."""
     return {
@@ -407,7 +407,7 @@ def sample_market_quotes() -> dict[str, dict[str, Any]]:
     }
 
 
-@pytest.fixture()
+@pytest.fixture
 def sample_conflict_data() -> dict[str, Any]:
     """Sample conflict data for testing conflict resolution."""
     return {
@@ -430,7 +430,7 @@ def sample_conflict_data() -> dict[str, Any]:
     }
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_external_apis():
     """Mock external API responses for testing."""
     return {
@@ -462,7 +462,7 @@ def mock_external_apis():
     }
 
 
-@pytest.fixture()
+@pytest.fixture
 def sample_validation_cache() -> list[dict[str, Any]]:
     """Sample ISIN validation cache entries for testing."""
     return [
@@ -489,7 +489,7 @@ def sample_validation_cache() -> list[dict[str, Any]]:
     ]
 
 
-@pytest.fixture()
+@pytest.fixture
 def isin_test_cases() -> dict[str, list[tuple[str, bool, str]]]:
     """Comprehensive ISIN test cases for validation testing."""
     return {
@@ -524,7 +524,7 @@ def isin_test_cases() -> dict[str, list[tuple[str, bool, str]]]:
     }
 
 
-@pytest.fixture()
+@pytest.fixture
 def performance_test_data() -> dict[str, Any]:
     """Data for performance testing ISIN operations."""
     return {
@@ -539,7 +539,7 @@ def performance_test_data() -> dict[str, Any]:
     }
 
 
-@pytest.fixture()
+@pytest.fixture
 def integration_test_markers():
     """Pytest markers for integration tests."""
     return pytest.mark.skipif(

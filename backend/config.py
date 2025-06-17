@@ -1,6 +1,8 @@
 """Configuration settings for the Financial Dashboard backend."""
 
+import os
 from functools import lru_cache
+from pathlib import Path
 
 from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -27,7 +29,9 @@ class Settings(BaseSettings):
     api_reload: bool = True
 
     # Database
-    database_url: str = "postgresql://localhost:5432/financial_dashboard"  # Set DB credentials via DATABASE_URL env var
+    database_url: str = (
+        "postgresql://localhost:5432/financial_dashboard"  # Set DB credentials via DATABASE_URL env var
+    )
     database_echo: bool = False
 
     # Redis
@@ -89,7 +93,37 @@ class Settings(BaseSettings):
         return self
 
 
+def read_secret_file(secret_name: str) -> str | None:
+    """Read secret from Docker secret file or environment variable."""
+    # First try environment variable with _FILE suffix
+    file_path = os.getenv(f"{secret_name}_FILE")
+    if file_path and Path(file_path).exists():
+        return Path(file_path).read_text().strip()
+
+    # Fall back to regular environment variable
+    return os.getenv(secret_name)
+
+
 @lru_cache
 def get_settings() -> Settings:
-    """Get cached settings instance."""
-    return Settings()
+    """Get cached settings instance with Docker secrets support."""
+    # Override specific settings from Docker secrets if available
+    overrides = {}
+
+    secret_key = read_secret_file("SECRET_KEY")
+    if secret_key:
+        overrides["secret_key"] = secret_key
+
+    database_url = read_secret_file("DATABASE_URL")
+    if database_url:
+        overrides["database_url"] = database_url
+
+    flower_password = read_secret_file("FLOWER_PASSWORD")
+    if flower_password:
+        overrides["flower_password"] = flower_password
+
+    mcp_auth_token = read_secret_file("MCP_AUTH_TOKEN")
+    if mcp_auth_token:
+        overrides["mcp_auth_token"] = mcp_auth_token
+
+    return Settings(**overrides)

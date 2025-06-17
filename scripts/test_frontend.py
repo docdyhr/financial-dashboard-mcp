@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""Test script to validate the Streamlit frontend components
-"""
+"""Test script to validate the Streamlit frontend components"""
 
 import os
 import sys

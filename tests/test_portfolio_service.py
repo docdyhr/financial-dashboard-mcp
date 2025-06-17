@@ -10,13 +10,13 @@ from backend.models import Asset, AssetCategory, AssetType, CashAccount, Positio
 from backend.services.portfolio import PortfolioService
 
 
-@pytest.fixture()
+@pytest.fixture
 def portfolio_service():
     """Create portfolio service instance."""
     return PortfolioService()
 
 
-@pytest.fixture()
+@pytest.fixture
 def test_user(db_session: Session):
     """Create a test user."""
     user = User(
@@ -30,7 +30,7 @@ def test_user(db_session: Session):
     return user
 
 
-@pytest.fixture()
+@pytest.fixture
 def test_assets(db_session: Session):
     """Create test assets."""
     assets = [
@@ -80,7 +80,7 @@ def test_assets(db_session: Session):
     return assets
 
 
-@pytest.fixture()
+@pytest.fixture
 def test_cash_account(db_session: Session, test_user: User):
     """Create a test cash account."""
     cash_account = CashAccount(
@@ -95,7 +95,7 @@ def test_cash_account(db_session: Session, test_user: User):
     return cash_account
 
 
-@pytest.fixture()
+@pytest.fixture
 def test_positions(db_session: Session, test_user: User, test_assets: list[Asset]):
     """Create test positions."""
     positions = [

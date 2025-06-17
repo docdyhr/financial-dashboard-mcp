@@ -479,7 +479,9 @@ class TestQualityReporter:
 
         for metric in sorted_metrics:
             status = (
-                "🟢" if metric.coverage >= 90 else "🟡" if metric.coverage >= 70 else "🔴"
+                "🟢"
+                if metric.coverage >= 90
+                else "🟡" if metric.coverage >= 70 else "🔴"
             )
             short_name = metric.name[-37:] if len(metric.name) > 37 else metric.name
             print(

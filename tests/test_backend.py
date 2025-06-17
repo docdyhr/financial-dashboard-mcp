@@ -37,7 +37,7 @@ def test_api_status() -> None:
     assert "services" in data  # nosec
 
 
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_app_startup() -> None:
     """Test that the app starts up correctly."""
     # This is a placeholder test - in a real app you might test database connections

@@ -17,6 +17,8 @@ sys.path.insert(0, str(project_root))
 
 import hashlib  # noqa: E402
 import logging  # noqa: E402
+import secrets  # noqa: E402
+import string  # noqa: E402
 from datetime import datetime  # noqa: E402
 
 from backend.database import get_db_session  # noqa: E402
@@ -25,6 +27,12 @@ from backend.models.user import User  # noqa: E402
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+
+def generate_secure_password(length: int = 16) -> str:
+    """Generate a cryptographically secure password."""
+    alphabet = string.ascii_letters + string.digits + "!@#$%^&*"
+    return "".join(secrets.choice(alphabet) for _ in range(length))
 
 
 def create_default_user():
@@ -55,8 +63,8 @@ def create_default_user():
                 logger.info("MCP integration should use this user_id")
                 return existing_email_user
 
-            # Create hashed password (simple hash for demo purposes)
-            password = "mcp_default_password_change_me"  # nosec B105
+            # Generate secure password
+            password = generate_secure_password()
             hashed_password = hashlib.sha256(password.encode()).hexdigest()
 
             # Create the user directly
@@ -86,9 +94,10 @@ def create_default_user():
             logger.info("")
             logger.info("🎉 MCP integration can now use this user for API calls!")
             logger.info("")
-            logger.info("⚠️  SECURITY NOTE:")
-            logger.info("   The default password is 'mcp_default_password_change_me'")
-            logger.info("   Consider changing this in production environments.")
+            logger.info("🔒 SECURITY NOTE:")
+            logger.info(f"   Generated secure password: {password}")
+            logger.info("   Store this password securely - it won't be shown again.")
+            logger.info("   Password is hashed in the database for security.")
 
             return new_user
 
@@ -117,17 +126,16 @@ def check_user_access():
             if response.status_code == 200:
                 logger.info("✅ API access test passed - MCP integration should work!")
                 return True
-            elif (
+            if (
                 response.status_code == 404
                 and "User with ID 1 not found" in response.text
             ):
                 logger.warning("⚠️  User exists in database but API can't find it")
                 logger.warning("This might be a database/API connection issue")
                 return False
-            else:
-                logger.info(f"📊 API response: {response.status_code}")
-                logger.info("This is expected if the user has no positions yet")
-                return True
+            logger.info(f"📊 API response: {response.status_code}")
+            logger.info("This is expected if the user has no positions yet")
+            return True
 
     except Exception as e:
         logger.warning(f"⚠️  Could not test API access: {e}")

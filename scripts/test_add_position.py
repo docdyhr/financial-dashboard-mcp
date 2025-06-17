@@ -185,9 +185,8 @@ async def main():
         print("2. Test in Claude: 'Add 100 shares of AAPL at $180'")
         print("3. Try: 'Show me my current portfolio'")
         return True
-    else:
-        print("❌ Some tests failed. Check the errors above.")
-        return False
+    print("❌ Some tests failed. Check the errors above.")
+    return False
 
 
 if __name__ == "__main__":

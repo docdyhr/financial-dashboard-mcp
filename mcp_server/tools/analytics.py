@@ -204,7 +204,8 @@ class AnalyticsTools:
                         current_allocation["cash"] = (
                             current_allocation.get("cash", 0) + percentage
                         )
-        except Exception:
+        except Exception as e:
+            logger.error(f"Error calculating asset allocation for user {user_id}: {e}")
             current_allocation = {}
 
         recommendation_text = f"""**Portfolio Allocation Recommendation** 🎯

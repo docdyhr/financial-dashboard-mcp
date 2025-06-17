@@ -327,8 +327,7 @@ async def import_user_settings(
                 message="User settings imported successfully",
                 data=UserSettingsResponse(**settings.to_dict()),
             )
-        else:
-            raise HTTPException(status_code=500, detail="Failed to import settings")
+        raise HTTPException(status_code=500, detail="Failed to import settings")
     except HTTPException:
         raise
     except Exception as e:

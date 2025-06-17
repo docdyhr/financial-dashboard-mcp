@@ -5,6 +5,7 @@ Revises: add_isin_support
 Create Date: 2025-06-16 23:48:31.116841
 
 """
+
 from typing import Sequence, Union
 
 from alembic import op

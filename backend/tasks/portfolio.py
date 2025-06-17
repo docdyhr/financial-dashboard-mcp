@@ -12,9 +12,25 @@ from backend.models.asset import Asset
 from backend.models.portfolio_snapshot import PortfolioSnapshot
 from backend.models.position import Position
 from backend.models.user import User
+from backend.services.cash_account import CashAccountService
 from backend.tasks import celery_app
 
 logger = logging.getLogger(__name__)
+
+# Initialize cash account service
+cash_account_service = CashAccountService()
+
+
+def _get_user_cash_balance(db, user_id: int) -> Decimal:
+    """Get total cash balance for a user across all currencies converted to USD."""
+    try:
+        # For now, get balance in USD (primary currency)
+        # In the future, this could convert all currencies to user's preferred currency
+        usd_balance = cash_account_service.get_cash_balance(db, user_id, "USD")
+        return usd_balance
+    except Exception as e:
+        logger.warning(f"Error getting cash balance for user {user_id}: {e}")
+        return Decimal("0")
 
 
 @celery_app.task(bind=True, name="calculate_portfolio_performance")  # type: ignore[misc]
@@ -284,7 +300,7 @@ def create_portfolio_snapshot(self, user_id: int | None = None) -> dict[str, Any
                         total_gain_loss=total_gain_loss,
                         total_gain_loss_percent=Decimal(str(total_gain_loss_percent)),
                         total_positions=total_positions,
-                        cash_balance=Decimal("0"),  # TODO: Implement cash tracking
+                        cash_balance=_get_user_cash_balance(db, user.id),
                     )  # type: ignore[call-arg]
 
                     db.add(snapshot)

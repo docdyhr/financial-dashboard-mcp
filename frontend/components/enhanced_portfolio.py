@@ -460,37 +460,27 @@ def risk_analysis_dashboard(portfolio_df: pd.DataFrame):
                     (
                         "Good"
                         if num_positions >= 10
-                        else "Medium"
-                        if num_positions >= 5
-                        else "Poor"
+                        else "Medium" if num_positions >= 5 else "Poor"
                     ),
                     (
                         "Good"
                         if effective_positions >= 8
-                        else "Medium"
-                        if effective_positions >= 5
-                        else "Poor"
+                        else "Medium" if effective_positions >= 5 else "Poor"
                     ),
                     (
                         "Good"
                         if currency_count >= 3
-                        else "Medium"
-                        if currency_count >= 2
-                        else "Poor"
+                        else "Medium" if currency_count >= 2 else "Poor"
                     ),
                     (
                         "Good"
                         if country_count >= 5
-                        else "Medium"
-                        if country_count >= 3
-                        else "Poor"
+                        else "Medium" if country_count >= 3 else "Poor"
                     ),
                     (
                         "Good"
                         if herfindahl_index <= 0.2
-                        else "Medium"
-                        if herfindahl_index <= 0.4
-                        else "Poor"
+                        else "Medium" if herfindahl_index <= 0.4 else "Poor"
                     ),
                 ],
             }
@@ -541,9 +531,7 @@ def real_time_monitoring_widget():
             color = (
                 "🟢"
                 if market_state == "OPEN"
-                else "🔴"
-                if market_state == "CLOSED"
-                else "🟡"
+                else "🔴" if market_state == "CLOSED" else "🟡"
             )
             st.metric("Market Status", f"{color} {market_state}")
 

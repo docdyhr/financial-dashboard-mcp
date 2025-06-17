@@ -175,8 +175,16 @@ def wait_for_backend():
             )
             if response.status_code == 200:
                 return True
-        except Exception:
-            pass
+        except (
+            requests.RequestException,
+            requests.ConnectionError,
+            requests.Timeout,
+        ) as e:
+            logger.debug(
+                f"Health check attempt {attempt + 1}/{max_attempts} failed: {e}"
+            )
+        except Exception as e:
+            logger.warning(f"Unexpected error during health check: {e}")
 
         if shutdown_requested:
             return False

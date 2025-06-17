@@ -13,7 +13,7 @@ from fastapi.testclient import TestClient
 from backend.api.isin import router
 
 
-@pytest.fixture()
+@pytest.fixture
 def test_client():
     """Create FastAPI test client for ISIN API."""
     from fastapi import FastAPI
@@ -23,7 +23,7 @@ def test_client():
     return TestClient(app)
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_db_session():
     """Mock database session for ISIN API tests."""
     mock_session = Mock()

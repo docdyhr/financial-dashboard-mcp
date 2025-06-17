@@ -100,21 +100,61 @@ class AssetBase(BaseSchema):
                 # Check if it's a known European/international suffix
                 full_suffix = "." + suffix
                 if full_suffix in european_suffixes:
-                    # Valid international ticker
-                    pass
-                else:
-                    # Unknown suffix - still allow but could warn
-                    pass
+                    # Valid international ticker - perform additional validation
+                    cls._validate_international_ticker(ticker, full_suffix)
+                # Unknown suffix - validate format but allow with warning
+                elif not cls._is_valid_ticker_format(base_ticker):
+                    raise ValueError(
+                        f"Invalid ticker format for base ticker '{base_ticker}'. "
+                        f"Must be 1-10 alphanumeric characters."
+                    )
+                    # Note: We allow unknown suffixes but could log a warning
             else:
                 raise ValueError(
                     "Invalid ticker format: only one dot separator allowed"
                 )
-        else:
-            # US ticker format
-            if len(ticker) < 1 or len(ticker) > 10:
-                raise ValueError("US ticker must be between 1 and 10 characters")
+        # US ticker format
+        elif len(ticker) < 1 or len(ticker) > 10:
+            raise ValueError("US ticker must be between 1 and 10 characters")
 
         return ticker
+
+    @classmethod
+    def _is_valid_ticker_format(cls, ticker: str) -> bool:
+        """Check if ticker has valid format (1-10 alphanumeric characters)."""
+        import re
+
+        return bool(re.match(r"^[A-Z0-9]{1,10}$", ticker))
+
+    @classmethod
+    def _validate_international_ticker(cls, ticker: str, suffix: str) -> None:
+        """Perform additional validation for international tickers."""
+        base_ticker = ticker.split(".")[0]
+
+        # Validate base ticker format
+        if not cls._is_valid_ticker_format(base_ticker):
+            raise ValueError(
+                f"Invalid base ticker format '{base_ticker}'. "
+                f"Must be 1-10 alphanumeric characters."
+            )
+
+        # Additional validation based on exchange
+        if suffix == ".L":  # London Stock Exchange
+            if len(base_ticker) < 2:
+                raise ValueError(
+                    f"London Stock Exchange tickers typically have 2+ characters, got '{base_ticker}'"
+                )
+        elif suffix == ".PA":  # Euronext Paris
+            if len(base_ticker) > 5:
+                raise ValueError(
+                    f"Euronext Paris tickers typically have 5 or fewer characters, got '{base_ticker}'"
+                )
+        elif suffix == ".AS":  # Euronext Amsterdam
+            if len(base_ticker) > 5:
+                raise ValueError(
+                    f"Euronext Amsterdam tickers typically have 5 or fewer characters, got '{base_ticker}'"
+                )
+        # Add more exchange-specific validation as needed
 
     @field_validator("currency")
     @classmethod

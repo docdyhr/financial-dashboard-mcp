@@ -1,7 +1,6 @@
 """ISIN (International Securities Identification Number) related models."""
 
 from datetime import datetime
-from typing import Optional
 
 from sqlalchemy import Boolean, DateTime, Float, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, validates
@@ -98,7 +97,7 @@ class ISINTickerMapping(Base):
         return confidence
 
     @validates("currency")
-    def validate_currency(self, key: str, currency: Optional[str]) -> Optional[str]:
+    def validate_currency(self, key: str, currency: str | None) -> str | None:
         """Validate currency code."""
         if currency is None:
             return None
@@ -183,9 +182,7 @@ class ISINValidationCache(Base):
         return isin
 
     @validates("country_code")
-    def validate_country_code(
-        self, key: str, country_code: Optional[str]
-    ) -> Optional[str]:
+    def validate_country_code(self, key: str, country_code: str | None) -> str | None:
         """Validate country code format."""
         if country_code is None:
             return None
@@ -216,11 +213,11 @@ class ISINValidationCache(Base):
         cls,
         isin: str,
         is_valid: bool,
-        country_code: Optional[str] = None,
-        country_name: Optional[str] = None,
-        national_code: Optional[str] = None,
-        check_digit: Optional[str] = None,
-        validation_error: Optional[str] = None,
+        country_code: str | None = None,
+        country_name: str | None = None,
+        national_code: str | None = None,
+        check_digit: str | None = None,
+        validation_error: str | None = None,
     ) -> "ISINValidationCache":
         """Create a new validation cache entry."""
         instance = cls()

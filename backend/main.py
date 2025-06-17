@@ -3,12 +3,13 @@
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from backend.api import (
     assets,
+    auth,
     cash_accounts,
     isin,
     portfolio,
@@ -18,6 +19,12 @@ from backend.api import (
     user_settings,
 )
 from backend.config import get_settings
+from backend.core.exceptions import (
+    FinancialDashboardException,
+    financial_dashboard_exception_handler,
+    generic_exception_handler,
+    validation_exception_handler,
+)
 from backend.database import get_db_session
 
 # Configure logging
@@ -40,7 +47,8 @@ async def _check_services() -> dict[str, str]:
         with get_db_session() as db:
             db.execute(text("SELECT 1"))
         services["database"] = "healthy"
-    except Exception:
+    except Exception as e:
+        logger.warning(f"Database health check failed: {e}")
         services["database"] = "unhealthy"
 
     # Check Redis/Celery (simplified check)
@@ -51,7 +59,8 @@ async def _check_services() -> dict[str, str]:
         result = celery_app.control.ping(timeout=1)
         services["celery"] = "healthy" if result else "unhealthy"
         services["redis"] = "healthy" if result else "unhealthy"
-    except Exception:
+    except Exception as e:
+        logger.warning(f"Celery/Redis health check failed: {e}")
         services["celery"] = "unhealthy"
         services["redis"] = "unhealthy"
 
@@ -89,6 +98,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Add exception handlers
+app.add_exception_handler(
+    FinancialDashboardException, financial_dashboard_exception_handler
+)
+app.add_exception_handler(HTTPException, validation_exception_handler)
+app.add_exception_handler(Exception, generic_exception_handler)
+
 
 @app.get("/")
 async def root():
@@ -103,13 +119,24 @@ async def root():
 @app.get("/health")
 async def health_check():
     """Health check endpoint."""
+    from backend.core.security import validate_production_config
+
+    config_errors = []
+    if settings.environment == "production":
+        config_errors = validate_production_config()
+
+    status = "healthy" if not config_errors else "degraded"
+    status_code = 200 if not config_errors else 503
+
     return JSONResponse(
         content={
-            "status": "healthy",
+            "status": status,
             "service": "backend",
             "version": settings.app_version,
+            "environment": settings.environment,
+            "config_errors": config_errors,
         },
-        status_code=200,
+        status_code=status_code,
     )
 
 
@@ -126,6 +153,7 @@ async def api_status():
 
 
 # Include API routers
+app.include_router(auth.router, prefix="/api/v1/auth", tags=["authentication"])
 app.include_router(portfolio.router, prefix="/api/v1/portfolio", tags=["portfolio"])
 app.include_router(assets.router, prefix="/api/v1/assets", tags=["assets"])
 app.include_router(cash_accounts.router, prefix="/api/v1", tags=["cash-accounts"])

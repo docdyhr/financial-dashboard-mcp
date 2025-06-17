@@ -1,0 +1,155 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.backend
+    environment:
+      - ENVIRONMENT=production
+      - DATABASE_URL_FILE=/run/secrets/db_url
+      - SECRET_KEY_FILE=/run/secrets/secret_key
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    secrets:
+      - db_url
+      - secret_key
+      - flower_password
+    depends_on:
+      - db
+      - redis
+    ports:
+      - "8000:8000"
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.frontend
+    environment:
+      - BACKEND_URL=http://backend:8000
+    depends_on:
+      - backend
+    ports:
+      - "8501:8501"
+    networks:
+      - app-network
+
+  celery:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.backend
+    command: celery -A backend.tasks.worker worker --loglevel=info
+    environment:
+      - ENVIRONMENT=production
+      - DATABASE_URL_FILE=/run/secrets/db_url
+      - SECRET_KEY_FILE=/run/secrets/secret_key
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    secrets:
+      - db_url
+      - secret_key
+    depends_on:
+      - db
+      - redis
+    networks:
+      - app-network
+
+  celery-beat:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.backend
+    command: celery -A backend.tasks.worker beat --loglevel=info
+    environment:
+      - ENVIRONMENT=production
+      - DATABASE_URL_FILE=/run/secrets/db_url
+      - SECRET_KEY_FILE=/run/secrets/secret_key
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    secrets:
+      - db_url
+      - secret_key
+    depends_on:
+      - db
+      - redis
+    networks:
+      - app-network
+
+  flower:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.backend
+    command: celery -A backend.tasks.worker flower --basic_auth=$${FLOWER_USERNAME}:$${FLOWER_PASSWORD}
+    environment:
+      - ENVIRONMENT=production
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - FLOWER_USERNAME=admin
+      - FLOWER_PASSWORD_FILE=/run/secrets/flower_password
+    secrets:
+      - flower_password
+    depends_on:
+      - redis
+    ports:
+      - "5555:5555"
+    networks:
+      - app-network
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER_FILE=/run/secrets/db_user
+      - POSTGRES_PASSWORD_FILE=/run/secrets/db_password
+      - POSTGRES_DB=financial_dashboard
+    secrets:
+      - db_user
+      - db_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --requirepass_FILE /run/secrets/redis_password
+    secrets:
+      - redis_password
+    volumes:
+      - redis_data:/data
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+secrets:
+  db_url:
+    external: true
+  db_user:
+    external: true
+  db_password:
+    external: true
+  secret_key:
+    external: true
+  flower_password:
+    external: true
+  redis_password:
+    external: true
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  app-network:
+    driver: bridge

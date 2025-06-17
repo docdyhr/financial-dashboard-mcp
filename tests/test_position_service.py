@@ -18,13 +18,13 @@ from backend.schemas.position import PositionCreate
 from backend.services.position import PositionService
 
 
-@pytest.fixture()
+@pytest.fixture
 def position_service():
     """Create position service instance."""
     return PositionService()
 
 
-@pytest.fixture()
+@pytest.fixture
 def test_user(db_session: Session):
     """Create a test user."""
     user = User(
@@ -38,7 +38,7 @@ def test_user(db_session: Session):
     return user
 
 
-@pytest.fixture()
+@pytest.fixture
 def test_asset(db_session: Session):
     """Create a test asset."""
     asset = Asset(

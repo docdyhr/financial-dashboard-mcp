@@ -11,13 +11,13 @@ from backend.schemas.cash_account import CashAccountCreate, CashTransactionCreat
 from backend.services.cash_account import CashAccountService
 
 
-@pytest.fixture()
+@pytest.fixture
 def cash_service():
     """Create cash account service instance."""
     return CashAccountService()
 
 
-@pytest.fixture()
+@pytest.fixture
 def test_user(db_session: Session):
     """Create a test user."""
     user = User(
