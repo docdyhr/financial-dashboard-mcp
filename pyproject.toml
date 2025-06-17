@@ -64,19 +64,6 @@ filterwarnings = [
     "ignore::UserWarning",
     "error::pytest.PytestConfigWarning",
 ]
-markers = [
-    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
-    "integration: marks tests as integration tests",
-    "unit: marks tests as unit tests",
-    "financial: marks tests as financial calculation tests",
-    "security: marks tests as security tests",
-    "mcp: marks tests as MCP server tests",
-    "api: marks tests as API tests",
-    "database: marks tests as database tests",
-    "redis: marks tests as Redis tests",
-    "celery: marks tests as Celery task tests",
-    "external: marks tests that require external services",
-]
 asyncio_mode = "auto"
 
 [tool.coverage.run]

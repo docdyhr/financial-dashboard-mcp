@@ -4,8 +4,7 @@ from collections.abc import Generator
 from datetime import datetime
 
 from sqlalchemy import DateTime, Integer, create_engine, func
-from sqlalchemy.ext.declarative import as_declarative
-from sqlalchemy.orm import Mapped, Session, mapped_column, sessionmaker
+from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, sessionmaker
 
 from backend.config import get_settings
 
@@ -23,8 +22,7 @@ engine = create_engine(
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
-@as_declarative()
-class Base:
+class Base(DeclarativeBase):
     """Base class for all database models."""
 
     # __tablename__ will be defined in each model individually.

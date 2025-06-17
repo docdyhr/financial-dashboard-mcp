@@ -53,7 +53,6 @@ class ISINTickerMapping(Base):
             "ticker",
             "exchange_code",
             name="uq_isin_ticker_exchange_active",
-            postgresql_where="is_active = true",
         ),
     )
 

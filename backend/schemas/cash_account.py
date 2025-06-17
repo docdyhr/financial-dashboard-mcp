@@ -2,7 +2,7 @@
 
 from decimal import Decimal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class CashAccountBase(BaseModel):
@@ -38,8 +38,7 @@ class CashAccountResponse(CashAccountBase):
     balance: Decimal
     formatted_balance: str
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class CashTransactionCreate(BaseModel):
@@ -65,5 +64,4 @@ class CashTransactionResponse(BaseModel):
     transaction_date: str
     new_balance: Decimal
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
