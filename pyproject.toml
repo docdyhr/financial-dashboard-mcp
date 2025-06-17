@@ -271,7 +271,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "financial-dashboard-mcp"
-version = "2.0.1"
+version = "2.0.2"
 description = "A production-ready financial dashboard with AI integration, zero technical debt, and streamlined dependencies"
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -426,7 +426,7 @@ ignore_token_for_push = false
 
 # Bumpversion configuration (alternative to semantic-release)
 [tool.bumpversion]
-current_version = "2.0.1"
+current_version = "2.0.2"
 parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)"
 serialize = ["{major}.{minor}.{patch}"]
 search = "{current_version}"
@@ -444,8 +444,8 @@ commit_args = ""
 
 [[tool.bumpversion.files]]
 filename = "pyproject.toml"
-search = 'version = "2.0.1"'
-replace = 'version = "2.0.1"'
+search = 'version = "2.0.2"'
+replace = 'version = "2.0.2"'
 
 [[tool.bumpversion.files]]
 filename = "backend/__init__.py"
