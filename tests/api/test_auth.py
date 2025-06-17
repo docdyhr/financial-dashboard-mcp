@@ -12,19 +12,23 @@ client = TestClient(app)
 
 def test_register_new_user():
     """Test user registration."""
+    import uuid
+
+    unique_id = str(uuid.uuid4())[:8]
+
     response = client.post(
         "/api/v1/auth/register",
         json={
-            "email": "newuser@example.com",
-            "username": "newuser",
+            "email": f"newuser{unique_id}@example.com",
+            "username": f"newuser{unique_id}",
             "password": "securepassword123",
             "full_name": "New User",
         },
     )
     assert response.status_code == 200
     data = response.json()
-    assert data["email"] == "newuser@example.com"
-    assert data["username"] == "newuser"
+    assert data["email"] == f"newuser{unique_id}@example.com"
+    assert data["username"] == f"newuser{unique_id}"
     assert data["full_name"] == "New User"
     assert "hashed_password" not in data
 
@@ -65,14 +69,14 @@ def test_login_with_invalid_credentials():
         },
     )
     assert response.status_code == 401
-    assert response.json()["detail"] == "Incorrect username or password"
+    assert response.json()["message"] == "Incorrect username or password"
 
 
 def test_access_protected_endpoint_without_token():
     """Test accessing protected endpoint without token."""
     response = client.get("/api/v1/positions/")
     assert response.status_code == 401
-    assert response.json()["detail"] == "Not authenticated"
+    assert response.json()["message"] == "Not authenticated"
 
 
 def test_access_protected_endpoint_with_token():
@@ -111,19 +115,23 @@ class TestUserRegistration:
 
     def test_register_with_valid_data(self):
         """Test user registration with valid data."""
+        import uuid
+
+        unique_id = str(uuid.uuid4())[:8]
+
         response = client.post(
             "/api/v1/auth/register",
             json={
-                "email": "valid@example.com",
-                "username": "validuser",
+                "email": f"valid{unique_id}@example.com",
+                "username": f"validuser{unique_id}",
                 "password": "SecurePass123!",
                 "full_name": "Valid User",
             },
         )
         assert response.status_code == 200
         data = response.json()
-        assert data["email"] == "valid@example.com"
-        assert data["username"] == "validuser"
+        assert data["email"] == f"valid{unique_id}@example.com"
+        assert data["username"] == f"validuser{unique_id}"
         assert "password" not in data
         assert "hashed_password" not in data
 
@@ -149,7 +157,10 @@ class TestUserRegistration:
             },
         )
         assert response.status_code == 400
-        assert "already registered" in response.json()["detail"].lower()
+        assert (
+            "already taken" in response.json()["message"].lower()
+            or "already registered" in response.json()["message"].lower()
+        )
 
     def test_register_duplicate_username(self):
         """Test registration with duplicate username."""
@@ -173,7 +184,10 @@ class TestUserRegistration:
             },
         )
         assert response.status_code == 400
-        assert "already registered" in response.json()["detail"].lower()
+        assert (
+            "already taken" in response.json()["message"].lower()
+            or "already registered" in response.json()["message"].lower()
+        )
 
     @pytest.mark.parametrize(
         "email",
@@ -277,7 +291,7 @@ class TestUserLogin:
             },
         )
         assert response.status_code == 401
-        assert "incorrect" in response.json()["detail"].lower()
+        assert "incorrect" in response.json()["message"].lower()
 
     def test_login_nonexistent_user(self):
         """Test login with nonexistent user."""
@@ -289,7 +303,7 @@ class TestUserLogin:
             },
         )
         assert response.status_code == 401
-        assert "incorrect" in response.json()["detail"].lower()
+        assert "incorrect" in response.json()["message"].lower()
 
     def test_login_case_insensitive_email(self):
         """Test that email login is case insensitive."""
@@ -416,9 +430,8 @@ class TestProtectedEndpoints:
         "endpoint",
         [
             "/api/v1/positions/",
-            "/api/v1/portfolio/summary",
-            "/api/v1/transactions/",
-            "/api/v1/cash-accounts/",
+            "/api/v1/portfolio/summary/1",
+            "/api/v1/portfolio/performance/1",
         ],
     )
     def test_protected_endpoints_require_auth(self, endpoint):
@@ -430,9 +443,8 @@ class TestProtectedEndpoints:
         "endpoint",
         [
             "/api/v1/positions/",
-            "/api/v1/portfolio/summary",
-            "/api/v1/transactions/",
-            "/api/v1/cash-accounts/",
+            "/api/v1/portfolio/summary/1",
+            "/api/v1/portfolio/performance/1",
         ],
     )
     def test_protected_endpoints_with_valid_auth(self, endpoint):

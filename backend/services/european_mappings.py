@@ -739,3 +739,66 @@ def suggest_exchange_for_isin(isin: str) -> EuropeanExchange | None:
     }
 
     return primary_exchanges.get(country_code, country_exchanges[0])
+
+
+# Service instance management
+_european_mappings_service: "EuropeanMappingsService | None" = None
+
+
+class EuropeanMappingsService:
+    """Service for managing European stock mappings."""
+
+    def __init__(self):
+        self.mappings: list[EuropeanStockMapping] = []
+        self._last_updated = datetime.now()
+
+    def get_mapping_by_isin(self, isin: str) -> EuropeanStockMapping | None:
+        """Get mapping by ISIN."""
+        for mapping in self.mappings:
+            if mapping.isin == isin:
+                return mapping
+        return None
+
+    def search_by_ticker(self, ticker: str) -> list[EuropeanStockMapping]:
+        """Search mappings by ticker."""
+        results = []
+        for mapping in self.mappings:
+            if ticker.upper() in mapping.ticker.upper():
+                results.append(mapping)
+        return results
+
+    def add_mapping(self, mapping: EuropeanStockMapping) -> None:
+        """Add a new mapping."""
+        # Remove existing mapping with same ISIN
+        self.mappings = [m for m in self.mappings if m.isin != mapping.isin]
+        self.mappings.append(mapping)
+        self._last_updated = datetime.now()
+
+    def get_all_mappings(self) -> list[EuropeanStockMapping]:
+        """Get all mappings."""
+        return self.mappings.copy()
+
+    def update_mapping(self, isin: str, **kwargs) -> bool:
+        """Update an existing mapping."""
+        for mapping in self.mappings:
+            if mapping.isin == isin:
+                for key, value in kwargs.items():
+                    if hasattr(mapping, key):
+                        setattr(mapping, key, value)
+                self._last_updated = datetime.now()
+                return True
+        return False
+
+    def remove_mapping(self, isin: str) -> bool:
+        """Remove a mapping by ISIN."""
+        original_count = len(self.mappings)
+        self.mappings = [m for m in self.mappings if m.isin != isin]
+        return len(self.mappings) < original_count
+
+
+def get_european_mappings_service() -> EuropeanMappingsService:
+    """Get the singleton European mappings service instance."""
+    global _european_mappings_service
+    if _european_mappings_service is None:
+        _european_mappings_service = EuropeanMappingsService()
+    return _european_mappings_service

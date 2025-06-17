@@ -794,3 +794,8 @@ class ISINService:
 
 # Global service instance
 isin_service = ISINService()
+
+
+def get_isin_service() -> ISINService:
+    """Get the global ISIN service instance."""
+    return isin_service

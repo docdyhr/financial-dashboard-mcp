@@ -15,7 +15,7 @@ from typing import Any
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
-from backend.database import get_db_session
+from backend.models import get_db
 from backend.models.isin import ISINTickerMapping
 from backend.services.european_mappings import (
     EuropeanStockMapping,
@@ -202,13 +202,16 @@ class ISINSyncService:
 
     async def _sync_batch(self, job: SyncJob, isins: list[str]):
         """Sync a batch of ISINs."""
-        with get_db_session() as db:
+        db = next(get_db())
+        try:
             for isin in isins:
                 try:
                     await self._sync_single_isin(db, job, isin)
                 except Exception as e:
                     logger.error(f"Error syncing ISIN {isin}: {e}")
                     job.errors.append(f"{isin}: {e!s}")
+        finally:
+            db.close()
 
     async def _sync_single_isin(self, db: Session, job: SyncJob, isin: str):
         """Sync a single ISIN."""
@@ -366,9 +369,9 @@ class ISINSyncService:
             return ConflictResolution.USE_NEW
 
         # Rule 4: Check data freshness
-        if existing.last_updated:
+        if existing.last_updated and isinstance(existing.last_updated, datetime):
             age = datetime.now() - existing.last_updated
-            if age.days > self.auto_resolve_rules["max_age_days"]:
+            if age.days > self.auto_resolve_rules.get("max_age_days", 30):
                 return ConflictResolution.USE_NEW
 
         return None

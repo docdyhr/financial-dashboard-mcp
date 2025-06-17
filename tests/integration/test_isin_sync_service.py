@@ -11,6 +11,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from backend.api.isin_sync import router
+from backend.models import get_db
 from backend.services.isin_sync_service import (
     ConflictResolution,
     ISINSyncService,
@@ -490,15 +491,27 @@ class TestISINSyncAPI:
                 return_value="bulk_job_123"
             )
 
-            with patch("backend.api.isin_sync.get_db_session") as mock_get_db:
+            # Override the dependency
+            def mock_get_db():
                 mock_db = Mock()
-                mock_mappings = [Mock(isin=f"DE{str(i).zfill(9)}0") for i in range(50)]
+                # Create mock mappings with proper isin attributes
+                mock_mappings = []
+                for i in range(50):
+                    mapping = Mock()
+                    mapping.isin = f"DE{str(i).zfill(9)}0"
+                    mock_mappings.append(mapping)
+
                 mock_db.query.return_value.filter.return_value.limit.return_value.all.return_value = (
                     mock_mappings
                 )
-                mock_get_db.return_value = mock_db
+                yield mock_db
 
+            test_client.app.dependency_overrides[get_db] = mock_get_db
+
+            try:
                 response = test_client.post("/isin/sync/bulk", json=bulk_request)
+            finally:
+                test_client.app.dependency_overrides = {}
 
                 assert response.status_code == 200
                 data = response.json()

@@ -78,7 +78,7 @@ class BaseMarketDataProvider(ABC):
         ticker_info = TickerUtils.parse_ticker(ticker)
         suggestions = []
 
-        if ticker_info.exchange:
+        if ticker_info.exchange_suffix:
             # Already has exchange suffix
             base = ticker_info.base_ticker
             suggestions.extend(

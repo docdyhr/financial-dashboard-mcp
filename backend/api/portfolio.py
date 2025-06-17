@@ -1,12 +1,14 @@
 """Portfolio API router for portfolio summary and performance endpoints."""
 
 from datetime import date
-from typing import Any
+from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
+from backend.auth.dependencies import get_current_active_user
 from backend.models import get_db
+from backend.models.user import User
 from backend.schemas.base import BaseResponse
 from backend.schemas.portfolio import (
     AllocationBreakdown,
@@ -14,6 +16,7 @@ from backend.schemas.portfolio import (
     PerformanceMetrics,
     PortfolioSummary,
 )
+from backend.services.performance_benchmark import get_performance_benchmark_service
 from backend.services.portfolio import PortfolioService
 
 router = APIRouter()
@@ -22,7 +25,9 @@ portfolio_service = PortfolioService()
 
 @router.get("/summary/{user_id}", response_model=BaseResponse[PortfolioSummary])
 async def get_portfolio_summary(
-    user_id: int, db: Session = Depends(get_db)
+    user_id: int,
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    db: Session = Depends(get_db),
 ) -> BaseResponse[PortfolioSummary]:
     """Get comprehensive portfolio summary for a user."""
     try:
@@ -59,6 +64,7 @@ async def get_allocation_breakdown(
 @router.get("/performance/{user_id}", response_model=BaseResponse[PerformanceMetrics])
 async def get_performance_metrics(
     user_id: int,
+    current_user: Annotated[User, Depends(get_current_active_user)],
     start_date: date | None = Query(
         None, description="Start date for performance calculation"
     ),
@@ -162,6 +168,37 @@ async def get_position_weights(
             success=True,
             message="Position weights calculated successfully",
             data=weights,
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e)) from e
+
+
+@router.get("/benchmark/{user_id}")
+async def get_benchmark_analysis(
+    user_id: int,
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    benchmarks: str = Query(
+        "SPY,VTI,QQQ,BND", description="Comma-separated list of benchmark tickers"
+    ),
+    start_date: date | None = Query(None, description="Start date for analysis"),
+    end_date: date | None = Query(None, description="End date for analysis"),
+    db: Session = Depends(get_db),
+) -> BaseResponse[Any]:
+    """Get comprehensive portfolio benchmark analysis."""
+    try:
+        benchmark_service = get_performance_benchmark_service()
+        benchmark_tickers = [ticker.strip().upper() for ticker in benchmarks.split(",")]
+
+        analysis = benchmark_service.get_comprehensive_benchmark_analysis(
+            db, user_id, benchmark_tickers, start_date, end_date
+        )
+
+        return BaseResponse(
+            success=True,
+            message="Benchmark analysis completed successfully",
+            data=analysis,
         )
     except HTTPException:
         raise

@@ -7,7 +7,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
-from backend.database import get_db_session
+from backend.models import get_db
 from backend.services.isin_sync_service import ConflictResolution, get_isin_sync_service
 
 logger = logging.getLogger(__name__)
@@ -251,7 +251,7 @@ async def resolve_conflict(request: ConflictResolutionRequest) -> dict[str, Any]
 async def start_bulk_sync(
     request: BulkSyncRequest,
     background_tasks: BackgroundTasks,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db),
 ) -> dict[str, Any]:
     """Start bulk synchronization based on criteria.
 
@@ -425,20 +425,20 @@ async def sync_service_health() -> dict[str, Any]:
         sync_service = get_isin_sync_service()
         stats = sync_service.get_sync_statistics()
 
-        # Determine health status
-        is_healthy = (
-            stats["service_running"]
-            and stats["failed_jobs"]
-            < stats["total_jobs"] * 0.1  # Less than 10% failure rate
-        )
+        # Determine health status with safe defaults
+        total_jobs = stats.get("total_jobs", 0)
+        failed_jobs = stats.get("failed_jobs", 0)
+        is_healthy = stats.get("service_running", False) and (
+            total_jobs == 0 or failed_jobs <= total_jobs * 0.1
+        )  # 10% or less failure rate
 
         health_data = {
             "healthy": is_healthy,
-            "service_running": stats["service_running"],
-            "queue_size": stats["queue_size"],
-            "active_jobs": stats["running_jobs"],
-            "recent_failures": stats["failed_jobs"],
-            "unresolved_conflicts": stats["unresolved_conflicts"],
+            "service_running": stats.get("service_running", False),
+            "queue_size": stats.get("queue_size", 0),
+            "active_jobs": stats.get("running_jobs", 0),
+            "recent_failures": stats.get("failed_jobs", 0),
+            "unresolved_conflicts": stats.get("unresolved_conflicts", 0),
             "last_check": __import__("datetime").datetime.now().isoformat(),
         }
 
