@@ -1,6 +1,27 @@
 # CHANGELOG
 
+## Unreleased
 
+### Fixed
+- Fixed EuropeanExchange enum error by renaming reserved 'name' attribute to 'display_name'
+- Fixed frontend import errors by adding proper Python path handling and absolute imports
+- Fixed invalid version numbers in pyproject.toml configuration
+- Removed hardcoded passwords from migration files, now uses environment variables
+- Added proper logging to silent exception handling in market data service
+- Removed obsolete Docker Compose version attribute
+- Updated system status documentation to reflect actual development state
+
+### Added
+- Complete cash account tracking integration in portfolio calculations
+- Position weight calculation in portfolio service
+- Comprehensive ticker validation with exchange-specific rules
+- Real benchmark data fetching using market data service
+
+### Changed
+- Updated SQLAlchemy to use modern DeclarativeBase instead of deprecated as_declarative
+- Updated Pydantic class Config to model_config with ConfigDict
+- Improved error handling with specific exception types and logging
+- Modernized codebase to be compatible with SQLAlchemy 2.0 and Pydantic V2
 
 ## v2.0.2 (2025-06-17)
 

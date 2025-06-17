@@ -1,33 +1,42 @@
 # TODO - Technical Debt and Improvements
 
-## High Priority Technical Debt
+## ✅ Recently Completed (June 2025)
 
-### 1. Cash Balance Implementation
+### Major Technical Debt Resolution
+- [x] **SQLAlchemy 2.0 Compatibility** - Fixed EuropeanExchange enum and UniqueConstraint issues
+- [x] **Frontend Import Errors** - Added proper Python path handling and absolute imports
+- [x] **Configuration Issues** - Fixed invalid version numbers in pyproject.toml
+- [x] **Security Hardening** - Replaced hardcoded passwords with environment variables
+- [x] **Cash Account System** - Implemented complete cash tracking in portfolio calculations
+- [x] **Authentication Infrastructure** - Added JWT-based auth system with proper security
+- [x] **Error Handling** - Replaced silent exception handling with proper logging
+- [x] **Code Modernization** - Updated to SQLAlchemy DeclarativeBase and Pydantic V2
 
-- [ ] Implement actual cash account tracking (currently hardcoded to DEFAULT_CASH_BALANCE)
-- [ ] Add cash deposit/withdrawal functionality
-- [ ] Update portfolio calculations to use real cash balances
-- **Files affected**: `backend/services/portfolio.py`, `backend/models/`, `backend/schemas/`
+## High Priority Remaining Tasks
 
-### 2. Authentication System
+### 1. Testing & Quality Assurance
 
-- [ ] Implement user authentication and authorization
-- [ ] Remove placeholder authentication packages or implement proper JWT/OAuth
-- [ ] Add user registration and login endpoints
-- **Files affected**: `backend/api/auth.py` (to create), `backend/services/auth.py` (to create)
+- [ ] Fix pytest marker warnings (markers defined but not recognized)
+- [ ] Expand test coverage for new authentication system
+- [ ] Add integration tests for cash account functionality
+- [ ] Validate end-to-end system startup and functionality
+- **Files affected**: `pytest.ini`, `tests/`
 
-### 3. Configuration Security
+### 2. Production Deployment
 
-- [ ] Implement environment variable validation for production
-- [ ] Add secure secret key generation
-- [ ] Create production-ready Docker configuration with secrets management
-- **Files affected**: `backend/config.py`, `docker-compose.yml`
+- [ ] Validate Docker production configuration
+- [ ] Test production secret management scripts
+- [ ] Add monitoring and health check endpoints
+- [ ] Create production deployment documentation
+- **Files affected**: `docker/docker-compose.prod.yml`, `scripts/setup_production_secrets.sh`
 
-### 4. Error Handling Standardization
+### 3. Feature Completion
 
-- [ ] Replace generic `except Exception` blocks with specific error handling
-- [ ] Implement consistent error responses across all API endpoints
-- [ ] Add error logging and monitoring
+- [ ] Complete MCP server integration testing
+- [ ] Implement remaining ISIN sync functionality  
+- [ ] Add portfolio performance benchmarking
+- [ ] Complete European market data support
+- **Files affected**: `mcp_server/`, `backend/services/isin_sync_service.py`
 - **Files affected**: All service and API files
 
 ## Medium Priority Improvements
