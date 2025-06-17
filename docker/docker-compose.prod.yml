@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   backend:
     build:
@@ -41,7 +39,7 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile.backend
-    command: celery -A backend.tasks.worker worker --loglevel=info
+    command: celery -A backend.tasks worker --loglevel=info
     environment:
       - ENVIRONMENT=production
       - DATABASE_URL_FILE=/run/secrets/db_url
@@ -62,7 +60,7 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile.backend
-    command: celery -A backend.tasks.worker beat --loglevel=info
+    command: celery -A backend.tasks beat --loglevel=info
     environment:
       - ENVIRONMENT=production
       - DATABASE_URL_FILE=/run/secrets/db_url
@@ -83,12 +81,10 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile.backend
-    command: celery -A backend.tasks.worker flower --basic_auth=$${FLOWER_USERNAME}:$${FLOWER_PASSWORD}
+    command: sh -c 'celery -A backend.tasks flower --basic_auth=admin:$(cat /run/secrets/flower_password)'
     environment:
       - ENVIRONMENT=production
       - CELERY_BROKER_URL=redis://redis:6379/0
-      - FLOWER_USERNAME=admin
-      - FLOWER_PASSWORD_FILE=/run/secrets/flower_password
     secrets:
       - flower_password
     depends_on:
@@ -119,7 +115,7 @@ services:
 
   redis:
     image: redis:7-alpine
-    command: redis-server --requirepass_FILE /run/secrets/redis_password
+    command: sh -c 'redis-server --requirepass $(cat /run/secrets/redis_password)'
     secrets:
       - redis_password
     volumes:
@@ -127,10 +123,29 @@ services:
     networks:
       - app-network
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD", "redis-cli", "--no-auth-warning", "ping"]
       interval: 5s
       timeout: 5s
       retries: 5
+
+  mcp_server:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.mcp
+    environment:
+      - ENVIRONMENT=production
+      - DATABASE_URL_FILE=/run/secrets/db_url
+      - BACKEND_URL=http://backend:8000
+      - MCP_AUTH_TOKEN_FILE=/run/secrets/mcp_auth_token
+    secrets:
+      - db_url
+      - mcp_auth_token
+    depends_on:
+      - backend
+    ports:
+      - "8502:8502"
+    networks:
+      - app-network
 
 secrets:
   db_url:
@@ -144,6 +159,8 @@ secrets:
   flower_password:
     external: true
   redis_password:
+    external: true
+  mcp_auth_token:
     external: true
 
 volumes:

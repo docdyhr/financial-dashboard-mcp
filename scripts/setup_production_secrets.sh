@@ -19,10 +19,11 @@ create_secret() {
 }
 
 # Generate secure values
-SECRET_KEY=$(python3 -c "from backend.core.security import generate_secret_key; print(generate_secret_key(64))")
-FLOWER_PASSWORD=$(python3 -c "from backend.core.security import generate_simple_password; print(generate_simple_password(20))")
-DB_PASSWORD=$(python3 -c "from backend.core.security import generate_simple_password; print(generate_simple_password(20))")
-REDIS_PASSWORD=$(python3 -c "from backend.core.security import generate_simple_password; print(generate_simple_password(20))")
+SECRET_KEY=$(python3 -c "import secrets; print(secrets.token_urlsafe(64))")
+FLOWER_PASSWORD=$(python3 -c "import secrets; print(secrets.token_urlsafe(20))")
+DB_PASSWORD=$(python3 -c "import secrets; print(secrets.token_urlsafe(20))")
+REDIS_PASSWORD=$(python3 -c "import secrets; print(secrets.token_urlsafe(20))")
+MCP_AUTH_TOKEN=$(python3 -c "import secrets; print(secrets.token_urlsafe(32))")
 
 # Database configuration
 DB_USER="financial_dashboard"
@@ -40,6 +41,7 @@ create_secret "db_url" "$DB_URL"
 create_secret "db_user" "$DB_USER"
 create_secret "db_password" "$DB_PASSWORD"
 create_secret "redis_password" "$REDIS_PASSWORD"
+create_secret "mcp_auth_token" "$MCP_AUTH_TOKEN"
 
 echo ""
 echo "Production secrets have been created!"
@@ -50,6 +52,7 @@ echo "Database User: $DB_USER"
 echo "Database Password: $DB_PASSWORD"
 echo "Flower Password: $FLOWER_PASSWORD"
 echo "Redis Password: $REDIS_PASSWORD"
+echo "MCP Auth Token: $MCP_AUTH_TOKEN"
 echo ""
 echo "To deploy in production, run:"
 echo "docker stack deploy -c docker/docker-compose.prod.yml financial-dashboard"

@@ -1,5 +1,6 @@
 """Portfolio service for portfolio operations and calculations."""
 
+import logging
 from datetime import date, timedelta
 from decimal import Decimal
 
@@ -704,5 +705,5 @@ class PortfolioService:
             return Decimal("10.0")  # ~10% annual S&P 500 historical average
 
         except Exception as e:
-            logging.error(f"Error calculating benchmark return: {e}")
+            logging.exception(f"Error calculating benchmark return: {e}")
             return Decimal("10.0")  # Fallback to historical average

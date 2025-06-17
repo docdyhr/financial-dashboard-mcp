@@ -146,9 +146,7 @@ class EnhancedDeutscheBorseProvider(BaseHTTPProvider):
 
         except (KeyError, ValueError, TypeError) as e:
             logger.warning(f"Error parsing Deutsche Börse response: {e}")
-            return self._create_error_result(
-                ticker, f"Response parsing error: {e!s}"
-            )
+            return self._create_error_result(ticker, f"Response parsing error: {e!s}")
 
 
 class EnhancedEuronextProvider(BaseHTTPProvider):
@@ -248,9 +246,7 @@ class EnhancedEuronextProvider(BaseHTTPProvider):
 
         except (KeyError, ValueError, TypeError) as e:
             logger.warning(f"Error parsing Euronext response: {e}")
-            return self._create_error_result(
-                ticker, f"Euronext parsing error: {e!s}"
-            )
+            return self._create_error_result(ticker, f"Euronext parsing error: {e!s}")
 
     def _get_euronext_suggestions(self, ticker: str) -> list[str]:
         """Get suggestions for Euronext ticker formats."""
