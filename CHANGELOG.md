@@ -1,27 +1,58 @@
 # CHANGELOG
 
-## Unreleased
 
-### Fixed
-- Fixed EuropeanExchange enum error by renaming reserved 'name' attribute to 'display_name'
-- Fixed frontend import errors by adding proper Python path handling and absolute imports
-- Fixed invalid version numbers in pyproject.toml configuration
-- Removed hardcoded passwords from migration files, now uses environment variables
-- Added proper logging to silent exception handling in market data service
-- Removed obsolete Docker Compose version attribute
-- Updated system status documentation to reflect actual development state
 
-### Added
-- Complete cash account tracking integration in portfolio calculations
-- Position weight calculation in portfolio service
-- Comprehensive ticker validation with exchange-specific rules
-- Real benchmark data fetching using market data service
+## v2.0.4 (2025-06-17)
 
-### Changed
-- Updated SQLAlchemy to use modern DeclarativeBase instead of deprecated as_declarative
-- Updated Pydantic class Config to model_config with ConfigDict
-- Improved error handling with specific exception types and logging
-- Modernized codebase to be compatible with SQLAlchemy 2.0 and Pydantic V2
+### Chore
+
+* chore: bump version to 2.0.3 [skip ci] ([`c666a7d`](https://github.com/docdyhr/financial-dashboard-mcp/commit/c666a7dc7d455f00e9f81605715a27dfabb4c92a))
+
+### Documentation
+
+* docs: update project documentation to reflect recent improvements
+
+Documentation Updates:
+- Update TODO.md to show completed technical debt resolution tasks
+- Update README.md features section to reflect current stable functionality
+- Update CHANGELOG.md with comprehensive list of recent fixes and improvements
+- Mark major items as completed: SQLAlchemy 2.0 compatibility, frontend fixes,
+  cash account integration, authentication system, error handling improvements
+
+Status Changes:
+- Change status from &#34;Production Ready&#34; to &#34;Stable &amp; Functional&#34;
+- Accurately reflect current codebase state and capabilities
+- Document security improvements and code modernization
+- Highlight European markets support and testing infrastructure
+
+This documentation update provides an accurate picture of the project&#39;s
+current state after the major technical debt resolution effort.
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude &lt;noreply@anthropic.com&gt; ([`53a635d`](https://github.com/docdyhr/financial-dashboard-mcp/commit/53a635d91d795ec7ccd65a4ca6f9f313f9279171))
+
+### Fix
+
+* fix: correct remaining invalid version numbers in pyproject.toml
+
+Fixed the final incorrect configuration values:
+- python_version: &#34;2.0.3&#34; → &#34;3.11&#34;
+- minversion: &#34;2.0.3&#34; → &#34;6.0&#34;
+- target-version: &#34;2.0.3&#34; → &#34;py311&#34;
+
+These were incorrectly set to the project version number rather than
+the correct tool-specific version identifiers. This resolves mypy,
+pytest, and ruff configuration issues.
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude &lt;noreply@anthropic.com&gt; ([`4444e81`](https://github.com/docdyhr/financial-dashboard-mcp/commit/4444e81fe1b5a59a837bcbc5db7484ad8524e119))
+
+### Unknown
+
+* Merge branch &#39;main&#39; of https://github.com/docdyhr/financial-dashboard-mcp ([`f7acd69`](https://github.com/docdyhr/financial-dashboard-mcp/commit/f7acd693239e483415e7a72ecec668c1bc3fea01))
+
 
 ## v2.0.3 (2025-06-17)
 
