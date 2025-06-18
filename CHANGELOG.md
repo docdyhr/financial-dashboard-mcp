@@ -2,6 +2,67 @@
 
 
 
+## v2.3.0 (2025-06-18)
+
+### Chore
+
+* chore: bump version to 2.2.0 [skip ci] ([`408a3c4`](https://github.com/docdyhr/financial-dashboard-mcp/commit/408a3c4fed15a829d49a3b1453695cece1b9324c))
+
+### Feature
+
+* feat: comprehensive feature development and testing suite
+
+This commit implements all high and medium priority tasks for the Financial Dashboard project:
+
+## Features Implemented
+
+### Core Functionality
+- Demo positions system with AAPL, MSFT, VOO, and BTC-USD test data
+- Real-time price updates using mock market data service
+- Celery periodic task scheduler for automated updates
+- Enhanced portfolio visualizations with Plotly charts
+- Backup and export functionality (CSV/JSON/database)
+
+### Authentication System
+- JWT-based authentication with password hashing
+- Streamlit authentication components and session management
+- Protected API endpoints with user validation
+- Non-authenticated app version for development (app_no_auth.py)
+
+### Database Improvements
+- Fixed migration dependencies (20250616_1114_08230f29a0db)
+- Added proper email validation with pydantic[email]
+- Corrected asset creation with required category field
+
+### Testing and Quality
+- Comprehensive test suite for position services
+- Demo data scripts for development testing
+- Quality check scripts for code analysis
+- Authentication testing utilities
+
+### Configuration Fixes
+- Fixed pyproject.toml Python version settings
+- Corrected ruff and mypy target versions
+- Updated requirements.txt with proper dependencies
+- Improved Docker Compose configuration
+
+## Technical Debt Resolution
+- Reformatted 168+ files with black, isort, and ruff
+- Resolved bcrypt compatibility issues
+- Fixed database migration chain
+- Standardized code formatting and imports
+
+## Development Tools
+- Added monitoring scripts for price updates
+- Created user management utilities
+- Enhanced testing infrastructure
+- Improved error handling and logging
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude &lt;noreply@anthropic.com&gt; ([`3e474ef`](https://github.com/docdyhr/financial-dashboard-mcp/commit/3e474ef327b4d85f508ad9518ea23080edfab75a))
+
+
 ## v2.2.0 (2025-06-17)
 
 ### Chore

@@ -24,7 +24,7 @@ ensure_newline_before_comments = true
 skip_glob = ["*/migrations/*", "*/venv/*"]
 
 [tool.mypy]
-python_version = "3.11"
+python_version = "2.3.0"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
@@ -46,7 +46,7 @@ disallow_untyped_defs = false
 disallow_incomplete_defs = false
 
 [tool.pytest.ini_options]
-minversion = "6.0"
+minversion = "2.3.0"
 testpaths = ["tests"]
 python_files = "test_*.py"
 python_classes = "Test*"
@@ -94,7 +94,7 @@ exclude_lines = [
 line-length = 88
 
 # Python 3.11
-target-version = "py311"
+target-version = "2.3.0"
 
 # Exclude directories
 exclude = [
@@ -271,7 +271,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "financial-dashboard-mcp"
-version = "2.2.0"
+version = "2.3.0"
 description = "A production-ready financial dashboard with AI integration, zero technical debt, and streamlined dependencies"
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -430,7 +430,7 @@ ignore_token_for_push = false
 
 # Bumpversion configuration (alternative to semantic-release)
 [tool.bumpversion]
-current_version = "2.2.0"
+current_version = "2.3.0"
 parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)"
 serialize = ["{major}.{minor}.{patch}"]
 search = "{current_version}"
@@ -448,8 +448,8 @@ commit_args = ""
 
 [[tool.bumpversion.files]]
 filename = "pyproject.toml"
-search = 'version = "2.2.0"'
-replace = 'version = "2.2.0"'
+search = 'version = "2.3.0"'
+replace = 'version = "2.3.0"'
 
 [[tool.bumpversion.files]]
 filename = "backend/__init__.py"
