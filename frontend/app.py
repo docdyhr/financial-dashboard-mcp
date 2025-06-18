@@ -13,10 +13,7 @@ import pandas as pd
 import requests
 import streamlit as st
 
-from frontend.components.auth import (
-    require_authentication,
-    show_user_info,
-)
+from frontend.components.auth import require_authentication, show_user_info
 from frontend.components.enhanced_portfolio import enhanced_portfolio_page
 from frontend.components.isin_analytics_dashboard import isin_analytics_dashboard
 from frontend.components.isin_input import isin_management_page
@@ -593,7 +590,6 @@ def settings_page():
                 st.success("Settings reloaded!")
                 st.rerun()
             except Exception as e:
-                logger.error(f"Failed to reload settings: {e}")
                 st.error(f"Failed to reload settings: {e}")
 
     tab1, tab2, tab3, tab4 = st.tabs(

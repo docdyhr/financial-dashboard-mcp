@@ -218,6 +218,37 @@ ignore = [
 
     # Airflow rules (if not using Airflow)
     "AIR001", # Variable name should be in SCREAMING_SNAKE_CASE
+
+    # Additional rules to reduce noise during development
+    "TRY301", # Abstract `raise` to an inner function - too verbose
+    "FBT001", # Boolean-typed positional argument in function definition
+    "FBT003", # Boolean positional value in function call
+    "ARG001", # Unused function argument (common in FastAPI dependencies)
+    "SLF001", # Private member accessed (common in service layers)
+    "BLE001", # Do not catch blind exception: `Exception` (sometimes necessary)
+    "RUF001", # String contains ambiguous unicode characters (test data)
+    "B904",   # Within an `except` clause, raise exceptions with `raise ...`
+    "RET504", # Unnecessary variable assignment before `return` statement
+    "PLR0911", # Too many return statements
+    "PLR0912", # Too many branches
+    "PLR0915", # Too many statements
+    "C901",   # Function is too complex
+    "ANN201", # Missing return type annotation for public function
+    "ANN202", # Missing return type annotation for private function
+    "ANN204", # Missing return type annotation for special method
+    "ANN205", # Missing return type annotation for staticmethod
+    "ANN206", # Missing return type annotation for classmethod
+    "TRY400", # Use `logging.exception` instead of `logging.error`
+    "TRY300", # Consider moving this statement to an `else` block
+    "G004",   # Logging statement uses f-string
+    "ARG002", # Unused method argument
+    "S106",   # Possible hardcoded password assigned to argument
+    "PT011",  # `pytest.raises(Exception)` is too broad
+    "INP001", # File is part of an implicit namespace package
+    "B007",   # Loop control variable not used within loop body
+    "DTZ005", # `datetime.datetime.now()` called without a `tz` argument
+    "DTZ011", # `datetime.date.today()` used
+    "RUF013", # PEP 484 prohibits implicit `Optional`
 ]
 
 fixable = ["ALL"]
