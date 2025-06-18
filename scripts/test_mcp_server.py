@@ -105,7 +105,7 @@ async def test_mcp_server():
 
         # Check tools are loaded
         logger.info(f"Server loaded {len(mcp_server.all_tools)} tools:")
-        for tool_name in mcp_server.all_tools.keys():
+        for tool_name in mcp_server.all_tools:
             logger.info(f"  - {tool_name}")
 
         # Cleanup

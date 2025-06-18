@@ -119,7 +119,7 @@ def handle_exception(exc: Exception) -> JSONResponse:
             },
         )
 
-    if isinstance(exc, ConfigurationError) or isinstance(exc, DatabaseError):
+    if isinstance(exc, ConfigurationError | DatabaseError):
         return JSONResponse(
             status_code=500,
             content={

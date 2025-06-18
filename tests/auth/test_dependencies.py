@@ -204,9 +204,6 @@ class TestAuthenticationSecurity:
         failed_attempts = 6
         lockout_threshold = 5
 
-        if failed_attempts > lockout_threshold:
-            account_locked = True
-        else:
-            account_locked = False
+        account_locked = failed_attempts > lockout_threshold
 
         assert account_locked is True

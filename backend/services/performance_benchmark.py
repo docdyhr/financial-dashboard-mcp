@@ -323,7 +323,7 @@ class PerformanceBenchmarkService:
 
         # Sharpe ratio analysis
         sharpe_ratios = []
-        for ticker, data in benchmarks.items():
+        for data in benchmarks.values():
             if data["benchmark"].sharpe_ratio:
                 sharpe_ratios.append(float(data["benchmark"].sharpe_ratio))
 
@@ -340,7 +340,7 @@ class PerformanceBenchmarkService:
 
         # Volatility analysis
         volatilities = []
-        for ticker, data in benchmarks.items():
+        for data in benchmarks.values():
             if data["benchmark"].volatility:
                 volatilities.append(float(data["benchmark"].volatility))
 

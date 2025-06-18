@@ -5,6 +5,7 @@ data sources, automatic conflict resolution, and background sync tasks.
 """
 
 import asyncio
+import contextlib
 import logging
 import time
 from dataclasses import dataclass, field
@@ -123,10 +124,8 @@ class ISINSyncService:
 
         if self._sync_task:
             self._sync_task.cancel()
-            try:
+            with contextlib.suppress(asyncio.CancelledError):
                 await self._sync_task
-            except asyncio.CancelledError:
-                pass
 
         logger.info("Background sync service stopped")
 

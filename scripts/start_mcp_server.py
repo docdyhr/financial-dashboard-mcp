@@ -11,7 +11,7 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from mcp_server.main import FinancialDashboardMCP, main  # noqa: E402
+from mcp_server.main import FinancialDashboardMCP, main
 
 
 def test_mcp_server():

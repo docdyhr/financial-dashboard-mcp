@@ -15,14 +15,14 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-import hashlib  # noqa: E402
-import logging  # noqa: E402
-import secrets  # noqa: E402
-import string  # noqa: E402
-from datetime import datetime  # noqa: E402
+import hashlib
+import logging
+import secrets
+import string
+from datetime import datetime
 
-from backend.database import get_db_session  # noqa: E402
-from backend.models.user import User  # noqa: E402
+from backend.database import get_db_session
+from backend.models.user import User
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

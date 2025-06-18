@@ -7,22 +7,21 @@ repos:
     rev: 6.0.1
     hooks:
       - id: isort
-  # Temporarily disabled ruff due to extensive linting issues
-  # - repo: https://github.com/charliermarsh/ruff-pre-commit
-  #   rev: v0.11.13
-  #   hooks:
-  #     - id: ruff
-  #       args: [--fix, --exit-non-zero-on-fix]
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.11.13
+    hooks:
+      - id: ruff
+        args: [--fix]  # Removed --exit-non-zero-on-fix to be less strict
   # - repo: https://github.com/pre-commit/mirrors-mypy
   #   rev: v1.16.0
   #   hooks:
   #     - id: mypy
-  # Temporarily disabled flake8 due to configuration issues
+  # Temporarily disabled flake8 due to configuration parsing issues
   # - repo: https://github.com/PyCQA/flake8
   #   rev: 7.2.0
   #   hooks:
   #     - id: flake8
-  #       args: [--max-line-length=120, --extend-ignore=E203,W503,T201,F401,F811,F821,E402,E501,W291,W292,W293]
+  #       args: [--max-line-length=120, --extend-ignore=E203,W503,T201,F401,F811,F821,E402,E501,W291,W292,W293,F541,F632,F841]
   # Temporarily disabled bandit - security issues noted for future resolution
   # - repo: https://github.com/PyCQA/bandit
   #   rev: 1.8.3

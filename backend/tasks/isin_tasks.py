@@ -699,11 +699,9 @@ def generate_isin_report() -> dict[str, Any]:
                     * 100,
                 },
                 "distribution": {
-                    "by_country": {country: count for country, count in country_dist},
-                    "by_exchange": {
-                        exchange: count for exchange, count in exchange_dist
-                    },
-                    "by_source": {source: count for source, count in source_dist},
+                    "by_country": dict(country_dist),
+                    "by_exchange": dict(exchange_dist),
+                    "by_source": dict(source_dist),
                 },
                 "activity": {"recent_mappings_7_days": recent_mappings},
                 "quality_metrics": {

@@ -23,7 +23,7 @@ from typing import Any
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from mcp_server.main import FinancialDashboardMCP  # noqa: E402
+from mcp_server.main import FinancialDashboardMCP
 
 # Configure logging
 logging.basicConfig(

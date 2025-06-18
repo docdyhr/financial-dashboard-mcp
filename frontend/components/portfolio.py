@@ -353,7 +353,7 @@ def holdings_table(backend_url: str):
         if position_options:
             selected_position_display = st.selectbox(
                 "Select a position to manage:",
-                options=["Select a position..."] + position_options,
+                options=["Select a position...", *position_options],
                 index=0,
             )
 

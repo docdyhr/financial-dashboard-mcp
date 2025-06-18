@@ -123,7 +123,7 @@ class ClaudeConfigUpdater:
                 servers = config.get("mcpServers", {})
                 if servers:
                     log_info("Existing MCP servers that will be preserved:")
-                    for server_name in servers.keys():
+                    for server_name in servers:
                         status = (
                             "🔄 Will update"
                             if server_name == "financial-dashboard"

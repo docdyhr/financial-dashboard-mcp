@@ -410,9 +410,7 @@ def generate_portfolio_report(
                     max([pos["weight"] for pos in positions]) if positions else 0
                 ),
                 "diversification_score": (
-                    len(set([pos["ticker"][:2] for pos in positions]))
-                    if positions
-                    else 0
+                    len({pos["ticker"][:2] for pos in positions}) if positions else 0
                 ),  # Simple sector diversity
             },
         }

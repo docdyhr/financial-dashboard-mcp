@@ -609,7 +609,7 @@ class EuropeanMappingService:
         """Export mappings to a list of dictionaries."""
         results = []
 
-        for isin, mappings in self.mappings.items():
+        for mappings in self.mappings.values():
             for mapping in mappings:
                 if exchange is None or mapping.exchange == exchange:
                     results.append(

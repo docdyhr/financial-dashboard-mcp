@@ -287,7 +287,7 @@ class TestMarketDataCalculations:
         self, sample_asset_prices: dict[str, dict[str, Any]]
     ) -> None:
         """Test price change calculation from market data."""
-        for ticker, data in sample_asset_prices.items():
+        for data in sample_asset_prices.values():
             price = data["price"]
             change = data["change"]
             change_percent = data["change_percent"]

@@ -359,12 +359,14 @@ def performance_attribution_chart(backend_url: str):
                 "relative",
                 "total",
             ],
-            x=df_attr["Asset"].tolist() + ["Total"],
+            x=[*df_attr["Asset"].tolist(), "Total"],
             textposition="outside",
             text=[f"+{x:.2f}%" for x in df_attr["Contribution (%)"]]
             + [f"{df_attr['Contribution (%)'].sum():.2f}%"],
-            y=df_attr["Contribution (%)"].tolist()
-            + [df_attr["Contribution (%)"].sum()],
+            y=[
+                *df_attr["Contribution (%)"].tolist(),
+                df_attr["Contribution (%)"].sum(),
+            ],
             connector={"line": {"color": "rgb(63, 63, 63)"}},
         )
     )
