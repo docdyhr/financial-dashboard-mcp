@@ -8,6 +8,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from backend.auth import create_access_token, get_password_hash, verify_password
+from backend.auth.dependencies import get_current_active_user
 from backend.database import get_db
 from backend.models.user import User
 from backend.schemas.auth import Token, UserCreate, UserResponse
@@ -101,3 +102,11 @@ async def login(
     access_token = create_access_token(data={"sub": str(user.id)})
 
     return {"access_token": access_token, "token_type": "bearer"}
+
+
+@router.get("/me", response_model=UserResponse)
+async def get_current_user_info(
+    current_user: Annotated[User, Depends(get_current_active_user)],
+) -> User:
+    """Get current user information."""
+    return current_user

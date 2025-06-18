@@ -21,7 +21,7 @@ plotly>=5.18.0
 psycopg2-binary>=2.9.9
 
 # Data & API
-pydantic>=2.5.3
+pydantic[email]>=2.5.3
 python-jose[cryptography]>=3.3.0
 
 # Cache/Message Broker

@@ -13,6 +13,10 @@ import pandas as pd
 import requests
 import streamlit as st
 
+from frontend.components.auth import (
+    require_authentication,
+    show_user_info,
+)
 from frontend.components.enhanced_portfolio import enhanced_portfolio_page
 from frontend.components.isin_analytics_dashboard import isin_analytics_dashboard
 from frontend.components.isin_input import isin_management_page
@@ -52,6 +56,14 @@ def check_backend_health():
         return response.status_code == 200
     except requests.exceptions.RequestException:
         return False
+
+
+def make_authenticated_request(method: str, endpoint: str, **kwargs):
+    """Make an authenticated request to the backend API."""
+    from frontend.components.auth import protected_request
+
+    url = f"{BACKEND_URL}{endpoint}"
+    return protected_request(method, url, **kwargs)
 
 
 def dashboard_page():
@@ -671,6 +683,14 @@ def settings_page():
 
 def main():
     """Main application function."""
+    # Initialize session state for navigation
+    if "page" not in st.session_state:
+        st.session_state.page = "Dashboard"
+
+    # Check authentication first
+    if not require_authentication():
+        return
+
     # Header
     st.markdown("# 💰 Financial Dashboard")
     st.markdown("*Powered by real-time task queue system*")
@@ -691,6 +711,7 @@ def main():
                 "Analytics",
                 "Settings",
             ],
+            key="page",
         )
 
         st.divider()
@@ -709,6 +730,9 @@ def main():
         st.markdown("- [Flower UI](http://localhost:5555)")
         st.markdown("- [API Docs](http://localhost:8000/docs)")
         st.markdown("- [GitHub](https://github.com/docdyhr/financial-dashboard-mcp)")
+
+        # User info and logout
+        show_user_info()
 
         # Last updated
         st.divider()
