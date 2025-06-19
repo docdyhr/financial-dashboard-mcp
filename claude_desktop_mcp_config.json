@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "financial-dashboard": {
+      "command": "python",
+      "args": [
+        "-c",
+        "import requests; import json; import sys; config = {'base_url': 'http://localhost:8000', 'token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZXhwIjoxNzUyODY5NTI2fQ.gvNGOesVBIcVIP7a_p3T28cXXs416ncmt7GnpplgbC4', 'user_id': 3}; print('MCP Financial Dashboard Server Ready')"
+      ],
+      "env": {
+        "FINANCIAL_DASHBOARD_URL": "http://localhost:8000",
+        "FINANCIAL_DASHBOARD_TOKEN": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZXhwIjoxNzUyODY5NTI2fQ.gvNGOesVBIcVIP7a_p3T28cXXs416ncmt7GnpplgbC4",
+        "FINANCIAL_DASHBOARD_USER_ID": "3"
+      }
+    }
+  }
+}

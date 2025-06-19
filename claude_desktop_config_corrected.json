@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "financial-dashboard": {
+      "command": "/Users/thomas/Programming/financial-dashboard-mcp/.venv/bin/python",
+      "args": [
+        "/Users/thomas/Programming/financial-dashboard-mcp/mcp_server/financial_dashboard_server.py"
+      ],
+      "env": {
+        "FINANCIAL_DASHBOARD_URL": "http://localhost:8000",
+        "FINANCIAL_DASHBOARD_TOKEN": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZXhwIjoxNzUyODcxOTM2fQ.ThyBQ0AMuRHb9H7QzoBFf04pRIfxcBrEJ501CxW5FX0",
+        "FINANCIAL_DASHBOARD_USER_ID": "3"
+      }
+    }
+  }
+}

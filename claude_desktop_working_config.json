@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "financial-dashboard": {
+      "command": "/Users/thomas/Programming/financial-dashboard-mcp/.venv/bin/python",
+      "args": ["-m", "mcp_server"],
+      "cwd": "/Users/thomas/Programming/financial-dashboard-mcp",
+      "env": {
+        "BACKEND_URL": "http://localhost:8000",
+        "PYTHONPATH": "/Users/thomas/Programming/financial-dashboard-mcp"
+      }
+    }
+  }
+}

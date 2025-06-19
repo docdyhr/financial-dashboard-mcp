@@ -1,0 +1,19 @@
+{
+  "financial_dashboard": {
+    "base_url": "http://localhost:8000",
+    "auth": {
+      "username": "claude_desktop",
+      "password": "Claude123",
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZXhwIjoxNzUyODY5NTI2fQ.gvNGOesVBIcVIP7a_p3T28cXXs416ncmt7GnpplgbC4",
+      "user_id": 3
+    },
+    "endpoints": {
+      "health": "/health",
+      "assets": "/api/v1/assets/",
+      "positions": "/api/v1/positions/",
+      "transactions": "/api/v1/transactions/",
+      "portfolio_overview": "/api/v1/portfolio/overview",
+      "auth_me": "/api/v1/auth/me"
+    }
+  }
+}

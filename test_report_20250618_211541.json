@@ -1,0 +1,95 @@
+{
+  "timestamp": "2025-06-18T21:15:41.718297",
+  "summary": {
+    "total_tests": 14,
+    "passed": 5,
+    "failed": 9,
+    "success_rate": 35.714285714285715
+  },
+  "results": [
+    {
+      "test": "Health Check",
+      "success": true,
+      "message": "API Version: 0.1.0",
+      "timestamp": "2025-06-18T21:15:35.994500"
+    },
+    {
+      "test": "Health Check",
+      "success": true,
+      "message": "API Version: 0.1.0",
+      "timestamp": "2025-06-18T21:15:35.997590"
+    },
+    {
+      "test": "User Registration",
+      "success": true,
+      "message": "New user created",
+      "timestamp": "2025-06-18T21:15:36.823174"
+    },
+    {
+      "test": "User Login",
+      "success": true,
+      "message": "User ID: 1",
+      "timestamp": "2025-06-18T21:15:37.584498"
+    },
+    {
+      "test": "Portfolio Operations",
+      "success": false,
+      "message": "Failed to create assets",
+      "timestamp": "2025-06-18T21:15:38.114126"
+    },
+    {
+      "test": "Transaction Management",
+      "success": false,
+      "message": "No positions available",
+      "timestamp": "2025-06-18T21:15:38.650080"
+    },
+    {
+      "test": "Market Data - Single Quote",
+      "success": false,
+      "message": "Status: 404",
+      "timestamp": "2025-06-18T21:15:39.160368"
+    },
+    {
+      "test": "Market Data - Batch Quotes",
+      "success": false,
+      "message": "Status: 404",
+      "timestamp": "2025-06-18T21:15:39.164485"
+    },
+    {
+      "test": "Performance Analytics",
+      "success": false,
+      "message": "Status: 404",
+      "timestamp": "2025-06-18T21:15:39.673034"
+    },
+    {
+      "test": "Data Export - CSV",
+      "success": false,
+      "message": "Status: 404",
+      "timestamp": "2025-06-18T21:15:40.182763"
+    },
+    {
+      "test": "Data Export - JSON",
+      "success": false,
+      "message": "Status: 404",
+      "timestamp": "2025-06-18T21:15:40.186164"
+    },
+    {
+      "test": "Security - Unauthorized Access",
+      "success": true,
+      "message": "Properly rejected",
+      "timestamp": "2025-06-18T21:15:40.696599"
+    },
+    {
+      "test": "Security - Token Refresh",
+      "success": false,
+      "message": "Status: 404",
+      "timestamp": "2025-06-18T21:15:40.700717"
+    },
+    {
+      "test": "Celery Tasks",
+      "success": false,
+      "message": "Failed to execute background task",
+      "timestamp": "2025-06-18T21:15:41.206927"
+    }
+  ]
+}

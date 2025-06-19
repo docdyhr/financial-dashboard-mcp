@@ -7,6 +7,7 @@ Your Claude Desktop is showing `spawn python ENOENT` errors because it's using a
 ## 📍 Claude Desktop Configuration Location
 
 Claude Desktop stores its configuration in:
+
 ```
 ~/Library/Application Support/Claude/claude_desktop_config.json
 ```
@@ -111,6 +112,7 @@ tail -20 ~/Library/Logs/Claude/mcp-server-financial-dashboard.log
 ### Expected Success Logs
 
 You should see logs like:
+
 ```
 [info] Initializing server...
 [info] Starting Financial Dashboard MCP Server
@@ -121,6 +123,7 @@ You should see logs like:
 ### Test in Claude
 
 Ask Claude:
+
 ```
 "What financial tools do you have available?"
 ```
@@ -132,17 +135,20 @@ You should see a response mentioning the 13 financial dashboard tools.
 ### If Still Getting ENOENT Errors
 
 1. **Verify Python path exists:**
+
    ```bash
    ls -la /Users/thomas/Programming/financial-dashboard-mcp/.venv/bin/python
    ```
 
 2. **Test MCP server manually:**
+
    ```bash
    cd /Users/thomas/Programming/financial-dashboard-mcp
    .venv/bin/python -m mcp_server --test
    ```
 
 3. **Check services are running:**
+
    ```bash
    cd /Users/thomas/Programming/financial-dashboard-mcp
    ./scripts/services.sh status
@@ -151,6 +157,7 @@ You should see a response mentioning the 13 financial dashboard tools.
 ### Alternative Configuration Methods
 
 #### Method A: Using Shell Script
+
 ```json
 {
   "mcpServers": {
@@ -164,6 +171,7 @@ You should see a response mentioning the 13 financial dashboard tools.
 ```
 
 #### Method B: Using Full Environment
+
 ```json
 {
   "mcpServers": {
@@ -203,6 +211,7 @@ cd /Users/thomas/Programming/financial-dashboard-mcp
 After successful configuration:
 
 ### ✅ In Claude Desktop Logs
+
 ```
 [info] Initializing server...
 [info] MCP server started successfully
@@ -210,11 +219,13 @@ After successful configuration:
 ```
 
 ### ✅ In Claude Chat
+
 - Claude will recognize financial dashboard tools
 - You can ask about portfolio management
 - AI analytics tools will be available
 
 ### ✅ Available Tools
+
 1. **Portfolio Management** (5 tools)
    - get_positions, get_portfolio_summary, get_allocation
    - add_position, update_position

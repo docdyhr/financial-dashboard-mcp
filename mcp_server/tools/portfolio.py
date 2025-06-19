@@ -15,7 +15,13 @@ class PortfolioTools:
     def __init__(self, backend_url: str = "http://localhost:8000"):
         """Initialize portfolio tools with backend URL."""
         self.backend_url = backend_url
-        self.http_client = httpx.AsyncClient(timeout=30.0)
+        # Set up authentication headers
+        self.auth_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZXhwIjoxNzUyODcxOTM2fQ.ThyBQ0AMuRHb9H7QzoBFf04pRIfxcBrEJ501CxW5FX0"
+        self.headers = {
+            "Authorization": f"Bearer {self.auth_token}",
+            "Content-Type": "application/json",
+        }
+        self.http_client = httpx.AsyncClient(timeout=30.0, headers=self.headers)
 
     async def close(self) -> None:
         """Close HTTP client."""
@@ -134,9 +140,9 @@ class PortfolioTools:
     async def _get_positions(self, arguments: dict[str, Any]) -> list[TextContent]:
         """Get current portfolio positions."""
         try:
-            # Use correct API v1 path with default user_id=5
+            # Use correct API v1 path with default user_id=3
             response = await self.http_client.get(
-                f"{self.backend_url}/api/v1/positions/?user_id=5"
+                f"{self.backend_url}/api/v1/positions/?user_id=3"
             )
             response.raise_for_status()
             data = response.json()
@@ -199,11 +205,12 @@ class PortfolioTools:
             if arguments.get("include_cash", True):
                 # Get cash balance from summary
                 summary_response = await self.http_client.get(
-                    f"{self.backend_url}/api/portfolio/summary"
+                    f"{self.backend_url}/api/v1/portfolio/summary/3"
                 )
                 if summary_response.status_code == 200:
                     summary_data = summary_response.json()
-                    cash_balance = summary_data.get("cash_balance", 0.0)
+                    data = summary_data.get("data", {})
+                    cash_balance = float(data.get("cash_balance", 0.0))
                     if cash_balance > 0:
                         positions_text += "**CASH**\n"
                         positions_text += f"  • Balance: ${cash_balance:,.2f}\n\n"
@@ -226,7 +233,7 @@ class PortfolioTools:
         try:
             # Get summary data
             summary_response = await self.http_client.get(
-                f"{self.backend_url}/api/v1/portfolio/summary/5"
+                f"{self.backend_url}/api/v1/portfolio/summary/3"
             )
             summary_response.raise_for_status()
             summary_data = summary_response.json()
@@ -236,7 +243,7 @@ class PortfolioTools:
             if arguments.get("include_performance", True):
                 try:
                     perf_response = await self.http_client.get(
-                        f"{self.backend_url}/api/v1/portfolio/performance/5"
+                        f"{self.backend_url}/api/v1/portfolio/performance/3"
                     )
                     if perf_response.status_code == 200:
                         perf_data = perf_response.json()
@@ -250,12 +257,13 @@ class PortfolioTools:
                 except Exception:
                     performance_text = "\n*Performance data unavailable*\n"
 
-            # Format summary
-            total_value = summary_data.get("total_value", 0.0)
-            cash_balance = summary_data.get("cash_balance", 0.0)
-            daily_change = summary_data.get("daily_change", 0.0)
-            daily_change_pct = summary_data.get("daily_change_percent", 0.0)
-            total_assets = summary_data.get("total_assets", 0)
+            # Format summary - extract data from nested structure
+            data = summary_data.get("data", {})
+            total_value = float(data.get("total_value", 0.0))
+            cash_balance = float(data.get("cash_balance", 0.0))
+            daily_change = float(data.get("daily_change") or 0.0)
+            daily_change_pct = float(data.get("daily_change_percent") or 0.0)
+            total_assets = data.get("total_assets", 0)
 
             change_symbol = "+" if daily_change >= 0 else ""
 
@@ -286,9 +294,9 @@ class PortfolioTools:
     async def _get_allocation(self, arguments: dict[str, Any]) -> list[TextContent]:
         """Get portfolio allocation breakdown."""
         try:
-            # Use correct API v1 path with default user_id=5
+            # Use correct API v1 path with default user_id=3
             response = await self.http_client.get(
-                f"{self.backend_url}/api/v1/portfolio/allocation/5"
+                f"{self.backend_url}/api/v1/portfolio/allocation/3"
             )
             response.raise_for_status()
             data = response.json()
@@ -349,7 +357,7 @@ class PortfolioTools:
 
             # Prepare position data with correct schema
             position_data = {
-                "user_id": 5,
+                "user_id": 3,
                 "asset_id": asset_id,
                 "quantity": str(quantity),
                 "average_cost_per_share": str(purchase_price),

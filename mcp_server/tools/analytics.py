@@ -15,7 +15,13 @@ class AnalyticsTools:
     def __init__(self, backend_url: str = "http://localhost:8000") -> None:
         """Initialize analytics tools with backend URL."""
         self.backend_url = backend_url
-        self.http_client = httpx.AsyncClient(timeout=30.0)
+        # Set up authentication headers
+        self.auth_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZXhwIjoxNzUyODcxOTM2fQ.ThyBQ0AMuRHb9H7QzoBFf04pRIfxcBrEJ501CxW5FX0"
+        self.headers = {
+            "Authorization": f"Bearer {self.auth_token}",
+            "Content-Type": "application/json",
+        }
+        self.http_client = httpx.AsyncClient(timeout=30.0, headers=self.headers)
 
     async def close(self):
         """Close HTTP client."""
@@ -205,7 +211,7 @@ class AnalyticsTools:
                             current_allocation.get("cash", 0) + percentage
                         )
         except Exception as e:
-            logger.error(f"Error calculating asset allocation for user {user_id}: {e}")
+            logger.error(f"Error calculating asset allocation: {e}")
             current_allocation = {}
 
         recommendation_text = f"""**Portfolio Allocation Recommendation** 🎯

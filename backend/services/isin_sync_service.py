@@ -487,7 +487,7 @@ class ISINSyncService:
         if datetime.now() - self._last_full_sync > timedelta(days=1):
             logger.info("Starting periodic full sync")
 
-            with get_db_session() as db:
+            with contextlib.closing(next(get_db())) as db:
                 # Get all ISINs that need updating
                 stale_mappings = (
                     db.query(ISINTickerMapping)
@@ -590,7 +590,7 @@ class ISINSyncService:
             return False
 
         try:
-            with get_db_session() as db:
+            with contextlib.closing(next(get_db())) as db:
                 for conflict in unresolved_conflicts:
                     await self._apply_resolution(db, conflict, resolution)
 

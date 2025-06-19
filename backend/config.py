@@ -90,6 +90,9 @@ class Settings(BaseSettings):
                 raise ValueError("FLOWER_PASSWORD must be set in production")
             if self.debug:
                 raise ValueError("Debug mode must be disabled in production")
+        elif self.environment == "development":
+            # Allow all origins in development for Claude Desktop access
+            self.cors_origins = ["*"]
         return self
 
 
