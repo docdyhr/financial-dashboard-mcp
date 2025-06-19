@@ -2,6 +2,56 @@
 
 
 
+## v2.5.2 (2025-06-19)
+
+### Chore
+
+* chore: bump version to 2.5.1 [skip ci] ([`99040ec`](https://github.com/docdyhr/financial-dashboard-mcp/commit/99040ec5f3ab55d98a5d24911645a0b12b03409f))
+
+### Documentation
+
+* docs: update TODO.md to reflect completed CI/CD fixes and next priorities
+
+- Marked CI/CD pipeline tasks as completed
+- Added production validation as top priority
+- Added MCP server integration and real market data as next priorities
+- Reorganized and renumbered remaining tasks
+- Added &#34;What&#39;s Next?&#34; summary section for clarity
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude &lt;noreply@anthropic.com&gt; ([`e01b08c`](https://github.com/docdyhr/financial-dashboard-mcp/commit/e01b08c18951e0d77d7d010ee401ce5d24c690b9))
+
+### Fix
+
+* fix: critical configuration and code issues
+
+- Fix CORS_ORIGINS parsing error in .env by using proper JSON array format
+- Fix Python version in pyproject.toml from 2.5.0 to 3.11
+- Fix undefined variable error in analytics.py by removing user_id reference
+- Fix undefined get_db_session() calls in isin_sync_service.py
+- Remove duplicate environment variables in .env
+- Fix lint errors in test_mcp_server.py with noqa comments
+- Add comprehensive MCP server integration for Claude Desktop
+- Add production setup scripts and testing utilities
+- Update documentation for Claude Desktop setup
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude &lt;noreply@anthropic.com&gt; ([`3045361`](https://github.com/docdyhr/financial-dashboard-mcp/commit/3045361f7a9cd7d7278d6d3da1248f9b7ddc0830))
+
+### Unknown
+
+* merge: resolve conflicts with main branch
+
+- Keep Python 3.11 version for mypy configuration
+- Keep py311 target version for ruff
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude &lt;noreply@anthropic.com&gt; ([`6817e2d`](https://github.com/docdyhr/financial-dashboard-mcp/commit/6817e2d1d971f6ea505b89a357b81be03cd536d5))
+
+
 ## v2.5.1 (2025-06-18)
 
 ### Chore
