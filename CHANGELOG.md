@@ -2,6 +2,27 @@
 
 
 
+## v2.5.3 (2025-06-19)
+
+### Chore
+
+* chore: bump version to 2.5.2 [skip ci] ([`7fb5d32`](https://github.com/docdyhr/financial-dashboard-mcp/commit/7fb5d32c1312d7c25600e3bf03642011e7b905fa))
+
+### Fix
+
+* fix: correct Python version configurations after automated version bump
+
+- Fix mypy python_version from 2.5.2 to 3.11
+- Fix ruff target-version from 2.5.2 to py311
+- Fix pytest minversion from 2.5.2 to 6.0
+
+The automated version bump incorrectly changed Python version settings instead of just the project version.
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude &lt;noreply@anthropic.com&gt; ([`3679387`](https://github.com/docdyhr/financial-dashboard-mcp/commit/3679387144202ed0a0d336cda757646a7a11340a))
+
+
 ## v2.5.2 (2025-06-19)
 
 ### Chore
