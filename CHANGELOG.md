@@ -2,6 +2,30 @@
 
 
 
+## v2.5.1 (2025-06-18)
+
+### Chore
+
+* chore: bump version to 2.5.0 [skip ci] ([`ef1f29e`](https://github.com/docdyhr/financial-dashboard-mcp/commit/ef1f29ed095da4aea00e1422f2e9d9db8aed42c7))
+
+### Fix
+
+* fix: update CI/CD pipeline to match local tool configuration
+
+- Remove flake8 from CI (disabled locally due to config issues)
+- Update ruff to use --fix flag matching local settings
+- Skip strict mypy checks for gradual adoption approach
+- Resolves CI/CD pipeline failures after local config changes
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude &lt;noreply@anthropic.com&gt; ([`99706e7`](https://github.com/docdyhr/financial-dashboard-mcp/commit/99706e7d3c048698e3ed575b7821dea2b899412c))
+
+### Unknown
+
+* Merge branch &#39;main&#39; of https://github.com/docdyhr/financial-dashboard-mcp ([`12e4663`](https://github.com/docdyhr/financial-dashboard-mcp/commit/12e46630007e20cf326e09382227de501965c819))
+
+
 ## v2.5.0 (2025-06-18)
 
 ### Chore
