@@ -2,6 +2,36 @@
 
 
 
+## v2.5.11 (2025-06-20)
+
+### Chore
+
+* chore: bump version to 2.5.10 [skip ci] ([`466a622`](https://github.com/docdyhr/financial-dashboard-mcp/commit/466a6220a4d6ee06c23adbe551917d4952219bf2))
+
+### Fix
+
+* fix: expand PLC0415 ignores and correct Python version configurations
+
+- Fix pyproject.toml configuration values corrupted by version bump:
+  - python_version: &#34;2.5.10&#34; → &#34;3.11&#34;
+  - target-version: &#34;2.5.10&#34; → &#34;py311&#34;
+  - minversion: &#34;2.5.10&#34; → &#34;6.0&#34;
+- Expand PLC0415 (import in local scope) ignore rules for:
+  - backend/api/* - imports in exception handlers
+  - backend/core/* - optional imports in functions
+  - backend/models/* - circular import avoidance
+  - backend/schemas/* - imports in validators
+  - backend/middleware/* - logging patterns
+  - archive/* - archived test files
+- Add LOG014 ignore for middleware error handlers
+
+This resolves CI/CD linting failures from imports in local scopes.
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude &lt;noreply@anthropic.com&gt; ([`7974f3f`](https://github.com/docdyhr/financial-dashboard-mcp/commit/7974f3f30d558012a8004e7b94c6c7ed32a93da3))
+
+
 ## v2.5.10 (2025-06-20)
 
 ### Chore
