@@ -2,6 +2,33 @@
 
 
 
+## v2.5.9 (2025-06-20)
+
+### Chore
+
+* chore: bump version to 2.5.8 [skip ci] ([`9322c79`](https://github.com/docdyhr/financial-dashboard-mcp/commit/9322c798a1fb5548ff3ead54fc42ff94e5f56069))
+
+### Fix
+
+* fix: correct pyproject.toml configurations after version bump
+
+Keep correct Python/ruff/pytest versions after automatic version bump:
+- python_version = &#39;3.11&#39; (not project version)
+- target-version = &#39;py311&#39; (not project version)
+- minversion = &#39;6.0&#39; (not project version) ([`e36ae8a`](https://github.com/docdyhr/financial-dashboard-mcp/commit/e36ae8ae6dbc797ef8c4b6cdc4734f4d731b84c3))
+
+* fix: resolve ruff/isort import formatting conflicts
+
+- Disable ruff import checking (I001) for backend/models/* files
+- Let standalone isort handle import formatting in model files
+- Fix import formatting to match CI/CD pipeline expectations
+- Ensure consistent formatting across all linting tools ([`8248207`](https://github.com/docdyhr/financial-dashboard-mcp/commit/8248207d0fabb941ad604e3bc3dd6bc97f97f652))
+
+### Unknown
+
+* Merge branch &#39;main&#39; of https://github.com/docdyhr/financial-dashboard-mcp ([`b49cf76`](https://github.com/docdyhr/financial-dashboard-mcp/commit/b49cf76b160753ee71f608b3cac672af04b6db1b))
+
+
 ## v2.5.8 (2025-06-20)
 
 ### Chore
