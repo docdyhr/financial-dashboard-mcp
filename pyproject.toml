@@ -25,7 +25,7 @@ skip_glob = ["*/migrations/*", "*/venv/*"]
 
 # MyPy configuration - currently relaxed for gradual typing adoption
 [tool.mypy]
-python_version = "2.5.10"
+python_version = "3.11"
 warn_return_any = false
 warn_unused_configs = false
 disallow_untyped_defs = false
@@ -70,7 +70,7 @@ module = [
 ignore_errors = true
 
 [tool.pytest.ini_options]
-minversion = "2.5.10"
+minversion = "6.0"
 testpaths = ["tests"]
 python_files = "test_*.py"
 python_classes = "Test*"
@@ -118,7 +118,7 @@ exclude_lines = [
 line-length = 88
 
 # Python 3.11
-target-version = "2.5.10"
+target-version = "py311"
 
 # Exclude directories
 exclude = [
@@ -344,8 +344,20 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 "*/__init__.py" = ["F401", "D104"]
 # Scripts can be less strict
 "scripts/*" = ["T201", "S603", "S607", "PLC0415"]
-# Models can have import formatting handled by standalone isort
-"backend/models/*" = ["I001"]
+# Archive/test files can be less strict
+"archive/*" = ["PLC0415", "T201", "S603", "S607"]
+# API files can have imports in exception handlers and functions
+"backend/api/*" = ["PLC0415"]
+# Core files can have imports in functions for optional imports
+"backend/core/*" = ["PLC0415"]
+# Main app can have imports in health checks
+"backend/main.py" = ["PLC0415"]
+# Models can have import formatting handled by standalone isort and optional imports
+"backend/models/*" = ["I001", "PLC0415"]
+# Schemas can have imports in validators
+"backend/schemas/*" = ["PLC0415"]
+# Middleware can have logging patterns
+"backend/middleware/*" = ["PLC0415", "LOG014"]
 
 [tool.ruff.lint.isort]
 # Use the same configuration as the standalone isort
