@@ -1,18 +1,16 @@
 #!/usr/bin/env python3
-"""
-Financial Dashboard MCP Server
+"""Financial Dashboard MCP Server
 
 A Model Context Protocol server that provides AI-powered financial analysis tools
 for portfolio management, market data, and investment recommendations.
 """
 
 import asyncio
-import json
 import logging
 import os
-from typing import Any, Optional
+from typing import Any
 
-from mcp import server, types
+from mcp import types
 from mcp.server import Server
 from mcp.server.session import ServerSession
 from mcp.server.stdio import stdio_server
@@ -104,7 +102,7 @@ class FinancialDashboardMCP:
                 logger.error(f"Error executing tool {name}: {e}")
                 return [
                     types.TextContent(
-                        type="text", text=f"Error executing tool {name}: {str(e)}"
+                        type="text", text=f"Error executing tool {name}: {e!s}"
                     )
                 ]
 

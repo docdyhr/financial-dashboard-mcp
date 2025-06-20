@@ -478,7 +478,6 @@ class ProductionTester:
             TextColumn("[progress.description]{task.description}"),
             console=console,
         ) as progress:
-
             # Define test sequence
             tests = [
                 ("Health Check", self.test_health_check),

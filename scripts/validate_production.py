@@ -1,16 +1,13 @@
 #!/usr/bin/env python3
-"""
-Production Environment Validation Script
+"""Production Environment Validation Script
 
 This script validates that the production environment is properly configured
 and secure before deployment.
 """
 
-import os
 import re
 import sys
 from pathlib import Path
-from typing import List, Tuple
 
 # ANSI color codes
 RED = "\033[0;31m"
@@ -39,7 +36,7 @@ def print_error(text: str) -> None:
     print(f"{RED}✗ {text}{NC}")
 
 
-def check_env_file() -> Tuple[bool, List[str]]:
+def check_env_file() -> tuple[bool, list[str]]:
     """Check if .env file exists and validate its contents."""
     issues = []
 
@@ -48,7 +45,7 @@ def check_env_file() -> Tuple[bool, List[str]]:
         return False, issues
 
     # Read .env file
-    with open(".env", "r") as f:
+    with open(".env") as f:
         env_content = f.read()
 
     # Check for required variables
@@ -98,13 +95,13 @@ def check_env_file() -> Tuple[bool, List[str]]:
     return len(issues) == 0, issues
 
 
-def check_docker_files() -> Tuple[bool, List[str]]:
+def check_docker_files() -> tuple[bool, list[str]]:
     """Check Docker configuration files for security issues."""
     issues = []
 
     # Check docker-compose.yml
     if Path("docker-compose.yml").exists():
-        with open("docker-compose.yml", "r") as f:
+        with open("docker-compose.yml") as f:
             compose_content = f.read()
 
         # Check for hardcoded passwords
@@ -119,7 +116,7 @@ def check_docker_files() -> Tuple[bool, List[str]]:
     return len(issues) == 0, issues
 
 
-def check_gitignore() -> Tuple[bool, List[str]]:
+def check_gitignore() -> tuple[bool, list[str]]:
     """Verify .gitignore properly excludes sensitive files."""
     issues = []
 
@@ -127,7 +124,7 @@ def check_gitignore() -> Tuple[bool, List[str]]:
         issues.append(".gitignore file not found")
         return False, issues
 
-    with open(".gitignore", "r") as f:
+    with open(".gitignore") as f:
         gitignore_content = f.read()
 
     required_patterns = [".env", "*.pem", "*.key", "secrets/", "*.secret"]
@@ -139,12 +136,12 @@ def check_gitignore() -> Tuple[bool, List[str]]:
     return len(issues) == 0, issues
 
 
-def check_file_permissions() -> Tuple[bool, List[str]]:
+def check_file_permissions() -> tuple[bool, list[str]]:
     """Check file permissions for sensitive files."""
     issues = []
 
     if Path(".env").exists():
-        stat_info = os.stat(".env")
+        stat_info = Path(".env").stat()
         mode = oct(stat_info.st_mode)[-3:]
         if mode != "600":
             issues.append(f".env file has insecure permissions: {mode} (should be 600)")
@@ -152,13 +149,13 @@ def check_file_permissions() -> Tuple[bool, List[str]]:
     return len(issues) == 0, issues
 
 
-def check_dependencies() -> Tuple[bool, List[str]]:
+def check_dependencies() -> tuple[bool, list[str]]:
     """Check for dependency security issues."""
     issues = []
 
     # This is a basic check - in production, use tools like safety or snyk
     if Path("requirements.txt").exists():
-        with open("requirements.txt", "r") as f:
+        with open("requirements.txt") as f:
             deps = f.read()
 
         # Check for known vulnerable versions (examples)
@@ -212,10 +209,9 @@ def main():
         print("3. Set up monitoring and alerting")
         print("4. Deploy with: docker-compose -f docker/docker-compose.prod.yml up -d")
         return 0
-    else:
-        print_error("Production validation failed!")
-        print_warning("Fix the issues above before deploying to production")
-        return 1
+    print_error("Production validation failed!")
+    print_warning("Fix the issues above before deploying to production")
+    return 1
 
 
 if __name__ == "__main__":

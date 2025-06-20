@@ -2,7 +2,6 @@
 
 import logging
 import os
-from typing import Optional
 
 import httpx
 
@@ -15,20 +14,20 @@ class AuthManager:
     def __init__(self, backend_url: str = "http://localhost:8000"):
         """Initialize auth manager."""
         self.backend_url = backend_url
-        self._auth_token: Optional[str] = None
-        self._user_id: Optional[int] = None
+        self._auth_token: str | None = None
+        self._user_id: int | None = None
 
         # Get demo credentials from environment or use defaults
         self.demo_username = os.getenv("DEMO_USERNAME", "demo")
         self.demo_password = os.getenv("DEMO_PASSWORD", "demo123")
 
-    async def get_auth_token(self) -> Optional[str]:
+    async def get_auth_token(self) -> str | None:
         """Get current auth token, refreshing if needed."""
         if self._auth_token is None:
             await self._authenticate()
         return self._auth_token
 
-    async def get_user_id(self) -> Optional[int]:
+    async def get_user_id(self) -> int | None:
         """Get current user ID."""
         if self._user_id is None:
             await self._authenticate()
@@ -103,7 +102,7 @@ class AuthManager:
 
 
 # Global auth manager instance
-_auth_manager: Optional[AuthManager] = None
+_auth_manager: AuthManager | None = None
 
 
 def get_auth_manager(backend_url: str = "http://localhost:8000") -> AuthManager:
