@@ -467,40 +467,70 @@ class TestISINMappingAPI:
         mapping_id = 1
         update_data = {"security_name": "Apple Inc. (Updated)", "confidence": 0.98}
 
-        with patch("backend.database.get_db_session") as mock_get_db:
-            mock_get_db.return_value.__enter__.return_value = mock_db_session
+        from backend.database import get_db_session
 
+        # Override the dependency in the test client's app
+        def override_get_db():
+            yield mock_db_session
+
+        test_client.app.dependency_overrides[get_db_session] = override_get_db
+
+        try:
             response = test_client.put(f"/isin/mappings/{mapping_id}", json=update_data)
 
             assert response.status_code == 200
             data = response.json()
-            assert data["success"] is True
+            assert (
+                data["id"] == mapping_id
+            )  # Response is the updated mapping, not {"success": True}
+        finally:
+            # Clean up dependency override
+            test_client.app.dependency_overrides.clear()
 
     def test_update_nonexistent_mapping(self, test_client):
         """Test updating non-existent mapping."""
-        with patch("backend.api.isin.get_db_session") as mock_get_db:
-            mock_session = Mock()
-            mock_session.query.return_value.filter.return_value.first.return_value = (
-                None
-            )
-            mock_get_db.return_value.__enter__.return_value = mock_session
+        from backend.database import get_db_session
 
+        mock_session = Mock()
+        mock_session.query.return_value.filter.return_value.first.return_value = None
+
+        # Override the dependency in the test client's app
+        def override_get_db():
+            yield mock_session
+
+        test_client.app.dependency_overrides[get_db_session] = override_get_db
+
+        try:
             response = test_client.put("/isin/mappings/999", json={"confidence": 0.98})
 
             assert response.status_code == 404
+        finally:
+            # Clean up dependency override
+            test_client.app.dependency_overrides.clear()
 
     def test_delete_mapping(self, test_client, mock_db_session):
         """Test deleting ISIN mapping."""
         mapping_id = 1
 
-        with patch("backend.database.get_db_session") as mock_get_db:
-            mock_get_db.return_value.__enter__.return_value = mock_db_session
+        from backend.database import get_db_session
 
+        # Override the dependency in the test client's app
+        def override_get_db():
+            yield mock_db_session
+
+        test_client.app.dependency_overrides[get_db_session] = override_get_db
+
+        try:
             response = test_client.delete(f"/isin/mappings/{mapping_id}")
 
             assert response.status_code == 200
             data = response.json()
-            assert data["success"] is True
+            assert (
+                data["message"] == "ISIN mapping deleted successfully"
+            )  # Response is a message, not {"success": True}
+        finally:
+            # Clean up dependency override
+            test_client.app.dependency_overrides.clear()
 
 
 class TestISINStatisticsAPI:
@@ -508,48 +538,94 @@ class TestISINStatisticsAPI:
 
     def test_get_statistics(self, test_client, mock_db_session):
         """Test getting ISIN system statistics."""
-        with patch("backend.api.isin.get_db_session") as mock_get_db:
-            # Mock statistics queries
-            mock_session = Mock()
-            mock_session.query.return_value.filter.return_value.count.return_value = (
-                1000
-            )
-            mock_session.query.return_value.filter.return_value.group_by.return_value.all.return_value = [
-                ("US", 500),
-                ("DE", 300),
-                ("GB", 200),
-            ]
-            mock_get_db.return_value.__enter__.return_value = mock_session
+        from backend.database import get_db_session
 
+        # Mock statistics queries
+        mock_session = Mock()
+        mock_session.query.return_value.count.return_value = 1000
+        mock_session.query.return_value.filter.return_value.count.return_value = 800
+        mock_session.query.return_value.scalar.return_value = 500
+
+        # Mock country stats
+        mock_country_result = Mock()
+        mock_country_result.country = "US"
+        mock_country_result.count = 500
+        mock_session.query.return_value.filter.return_value.group_by.return_value.order_by.return_value.limit.return_value.all.return_value = [
+            mock_country_result
+        ]
+
+        # Mock exchange stats
+        mock_exchange_result = Mock()
+        mock_exchange_result.exchange_code = "XNAS"
+        mock_exchange_result.count = 300
+        mock_session.query.return_value.filter.return_value.group_by.return_value.order_by.return_value.limit.return_value.all.return_value = [
+            mock_exchange_result
+        ]
+
+        # Mock source stats
+        mock_source_result = Mock()
+        mock_source_result.source = "test"
+        mock_source_result.count = 200
+        mock_session.query.return_value.filter.return_value.group_by.return_value.order_by.return_value.all.return_value = [
+            mock_source_result
+        ]
+
+        # Override the dependency in the test client's app
+        def override_get_db():
+            yield mock_session
+
+        test_client.app.dependency_overrides[get_db_session] = override_get_db
+
+        try:
             response = test_client.get("/isin/statistics")
 
             assert response.status_code == 200
             data = response.json()
-            assert data["success"] is True
-            assert "total_mappings" in data["statistics"]
-            assert "coverage_stats" in data["statistics"]
+            assert "total_mappings" in data
+            assert "active_mappings" in data
+        finally:
+            # Clean up dependency override
+            test_client.app.dependency_overrides.clear()
 
     def test_get_statistics_by_country(self, test_client, mock_db_session):
         """Test getting statistics filtered by country."""
-        with patch("backend.database.get_db_session") as mock_get_db:
-            mock_get_db.return_value.__enter__.return_value = mock_db_session
+        from backend.database import get_db_session
 
+        # Override the dependency in the test client's app
+        def override_get_db():
+            yield mock_db_session
+
+        test_client.app.dependency_overrides[get_db_session] = override_get_db
+
+        try:
             response = test_client.get("/isin/statistics", params={"country": "US"})
 
             assert response.status_code == 200
             data = response.json()
-            assert data["success"] is True
+            assert "total_mappings" in data
+        finally:
+            # Clean up dependency override
+            test_client.app.dependency_overrides.clear()
 
     def test_get_statistics_by_exchange(self, test_client, mock_db_session):
         """Test getting statistics filtered by exchange."""
-        with patch("backend.database.get_db_session") as mock_get_db:
-            mock_get_db.return_value.__enter__.return_value = mock_db_session
+        from backend.database import get_db_session
 
+        # Override the dependency in the test client's app
+        def override_get_db():
+            yield mock_db_session
+
+        test_client.app.dependency_overrides[get_db_session] = override_get_db
+
+        try:
             response = test_client.get("/isin/statistics", params={"exchange": "XNAS"})
 
             assert response.status_code == 200
             data = response.json()
-            assert data["success"] is True
+            assert "total_mappings" in data
+        finally:
+            # Clean up dependency override
+            test_client.app.dependency_overrides.clear()
 
 
 class TestISINImportAPI:
@@ -564,30 +640,43 @@ class TestISINImportAPI:
                     "isin": "US0378331005",
                     "ticker": "AAPL",
                     "exchange_code": "XNAS",
+                    "exchange_name": "NASDAQ",
                     "security_name": "Apple Inc.",
                     "currency": "USD",
+                    "source": "test_import",
                     "confidence": 0.95,
                 },
                 {
                     "isin": "DE0007164600",
                     "ticker": "SAP",
                     "exchange_code": "XETR",
+                    "exchange_name": "Frankfurt",
                     "security_name": "SAP SE",
                     "currency": "EUR",
+                    "source": "test_import",
                     "confidence": 0.92,
                 },
             ],
         }
 
-        with patch("backend.database.get_db_session") as mock_get_db:
-            mock_get_db.return_value.__enter__.return_value = mock_db_session
+        from backend.database import get_db_session
 
+        # Override the dependency in the test client's app
+        def override_get_db():
+            yield mock_db_session
+
+        test_client.app.dependency_overrides[get_db_session] = override_get_db
+
+        try:
             response = test_client.post("/isin/import", json=import_data)
 
             assert response.status_code == 200
             data = response.json()
-            assert data["success"] is True
-            assert data["imported"] == 2
+            assert data["total_created"] == 2
+            assert data["total_requested"] == 2
+        finally:
+            # Clean up dependency override
+            test_client.app.dependency_overrides.clear()
 
     def test_import_empty_mappings(self, test_client):
         """Test importing empty mappings list."""
@@ -595,7 +684,7 @@ class TestISINImportAPI:
             "/isin/import", json={"source": "test", "mappings": []}
         )
 
-        assert response.status_code == 400
+        assert response.status_code == 422  # Pydantic validation error for min_items=1
 
     def test_import_invalid_mappings(self, test_client):
         """Test importing invalid mappings."""
@@ -603,16 +692,17 @@ class TestISINImportAPI:
             "source": "test_import",
             "mappings": [
                 {
-                    "isin": "INVALID",  # Invalid ISIN
-                    "ticker": "",  # Empty ticker
+                    "isin": "INVALID",  # Invalid ISIN (needs 12 chars)
+                    "ticker": "",  # Empty ticker (needs min 1 char)
                     "exchange_code": "XNAS",
+                    "source": "test",  # Required field
                 }
             ],
         }
 
         response = test_client.post("/isin/import", json=invalid_import)
 
-        assert response.status_code == 400
+        assert response.status_code == 422  # Pydantic validation error
 
 
 class TestISINQuoteAPI:
@@ -622,37 +712,65 @@ class TestISINQuoteAPI:
         self, test_client, mock_db_session, sample_market_quotes
     ):
         """Test getting market quote by identifier."""
-        with patch("backend.database.get_db_session") as mock_get_db:
-            mock_get_db.return_value.__enter__.return_value = mock_db_session
+        from backend.database import get_db_session
 
+        # Override the dependency in the test client's app
+        def override_get_db():
+            yield mock_db_session
+
+        test_client.app.dependency_overrides[get_db_session] = override_get_db
+
+        try:
             with patch("backend.api.isin.market_data_service") as mock_market_service:
-                mock_market_service.get_quote_by_isin.return_value = (
-                    sample_market_quotes["US0378331005"]
-                )
+                # Mock the fetch_quote method to return a successful result
+                mock_result = Mock()
+                mock_result.success = True
+                mock_result.ticker = "AAPL"
+                mock_result.current_price = 150.0
+                mock_result.day_change = 2.5
+                mock_result.day_change_percent = 1.7
+                mock_result.volume = 1000000
+                mock_result.data_source = "mock"
 
-                response = test_client.get(
-                    "/isin/quote", params={"identifier": "US0378331005"}
-                )
+                mock_market_service.fetch_quote.return_value = mock_result
+
+                response = test_client.get("/isin/quote/US0378331005")
 
                 assert response.status_code == 200
                 data = response.json()
                 assert data["success"] is True
-                assert data["quote"]["symbol"] == "AAPL"
+                assert data["ticker"] == "AAPL"
+        finally:
+            # Clean up dependency override
+            test_client.app.dependency_overrides.clear()
 
     def test_get_quote_not_found(self, test_client):
         """Test getting quote for unknown identifier."""
-        with patch("backend.api.isin.get_db_session") as mock_get_db:
-            mock_session = Mock()
-            mock_session.query.return_value.filter.return_value.order_by.return_value.first.return_value = (
-                None
-            )
-            mock_get_db.return_value.__enter__.return_value = mock_session
+        from backend.database import get_db_session
 
-            response = test_client.get(
-                "/isin/quote", params={"identifier": "UNKNOWN123"}
-            )
+        mock_session = Mock()
 
-            assert response.status_code == 404
+        # Override the dependency in the test client's app
+        def override_get_db():
+            yield mock_session
+
+        test_client.app.dependency_overrides[get_db_session] = override_get_db
+
+        try:
+            with patch("backend.api.isin.market_data_service") as mock_market_service:
+                # Mock the fetch_quote method to return a failed result
+                mock_result = Mock()
+                mock_result.success = False
+                mock_result.error = "Identifier not found"
+
+                mock_market_service.fetch_quote.return_value = mock_result
+
+                response = test_client.get("/isin/quote/UNKNOWN123")
+
+                assert response.status_code == 404
+        finally:
+            # Clean up dependency override
+            test_client.app.dependency_overrides.clear()
 
 
 class TestISINAPIErrorHandling:
