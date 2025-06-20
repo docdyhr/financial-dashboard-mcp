@@ -2,6 +2,42 @@
 
 
 
+## v2.5.6 (2025-06-20)
+
+### Chore
+
+* chore: bump version to 2.5.5 [skip ci] ([`bdf6b6e`](https://github.com/docdyhr/financial-dashboard-mcp/commit/bdf6b6ec738d5755b3b680d7bf1ca414b52ff601))
+
+### Fix
+
+* fix: improve ISIN API test coverage and resolve configuration issues
+
+- Fix database session mocking patterns across all ISIN API tests
+- Apply dependency override pattern consistently for better test isolation
+- Update test expectations to match actual API response schemas
+- Fix endpoint URL paths (quote/{identifier} vs quote with params)
+- Resolve import sorting issues in asset.py and transaction.py
+- Fix ruff target-version configuration error in pyproject.toml
+- Achieve 36/41 passing tests (87% success rate)
+
+Remaining: 5 failing tests with complex mock setups
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude &lt;noreply@anthropic.com&gt; ([`a41fde2`](https://github.com/docdyhr/financial-dashboard-mcp/commit/a41fde2aae9c51030009dd81b6897ad310c41d52))
+
+### Unknown
+
+* merge: resolve pyproject.toml target-version conflict
+
+- Keep py311 as the correct ruff target-version
+- Merge with version bump changes from main
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude &lt;noreply@anthropic.com&gt; ([`ec83c14`](https://github.com/docdyhr/financial-dashboard-mcp/commit/ec83c14ba67d6a1b877695a236df5e4388657213))
+
+
 ## v2.5.5 (2025-06-20)
 
 ### Chore
