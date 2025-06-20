@@ -2,6 +2,36 @@
 
 
 
+## v2.5.8 (2025-06-20)
+
+### Chore
+
+* chore: bump version to 2.5.7 [skip ci] ([`f9aeb5b`](https://github.com/docdyhr/financial-dashboard-mcp/commit/f9aeb5bbb0d5d3a6955095ba1e05d196ee6c89e1))
+
+### Fix
+
+* fix: resolve CI/CD pipeline failures - formatting and configuration issues
+
+Key fixes:
+- Fix import formatting in backend/models/asset.py and transaction.py
+- Fix pyproject.toml configuration errors:
+  - Correct ruff target-version from &#34;2.5.6&#34; to &#34;py311&#34;
+  - Fix mypy python_version from &#34;2.5.6&#34; to &#34;3.11&#34;
+  - Fix pytest minversion from &#34;2.5.6&#34; to &#34;6.0&#34;
+- Apply consistent code formatting across all files
+- Fix ruff linting issues (os.stat -&gt; Path.stat)
+
+This resolves the CI/CD pipeline failures that were preventing successful builds.
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude &lt;noreply@anthropic.com&gt; ([`072f143`](https://github.com/docdyhr/financial-dashboard-mcp/commit/072f1434c0c718fae27c5ea67fe3ab9e9f91fd34))
+
+### Unknown
+
+* merge: resolve pyproject.toml conflicts - keep correct Python/ruff versions ([`437a8ec`](https://github.com/docdyhr/financial-dashboard-mcp/commit/437a8ec851a8d31dcb03eb8f3ef7866fe8e70caa))
+
+
 ## v2.5.7 (2025-06-20)
 
 ### Chore
