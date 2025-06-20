@@ -2,6 +2,44 @@
 
 
 
+## v2.5.12 (2025-06-20)
+
+### Chore
+
+* chore: bump version to 2.5.11 [skip ci] ([`0793b36`](https://github.com/docdyhr/financial-dashboard-mcp/commit/0793b3697cefd7c64b1555fabece1a9892474160))
+
+### Fix
+
+* fix: correct Python version configurations corrupted by version bump 2.5.11
+
+- Fix mypy python_version from 2.5.11 to 3.11
+- Fix ruff target-version from 2.5.11 to py311
+- Fix pytest minversion from 2.5.11 to 6.0
+
+The automated version bump continues to incorrectly change Python version settings.
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude &lt;noreply@anthropic.com&gt; ([`dcf932a`](https://github.com/docdyhr/financial-dashboard-mcp/commit/dcf932a9752faadd10032b7ac0e9411a82cb74c1))
+
+* fix: expand PLC0415 ignore patterns for all backend and frontend modules
+
+- Add PLC0415 ignore for backend/services/* (circular imports and optional imports)
+- Add PLC0415 ignore for backend/tasks/* (imports in functions)
+- Add PLC0415 ignore for frontend/* (optional imports and conditional imports)
+- Add FURB162 ignore for frontend/* (timezone handling patterns)
+
+This addresses remaining linting failures from imports in local scopes.
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude &lt;noreply@anthropic.com&gt; ([`3d6507f`](https://github.com/docdyhr/financial-dashboard-mcp/commit/3d6507f834d73bc3d88fd22d02e832dd9595e47f))
+
+### Unknown
+
+* Merge branch &#39;main&#39; of https://github.com/docdyhr/financial-dashboard-mcp ([`99b72cd`](https://github.com/docdyhr/financial-dashboard-mcp/commit/99b72cd9b0d07b3477844f5b586273fed0f036d6))
+
+
 ## v2.5.11 (2025-06-20)
 
 ### Chore
