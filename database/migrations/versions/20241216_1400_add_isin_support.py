@@ -1,7 +1,7 @@
 """Add ISIN support to assets and create ISIN mapping table
 
 Revision ID: add_isin_support
-Revises: 20250616_1101_59b5bd032377_add_user_settings_table
+Revises: 08230f29a0db
 Create Date: 2024-12-16 14:00:00.000000
 
 """

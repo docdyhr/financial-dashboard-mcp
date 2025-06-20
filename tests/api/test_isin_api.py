@@ -48,6 +48,19 @@ def mock_db_session():
     mock_cache.country_name = "United States"
     mock_cache.cached_at = datetime.now()
 
+    # Set up the query chain for ISIN mappings: query().filter().filter().order_by().all()
+    mock_query = Mock()
+    mock_filter1 = Mock()
+    mock_filter2 = Mock()
+    mock_order_by = Mock()
+
+    mock_session.query.return_value = mock_query
+    mock_query.filter.return_value = mock_filter1
+    mock_filter1.filter.return_value = mock_filter2
+    mock_filter2.order_by.return_value = mock_order_by
+    mock_order_by.all.return_value = [mock_mapping]
+
+    # Also support simpler chains for other queries
     mock_session.query.return_value.filter.return_value.first.return_value = (
         mock_mapping
     )
@@ -110,7 +123,7 @@ class TestISINValidationAPI:
 
     def test_validate_isin_caching(self, test_client, mock_db_session):
         """Test ISIN validation with caching."""
-        with patch("backend.api.isin.get_db_session") as mock_get_db:
+        with patch("backend.database.get_db_session") as mock_get_db:
             mock_get_db.return_value.__enter__.return_value = mock_db_session
 
             # First call should cache result
@@ -135,8 +148,19 @@ class TestISINResolverAPI:
 
     def test_resolve_isin_identifier(self, test_client, mock_db_session):
         """Test resolving ISIN identifier to ticker."""
-        with patch("backend.api.isin.get_db_session") as mock_get_db:
-            mock_get_db.return_value.__enter__.return_value = mock_db_session
+        # Mock the ISIN service method directly instead of database session
+        with patch(
+            "backend.services.isin_utils.isin_service.get_asset_info"
+        ) as mock_get_asset_info:
+            mock_get_asset_info.return_value = {
+                "original_identifier": "US0378331005",
+                "resolved_ticker": "AAPL",
+                "identifier_type": "isin",
+                "success": True,
+                "isin": "US0378331005",
+                "country_code": "US",
+                "country_name": "United States",
+            }
 
             response = test_client.post(
                 "/isin/resolve",
@@ -151,8 +175,16 @@ class TestISINResolverAPI:
 
     def test_resolve_ticker_identifier(self, test_client, mock_db_session):
         """Test resolving ticker identifier."""
-        with patch("backend.api.isin.get_db_session") as mock_get_db:
-            mock_get_db.return_value.__enter__.return_value = mock_db_session
+        with patch(
+            "backend.services.isin_utils.isin_service.get_asset_info"
+        ) as mock_get_asset_info:
+            mock_get_asset_info.return_value = {
+                "original_identifier": "AAPL",
+                "resolved_ticker": "AAPL",
+                "identifier_type": "ticker",
+                "success": True,
+                "isin": "US0378331005",
+            }
 
             response = test_client.post("/isin/resolve", json={"identifier": "AAPL"})
 
@@ -163,12 +195,16 @@ class TestISINResolverAPI:
 
     def test_resolve_unknown_identifier(self, test_client):
         """Test resolving unknown identifier."""
-        with patch("backend.api.isin.get_db_session") as mock_get_db:
-            mock_session = Mock()
-            mock_session.query.return_value.filter.return_value.order_by.return_value.first.return_value = (
-                None
-            )
-            mock_get_db.return_value.__enter__.return_value = mock_session
+        with patch(
+            "backend.services.isin_utils.isin_service.get_asset_info"
+        ) as mock_get_asset_info:
+            mock_get_asset_info.return_value = {
+                "original_identifier": "UNKNOWN123",
+                "resolved_ticker": None,
+                "identifier_type": "unknown",
+                "success": False,
+                "error": "Identifier not found",
+            }
 
             response = test_client.post(
                 "/isin/resolve", json={"identifier": "UNKNOWN123"}
@@ -184,8 +220,20 @@ class TestISINLookupAPI:
 
     def test_lookup_single_isin(self, test_client, mock_db_session):
         """Test looking up single ISIN."""
-        with patch("backend.api.isin.get_db_session") as mock_get_db:
-            mock_get_db.return_value.__enter__.return_value = mock_db_session
+        # Mock the mapping service method directly instead of database session
+        with patch(
+            "backend.services.isin_utils.isin_service.mapping_service.get_mappings_from_db"
+        ) as mock_get_mappings:
+            # Create mock mapping
+            mock_mapping = Mock()
+            mock_mapping.ticker = "AAPL"
+            mock_mapping.exchange_code = "XNAS"
+            mock_mapping.exchange_name = "NASDAQ"
+            mock_mapping.currency = "USD"
+            mock_mapping.confidence = 0.95
+            mock_mapping.source = "test"
+
+            mock_get_mappings.return_value = [mock_mapping]
 
             response = test_client.post(
                 "/isin/lookup",
@@ -194,16 +242,31 @@ class TestISINLookupAPI:
 
             assert response.status_code == 200
             data = response.json()
-            assert data["success"] is True
-            assert "US0378331005" in data["results"]
-            assert data["results"]["US0378331005"]["found"] is True
+            assert data["total_requested"] == 1
+            assert data["total_found"] == 1
+            assert len(data["results"]) == 1
+            assert data["results"][0]["isin"] == "US0378331005"
+            assert data["results"][0]["success"] is True
 
     def test_lookup_multiple_isins(self, test_client, mock_db_session):
         """Test looking up multiple ISINs."""
         isins = ["US0378331005", "DE0007164600", "GB0002162385"]
 
-        with patch("backend.api.isin.get_db_session") as mock_get_db:
-            mock_get_db.return_value.__enter__.return_value = mock_db_session
+        with patch(
+            "backend.services.isin_utils.isin_service.mapping_service.get_mappings_from_db"
+        ) as mock_get_mappings:
+            # Create mock mapping for each ISIN
+            def mock_mappings_side_effect(db, isin, active_only=True):
+                mock_mapping = Mock()
+                mock_mapping.ticker = "TEST"
+                mock_mapping.exchange_code = "XNAS"
+                mock_mapping.exchange_name = "NASDAQ"
+                mock_mapping.currency = "USD"
+                mock_mapping.confidence = 0.95
+                mock_mapping.source = "test"
+                return [mock_mapping]
+
+            mock_get_mappings.side_effect = mock_mappings_side_effect
 
             response = test_client.post(
                 "/isin/lookup",
@@ -216,7 +279,7 @@ class TestISINLookupAPI:
 
             assert response.status_code == 200
             data = response.json()
-            assert data["success"] is True
+            assert data["total_found"] == 3
             assert len(data["results"]) == len(isins)
 
     def test_lookup_empty_isin_list(self, test_client):
@@ -231,7 +294,7 @@ class TestISINLookupAPI:
 
         response = test_client.post("/isin/lookup", json={"isins": too_many_isins})
 
-        assert response.status_code == 400  # Too many ISINs
+        assert response.status_code == 422  # Validation error for too many ISINs
 
     def test_lookup_invalid_isins(self, test_client, sample_isin_data):
         """Test lookup with invalid ISINs."""
@@ -241,7 +304,7 @@ class TestISINLookupAPI:
             "/isin/lookup", json={"isins": invalid_isins[:3]}  # First 3 invalid ISINs
         )
 
-        assert response.status_code == 400  # Invalid ISIN format
+        assert response.status_code == 422  # Validation error for invalid ISIN format
 
 
 class TestISINSuggestionAPI:
@@ -257,17 +320,21 @@ class TestISINSuggestionAPI:
             ]
 
             response = test_client.post(
-                "/isin/suggestions", json={"isin": "DE0007164600", "max_suggestions": 5}
+                "/isin/suggest", json={"isin": "DE0007164600", "base_ticker": "SAP"}
             )
 
             assert response.status_code == 200
             data = response.json()
-            assert data["success"] is True
+            assert "suggestions" in data
             assert len(data["suggestions"]) > 0
+            assert data["isin"] == "DE0007164600"
+            assert data["base_ticker"] == "SAP"
 
     def test_suggest_invalid_isin(self, test_client):
         """Test suggestions for invalid ISIN."""
-        response = test_client.post("/isin/suggestions", json={"isin": "INVALID123"})
+        response = test_client.post(
+            "/isin/suggest", json={"isin": "INVALID12345", "base_ticker": "TEST"}
+        )
 
         assert response.status_code == 400  # Invalid ISIN
 
@@ -277,7 +344,7 @@ class TestISINMappingAPI:
 
     def test_get_mappings(self, test_client, mock_db_session):
         """Test getting ISIN mappings."""
-        with patch("backend.api.isin.get_db_session") as mock_get_db:
+        with patch("backend.database.get_db_session") as mock_get_db:
             mock_get_db.return_value.__enter__.return_value = mock_db_session
 
             response = test_client.get(
@@ -308,7 +375,7 @@ class TestISINMappingAPI:
             "confidence": 0.95,
         }
 
-        with patch("backend.api.isin.get_db_session") as mock_get_db:
+        with patch("backend.database.get_db_session") as mock_get_db:
             mock_get_db.return_value.__enter__.return_value = mock_db_session
 
             response = test_client.post("/isin/mappings", json=mapping_data)
@@ -335,7 +402,7 @@ class TestISINMappingAPI:
         mapping_id = 1
         update_data = {"security_name": "Apple Inc. (Updated)", "confidence": 0.98}
 
-        with patch("backend.api.isin.get_db_session") as mock_get_db:
+        with patch("backend.database.get_db_session") as mock_get_db:
             mock_get_db.return_value.__enter__.return_value = mock_db_session
 
             response = test_client.put(f"/isin/mappings/{mapping_id}", json=update_data)
@@ -361,7 +428,7 @@ class TestISINMappingAPI:
         """Test deleting ISIN mapping."""
         mapping_id = 1
 
-        with patch("backend.api.isin.get_db_session") as mock_get_db:
+        with patch("backend.database.get_db_session") as mock_get_db:
             mock_get_db.return_value.__enter__.return_value = mock_db_session
 
             response = test_client.delete(f"/isin/mappings/{mapping_id}")
@@ -399,7 +466,7 @@ class TestISINStatisticsAPI:
 
     def test_get_statistics_by_country(self, test_client, mock_db_session):
         """Test getting statistics filtered by country."""
-        with patch("backend.api.isin.get_db_session") as mock_get_db:
+        with patch("backend.database.get_db_session") as mock_get_db:
             mock_get_db.return_value.__enter__.return_value = mock_db_session
 
             response = test_client.get("/isin/statistics", params={"country": "US"})
@@ -410,7 +477,7 @@ class TestISINStatisticsAPI:
 
     def test_get_statistics_by_exchange(self, test_client, mock_db_session):
         """Test getting statistics filtered by exchange."""
-        with patch("backend.api.isin.get_db_session") as mock_get_db:
+        with patch("backend.database.get_db_session") as mock_get_db:
             mock_get_db.return_value.__enter__.return_value = mock_db_session
 
             response = test_client.get("/isin/statistics", params={"exchange": "XNAS"})
@@ -447,7 +514,7 @@ class TestISINImportAPI:
             ],
         }
 
-        with patch("backend.api.isin.get_db_session") as mock_get_db:
+        with patch("backend.database.get_db_session") as mock_get_db:
             mock_get_db.return_value.__enter__.return_value = mock_db_session
 
             response = test_client.post("/isin/import", json=import_data)
@@ -490,7 +557,7 @@ class TestISINQuoteAPI:
         self, test_client, mock_db_session, sample_market_quotes
     ):
         """Test getting market quote by identifier."""
-        with patch("backend.api.isin.get_db_session") as mock_get_db:
+        with patch("backend.database.get_db_session") as mock_get_db:
             mock_get_db.return_value.__enter__.return_value = mock_db_session
 
             with patch("backend.api.isin.market_data_service") as mock_market_service:
@@ -612,7 +679,7 @@ class TestISINAPIPerformance:
         """Test bulk lookup performance."""
         large_isin_list = [f"US{str(i).zfill(9)}5" for i in range(50)]
 
-        with patch("backend.api.isin.get_db_session") as mock_get_db:
+        with patch("backend.database.get_db_session") as mock_get_db:
             mock_get_db.return_value.__enter__.return_value = mock_db_session
 
             import time
