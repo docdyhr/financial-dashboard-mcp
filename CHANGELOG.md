@@ -2,6 +2,36 @@
 
 
 
+## v2.5.10 (2025-06-20)
+
+### Chore
+
+* chore: bump version to 2.5.9 [skip ci] ([`00d5862`](https://github.com/docdyhr/financial-dashboard-mcp/commit/00d5862d2f8058ec3fca014dc1836f4616c12819))
+
+### Fix
+
+* fix: correct Python version configurations after automated version bump
+
+- Fix mypy python_version from 2.5.9 to 3.11
+- Fix ruff target-version from 2.5.9 to py311
+- Fix pytest minversion from 2.5.9 to 6.0
+
+The automated version bump incorrectly changed Python version settings instead of just the project version.
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude &lt;noreply@anthropic.com&gt; ([`781d822`](https://github.com/docdyhr/financial-dashboard-mcp/commit/781d822e2587a89c9e6e68cc257820846b6a7902))
+
+* fix: ignore PLC0415 (import in local scope) for scripts
+
+Allow import statements in exception handlers for scripts. This is common
+for optional imports like traceback in error handling sections. ([`bb21098`](https://github.com/docdyhr/financial-dashboard-mcp/commit/bb210985f7da89507c228d4eeffad6c67941aac5))
+
+### Unknown
+
+* Merge branch &#39;main&#39; of https://github.com/docdyhr/financial-dashboard-mcp ([`dbf7ba2`](https://github.com/docdyhr/financial-dashboard-mcp/commit/dbf7ba279474c4ca24c53f642068172d8fccaaf8))
+
+
 ## v2.5.9 (2025-06-20)
 
 ### Chore
