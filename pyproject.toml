@@ -343,7 +343,7 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 # Init files can have unused imports
 "*/__init__.py" = ["F401", "D104"]
 # Scripts can be less strict
-"scripts/*" = ["T201", "S603", "S607"]
+"scripts/*" = ["T201", "S603", "S607", "PLC0415"]
 # Models can have import formatting handled by standalone isort
 "backend/models/*" = ["I001"]
 
