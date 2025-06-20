@@ -2,6 +2,42 @@
 
 
 
+## v2.5.14 (2025-06-20)
+
+### Chore
+
+* chore: bump version to 2.5.13 [skip ci] ([`54d7708`](https://github.com/docdyhr/financial-dashboard-mcp/commit/54d77086c778072b58f00b4a6e06d2f9a0b83331))
+
+### Fix
+
+* fix: correct Python version configurations corrupted by version bump 2.5.13
+
+- Fix mypy python_version from 2.5.13 to 3.11
+- Fix ruff target-version from 2.5.13 to py311
+- Fix pytest minversion from 2.5.13 to 6.0
+
+The automated version bump continues to incorrectly change Python version settings.
+This should resolve CI/CD pipeline issues along with the previously added alembic.ini file.
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude &lt;noreply@anthropic.com&gt; ([`5ec1abe`](https://github.com/docdyhr/financial-dashboard-mcp/commit/5ec1abeca15c65174cbf0a9b15690410162b5c9c))
+
+* fix: add missing alembic.ini file for CI/CD database migrations
+
+The alembic.ini file was being ignored by .gitignore, causing CI/CD
+pipeline failures when trying to run database migrations. This file
+is required for Alembic to locate migration scripts and configuration.
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude &lt;noreply@anthropic.com&gt; ([`ba12087`](https://github.com/docdyhr/financial-dashboard-mcp/commit/ba12087f39e528fd5050b3364cb8ee83e93186c2))
+
+### Unknown
+
+* Merge branch &#39;main&#39; of https://github.com/docdyhr/financial-dashboard-mcp ([`394fbcb`](https://github.com/docdyhr/financial-dashboard-mcp/commit/394fbcb7036cad4590a40ecb464fd27b1ac0bbdb))
+
+
 ## v2.5.13 (2025-06-20)
 
 ### Chore
