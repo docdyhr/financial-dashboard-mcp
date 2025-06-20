@@ -356,6 +356,12 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 "backend/models/*" = ["I001", "PLC0415"]
 # Schemas can have imports in validators
 "backend/schemas/*" = ["PLC0415"]
+# Backend services can have imports in functions for circular imports and optional imports
+"backend/services/*" = ["PLC0415"]
+# Backend tasks can have imports in functions
+"backend/tasks/*" = ["PLC0415"]
+# Frontend can have imports in functions for optional imports
+"frontend/*" = ["PLC0415", "FURB162"]
 # Middleware can have logging patterns
 "backend/middleware/*" = ["PLC0415", "LOG014"]
 
