@@ -2,6 +2,44 @@
 
 
 
+## v2.5.5 (2025-06-20)
+
+### Chore
+
+* chore: bump version to 2.5.4 [skip ci] ([`d5932ed`](https://github.com/docdyhr/financial-dashboard-mcp/commit/d5932ed9bd3f164f28e5b62c73b39cf44b15a338))
+
+### Fix
+
+* fix: resolve CI/CD pipeline failures
+
+- Add requirements-dev.txt installation to fix black command not found
+- Update upload-artifact from deprecated v3 to v4
+- Add debugging info for alembic migration path resolution
+- Ensure alembic.ini is available before running migrations
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude &lt;noreply@anthropic.com&gt; ([`6ed8ea5`](https://github.com/docdyhr/financial-dashboard-mcp/commit/6ed8ea5bf6ace8b5db1100ea6b2fe83505cfba45))
+
+### Style
+
+* style: apply black formatting to ISIN tests
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude &lt;noreply@anthropic.com&gt; ([`e8ede57`](https://github.com/docdyhr/financial-dashboard-mcp/commit/e8ede57a510a3e18296758777b7cd249cdcfd203))
+
+* style: apply pre-commit formatting fixes to ISIN tests
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude &lt;noreply@anthropic.com&gt; ([`aef94d6`](https://github.com/docdyhr/financial-dashboard-mcp/commit/aef94d66d1a240c7b2a6ed6c335e5204b8d52c56))
+
+### Unknown
+
+* Merge branch &#39;main&#39; of https://github.com/docdyhr/financial-dashboard-mcp ([`1fff31a`](https://github.com/docdyhr/financial-dashboard-mcp/commit/1fff31a6447734bded4edc75d572e0706d9e413c))
+
+
 ## v2.5.4 (2025-06-20)
 
 ### Chore
