@@ -24,7 +24,7 @@ async def test_mcp_tools():
 
         # Test portfolio tools
         logger.info("Testing Portfolio Tools...")
-        portfolio_tools = PortfolioTools()
+        portfolio_tools = PortfolioTools("http://localhost:8000")
 
         # Test get tools
         tools = portfolio_tools.get_tools()
@@ -46,7 +46,7 @@ async def test_mcp_tools():
 
         # Test market data tools
         logger.info("Testing Market Data Tools...")
-        market_tools = MarketDataTools()
+        market_tools = MarketDataTools("http://localhost:8000")
 
         tools = market_tools.get_tools()
         logger.info(f"Market tools available: {[tool.name for tool in tools]}")
@@ -66,7 +66,7 @@ async def test_mcp_tools():
 
         # Test analytics tools
         logger.info("Testing Analytics Tools...")
-        analytics_tools = AnalyticsTools()
+        analytics_tools = AnalyticsTools("http://localhost:8000")
 
         tools = analytics_tools.get_tools()
         logger.info(f"Analytics tools available: {[tool.name for tool in tools]}")

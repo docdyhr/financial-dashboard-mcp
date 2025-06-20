@@ -6,6 +6,8 @@ from typing import Any
 import httpx
 from mcp.types import TextContent, Tool
 
+from mcp_server.auth import get_auth_manager
+
 logger = logging.getLogger(__name__)
 
 
@@ -15,13 +17,8 @@ class MarketDataTools:
     def __init__(self, backend_url: str = "http://localhost:8000"):
         """Initialize market data tools with backend URL."""
         self.backend_url = backend_url
-        # Set up authentication headers
-        self.auth_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZXhwIjoxNzUyODcxOTM2fQ.ThyBQ0AMuRHb9H7QzoBFf04pRIfxcBrEJ501CxW5FX0"
-        self.headers = {
-            "Authorization": f"Bearer {self.auth_token}",
-            "Content-Type": "application/json",
-        }
-        self.http_client = httpx.AsyncClient(timeout=30.0, headers=self.headers)
+        self.auth_manager = get_auth_manager(backend_url)
+        self.http_client = httpx.AsyncClient(timeout=30.0)
 
     async def close(self):
         """Close HTTP client."""
@@ -111,9 +108,10 @@ class MarketDataTools:
     async def _get_asset_price(self, arguments: dict[str, Any]) -> list[TextContent]:
         """Get asset price information."""
         try:
+            headers = await self.auth_manager.get_headers()
             ticker = arguments["ticker"].upper()
             response = await self.http_client.get(
-                f"{self.backend_url}/api/assets/price/{ticker}"
+                f"{self.backend_url}/api/v1/assets/price/{ticker}", headers=headers
             )
             response.raise_for_status()
             data = response.json()
@@ -166,9 +164,12 @@ class MarketDataTools:
     ) -> list[TextContent]:
         """Calculate portfolio performance."""
         try:
+            headers = await self.auth_manager.get_headers()
+            user_id = await self.auth_manager.get_user_id()
             period = arguments["period"]
             response = await self.http_client.get(
-                f"{self.backend_url}/api/portfolio/performance"
+                f"{self.backend_url}/api/v1/portfolio/performance/{user_id}",
+                headers=headers,
             )
             response.raise_for_status()
             data = response.json()
@@ -235,8 +236,12 @@ class MarketDataTools:
             period = arguments.get("period", "1Y")
 
             # Get current positions for diversification analysis
+            headers = await self.auth_manager.get_headers()
+            user_id = await self.auth_manager.get_user_id()
+
             positions_response = await self.http_client.get(
-                f"{self.backend_url}/api/portfolio/positions"
+                f"{self.backend_url}/api/v1/positions/?user_id={user_id}",
+                headers=headers,
             )
             if positions_response.status_code != 200:
                 return [

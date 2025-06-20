@@ -6,6 +6,8 @@ from typing import Any
 import httpx
 from mcp.types import TextContent, Tool
 
+from mcp_server.auth import get_auth_manager
+
 logger = logging.getLogger(__name__)
 
 
@@ -15,13 +17,8 @@ class AnalyticsTools:
     def __init__(self, backend_url: str = "http://localhost:8000") -> None:
         """Initialize analytics tools with backend URL."""
         self.backend_url = backend_url
-        # Set up authentication headers
-        self.auth_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZXhwIjoxNzUyODcxOTM2fQ.ThyBQ0AMuRHb9H7QzoBFf04pRIfxcBrEJ501CxW5FX0"
-        self.headers = {
-            "Authorization": f"Bearer {self.auth_token}",
-            "Content-Type": "application/json",
-        }
-        self.http_client = httpx.AsyncClient(timeout=30.0, headers=self.headers)
+        self.auth_manager = get_auth_manager(backend_url)
+        self.http_client = httpx.AsyncClient(timeout=30.0)
 
     async def close(self):
         """Close HTTP client."""
@@ -189,8 +186,12 @@ class AnalyticsTools:
 
         # Get current allocation for comparison
         try:
+            headers = await self.auth_manager.get_headers()
+            user_id = await self.auth_manager.get_user_id()
+
             current_response = await self.http_client.get(
-                f"{self.backend_url}/api/portfolio/allocation"
+                f"{self.backend_url}/api/v1/portfolio/allocation/{user_id}",
+                headers=headers,
             )
             current_allocation: dict[str, float] = {}
             if current_response.status_code == 200:
@@ -397,11 +398,16 @@ Found {len(unique_opportunities)} opportunities matching your criteria:
 
         # Get current portfolio data
         try:
+            headers = await self.auth_manager.get_headers()
+            user_id = await self.auth_manager.get_user_id()
+
             allocation_response = await self.http_client.get(
-                f"{self.backend_url}/api/portfolio/allocation"
+                f"{self.backend_url}/api/v1/portfolio/allocation/{user_id}",
+                headers=headers,
             )
             summary_response = await self.http_client.get(
-                f"{self.backend_url}/api/portfolio/summary"
+                f"{self.backend_url}/api/v1/portfolio/summary/{user_id}",
+                headers=headers,
             )
 
             if (
@@ -511,14 +517,20 @@ Found {len(unique_opportunities)} opportunities matching your criteria:
 
         # Get portfolio data for analysis
         try:
+            headers = await self.auth_manager.get_headers()
+            user_id = await self.auth_manager.get_user_id()
+
             summary_response = await self.http_client.get(
-                f"{self.backend_url}/api/portfolio/summary"
+                f"{self.backend_url}/api/v1/portfolio/summary/{user_id}",
+                headers=headers,
             )
             positions_response = await self.http_client.get(
-                f"{self.backend_url}/api/portfolio/positions"
+                f"{self.backend_url}/api/v1/positions/?user_id={user_id}",
+                headers=headers,
             )
             performance_response = await self.http_client.get(
-                f"{self.backend_url}/api/portfolio/performance"
+                f"{self.backend_url}/api/v1/portfolio/performance/{user_id}",
+                headers=headers,
             )
 
             if summary_response.status_code != 200:

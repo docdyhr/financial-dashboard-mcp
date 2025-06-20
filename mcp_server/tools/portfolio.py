@@ -6,6 +6,8 @@ from typing import Any
 import httpx
 from mcp.types import TextContent, Tool
 
+from mcp_server.auth import get_auth_manager
+
 logger = logging.getLogger(__name__)
 
 
@@ -15,13 +17,8 @@ class PortfolioTools:
     def __init__(self, backend_url: str = "http://localhost:8000"):
         """Initialize portfolio tools with backend URL."""
         self.backend_url = backend_url
-        # Set up authentication headers
-        self.auth_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZXhwIjoxNzUyODcxOTM2fQ.ThyBQ0AMuRHb9H7QzoBFf04pRIfxcBrEJ501CxW5FX0"
-        self.headers = {
-            "Authorization": f"Bearer {self.auth_token}",
-            "Content-Type": "application/json",
-        }
-        self.http_client = httpx.AsyncClient(timeout=30.0, headers=self.headers)
+        self.auth_manager = get_auth_manager(backend_url)
+        self.http_client = httpx.AsyncClient(timeout=30.0)
 
     async def close(self) -> None:
         """Close HTTP client."""
@@ -140,9 +137,21 @@ class PortfolioTools:
     async def _get_positions(self, arguments: dict[str, Any]) -> list[TextContent]:
         """Get current portfolio positions."""
         try:
-            # Use correct API v1 path with default user_id=3
+            # Get authenticated headers and user_id
+            headers = await self.auth_manager.get_headers()
+            user_id = await self.auth_manager.get_user_id()
+
+            if not user_id:
+                return [
+                    TextContent(
+                        type="text",
+                        text="Authentication failed. Please check your credentials.",
+                    )
+                ]
+
             response = await self.http_client.get(
-                f"{self.backend_url}/api/v1/positions/?user_id=3"
+                f"{self.backend_url}/api/v1/positions/?user_id={user_id}",
+                headers=headers,
             )
             response.raise_for_status()
             data = response.json()
@@ -205,7 +214,8 @@ class PortfolioTools:
             if arguments.get("include_cash", True):
                 # Get cash balance from summary
                 summary_response = await self.http_client.get(
-                    f"{self.backend_url}/api/v1/portfolio/summary/3"
+                    f"{self.backend_url}/api/v1/portfolio/summary/{user_id}",
+                    headers=headers,
                 )
                 if summary_response.status_code == 200:
                     summary_data = summary_response.json()
@@ -231,9 +241,22 @@ class PortfolioTools:
     ) -> list[TextContent]:
         """Get portfolio summary."""
         try:
+            # Get authenticated headers and user_id
+            headers = await self.auth_manager.get_headers()
+            user_id = await self.auth_manager.get_user_id()
+
+            if not user_id:
+                return [
+                    TextContent(
+                        type="text",
+                        text="Authentication failed. Please check your credentials.",
+                    )
+                ]
+
             # Get summary data
             summary_response = await self.http_client.get(
-                f"{self.backend_url}/api/v1/portfolio/summary/3"
+                f"{self.backend_url}/api/v1/portfolio/summary/{user_id}",
+                headers=headers,
             )
             summary_response.raise_for_status()
             summary_data = summary_response.json()
@@ -243,7 +266,8 @@ class PortfolioTools:
             if arguments.get("include_performance", True):
                 try:
                     perf_response = await self.http_client.get(
-                        f"{self.backend_url}/api/v1/portfolio/performance/3"
+                        f"{self.backend_url}/api/v1/portfolio/performance/{user_id}",
+                        headers=headers,
                     )
                     if perf_response.status_code == 200:
                         perf_data = perf_response.json()
@@ -294,9 +318,21 @@ class PortfolioTools:
     async def _get_allocation(self, arguments: dict[str, Any]) -> list[TextContent]:
         """Get portfolio allocation breakdown."""
         try:
-            # Use correct API v1 path with default user_id=3
+            # Get authenticated headers and user_id
+            headers = await self.auth_manager.get_headers()
+            user_id = await self.auth_manager.get_user_id()
+
+            if not user_id:
+                return [
+                    TextContent(
+                        type="text",
+                        text="Authentication failed. Please check your credentials.",
+                    )
+                ]
+
             response = await self.http_client.get(
-                f"{self.backend_url}/api/v1/portfolio/allocation/3"
+                f"{self.backend_url}/api/v1/portfolio/allocation/{user_id}",
+                headers=headers,
             )
             response.raise_for_status()
             data = response.json()
@@ -324,13 +360,25 @@ class PortfolioTools:
     async def _add_position(self, arguments: dict[str, Any]) -> list[TextContent]:
         """Add a new position."""
         try:
+            # Get authenticated headers and user_id
+            headers = await self.auth_manager.get_headers()
+            user_id = await self.auth_manager.get_user_id()
+
+            if not user_id:
+                return [
+                    TextContent(
+                        type="text",
+                        text="Authentication failed. Please check your credentials.",
+                    )
+                ]
+
             ticker = arguments["ticker"].upper()
             quantity = float(arguments["quantity"])
             purchase_price = float(arguments["purchase_price"])
 
             # First, check if asset exists or create it
             asset_response = await self.http_client.get(
-                f"{self.backend_url}/api/v1/assets/?query={ticker}"
+                f"{self.backend_url}/api/v1/assets/?query={ticker}", headers=headers
             )
             asset_response.raise_for_status()
             asset_data = asset_response.json()
@@ -349,7 +397,9 @@ class PortfolioTools:
                 }
 
                 create_response = await self.http_client.post(
-                    f"{self.backend_url}/api/v1/assets/", json=asset_create_data
+                    f"{self.backend_url}/api/v1/assets/",
+                    json=asset_create_data,
+                    headers=headers,
                 )
                 create_response.raise_for_status()
                 created_asset = create_response.json()
@@ -357,7 +407,7 @@ class PortfolioTools:
 
             # Prepare position data with correct schema
             position_data = {
-                "user_id": 3,
+                "user_id": user_id,
                 "asset_id": asset_id,
                 "quantity": str(quantity),
                 "average_cost_per_share": str(purchase_price),
@@ -368,7 +418,9 @@ class PortfolioTools:
                 position_data["purchase_date"] = arguments["purchase_date"]
 
             response = await self.http_client.post(
-                f"{self.backend_url}/api/v1/positions/", json=position_data
+                f"{self.backend_url}/api/v1/positions/",
+                json=position_data,
+                headers=headers,
             )
             response.raise_for_status()
 
@@ -406,6 +458,9 @@ The position has been added to your portfolio and will be included in future cal
     async def _update_position(self, arguments: dict[str, Any]) -> list[TextContent]:
         """Update an existing position."""
         try:
+            # Get authenticated headers
+            headers = await self.auth_manager.get_headers()
+
             position_id = arguments["position_id"]
             update_data = {}
 
@@ -417,6 +472,7 @@ The position has been added to your portfolio and will be included in future cal
             response = await self.http_client.put(
                 f"{self.backend_url}/api/v1/positions/{position_id}",
                 json=update_data,
+                headers=headers,
             )
             response.raise_for_status()
 

@@ -1,18 +1,30 @@
+# Development Docker Compose Configuration
+#
+# IMPORTANT: This file requires environment variables to be set.
+# Copy .env.example to .env and configure all required values.
+#
+# Security Notice: No default credentials are provided for security reasons.
+# You MUST set the following environment variables:
+# - POSTGRES_USER
+# - POSTGRES_PASSWORD
+# - POSTGRES_DB
+# - MCP_AUTH_TOKEN
+
 services:
   postgres:
     image: postgres:16-alpine
     container_name: financial_dashboard_db
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-financial_user}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-financial_pass}
-      POSTGRES_DB: ${POSTGRES_DB:-financial_dashboard}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-financial_user}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -38,10 +50,13 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_URL=postgresql://${POSTGRES_USER:-financial_user}:${POSTGRES_PASSWORD:-financial_pass}@postgres:5432/${POSTGRES_DB:-financial_dashboard}
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       - REDIS_URL=redis://redis:6379/0
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - SECRET_KEY=${SECRET_KEY}
+      - MCP_AUTH_TOKEN=${MCP_AUTH_TOKEN}
+      - ENVIRONMENT=${ENVIRONMENT:-development}
     depends_on:
       postgres:
         condition: service_healthy
@@ -58,10 +73,11 @@ services:
       dockerfile: docker/Dockerfile.backend
     container_name: financial_dashboard_celery_worker
     environment:
-      - DATABASE_URL=postgresql://${POSTGRES_USER:-financial_user}:${POSTGRES_PASSWORD:-financial_pass}@postgres:5432/${POSTGRES_DB:-financial_dashboard}
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       - REDIS_URL=redis://redis:6379/0
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - SECRET_KEY=${SECRET_KEY}
     depends_on:
       postgres:
         condition: service_healthy
@@ -78,10 +94,11 @@ services:
       dockerfile: docker/Dockerfile.backend
     container_name: financial_dashboard_celery_beat
     environment:
-      - DATABASE_URL=postgresql://${POSTGRES_USER:-financial_user}:${POSTGRES_PASSWORD:-financial_pass}@postgres:5432/${POSTGRES_DB:-financial_dashboard}
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       - REDIS_URL=redis://redis:6379/0
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - SECRET_KEY=${SECRET_KEY}
     depends_on:
       postgres:
         condition: service_healthy
@@ -102,9 +119,11 @@ services:
     environment:
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - FLOWER_USERNAME=${FLOWER_USERNAME}
+      - FLOWER_PASSWORD=${FLOWER_PASSWORD}
     depends_on:
       - redis
-    command: celery -A backend.tasks flower
+    command: celery -A backend.tasks flower --basic_auth=${FLOWER_USERNAME}:${FLOWER_PASSWORD}
 
   frontend:
     build:
@@ -115,6 +134,7 @@ services:
       - "8501:8501"
     environment:
       - BACKEND_URL=http://backend:8000
+      - SECRET_KEY=${SECRET_KEY}
     depends_on:
       - backend
     volumes:
@@ -130,9 +150,10 @@ services:
     ports:
       - "8502:8502"
     environment:
-      - DATABASE_URL=postgresql://${POSTGRES_USER:-financial_user}:${POSTGRES_PASSWORD:-financial_pass}@postgres:5432/${POSTGRES_DB:-financial_dashboard}
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       - BACKEND_URL=http://backend:8000
-      - MCP_AUTH_TOKEN=${MCP_AUTH_TOKEN:-development-token}
+      - MCP_AUTH_TOKEN=${MCP_AUTH_TOKEN}
+      - SECRET_KEY=${SECRET_KEY}
     depends_on:
       - backend
     volumes:

@@ -543,14 +543,50 @@ alembic downgrade -1
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
+Please read [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
 
 ## Security
 
-- All API endpoints require authentication (in production)
-- MCP server access is token-based
-- Sensitive data is encrypted at rest
-- No API keys or secrets should be committed to the repository
+### 🔒 Security Best Practices
+
+This project follows industry-standard security practices:
+
+- **Authentication**: JWT-based authentication with secure token generation
+- **Password Security**: Bcrypt hashing for all passwords
+- **API Security**: All endpoints require authentication in production
+- **Secret Management**: Environment-based configuration with no hardcoded credentials
+- **Data Protection**: Encrypted connections and secure data storage
+- **Access Control**: Token-based MCP server access with rotation support
+
+### 🚀 Production Deployment Security
+
+1. **Generate secure credentials:**
+   ```bash
+   ./scripts/setup_production.sh
+   ```
+
+2. **Validate production environment:**
+   ```bash
+   ./scripts/validate_production.py
+   ```
+
+3. **Security checklist:**
+   - ✅ All secrets are randomly generated
+   - ✅ No default passwords in production
+   - ✅ SSL/TLS certificates configured
+   - ✅ Firewall rules properly set
+   - ✅ Database connections encrypted
+   - ✅ API keys rotated regularly
+
+### ⚠️ Important Security Notes
+
+- **NEVER** commit `.env` files or real credentials to version control
+- **ALWAYS** use strong, randomly generated passwords and secrets
+- **ROTATE** API keys and tokens regularly
+- **MONITOR** access logs and security events
+- **UPDATE** dependencies regularly for security patches
+
+For detailed security guidelines, see [docs/SECURITY.md](docs/SECURITY.md)
 
 ## Project Status
 
@@ -599,7 +635,18 @@ fix(frontend): resolve chart rendering issue      → Patch release
 feat!: redesign authentication system            → Major release
 ```
 
-For detailed versioning guidelines, see [docs/SEMANTIC_VERSIONING.md](docs/SEMANTIC_VERSIONING.md).
+For detailed versioning guidelines, see [docs/technical/SEMANTIC_VERSIONING.md](docs/technical/SEMANTIC_VERSIONING.md).
+
+## 📚 Documentation
+
+Comprehensive documentation is available in the [docs/](docs/) directory:
+
+- **[📖 Documentation Index](docs/README.md)** - Complete documentation overview
+- **[🚀 Quick Start](docs/guides/QUICK_START.md)** - Get up and running quickly
+- **[🤖 MCP Server](docs/mcp/MCP_SERVER.md)** - AI integration with Claude Desktop
+- **[🔒 Security Guide](docs/SECURITY.md)** - Security best practices and audit checklist
+- **[🛠️ Contributing](docs/CONTRIBUTING.md)** - Development guidelines and setup
+- **[📋 TODO & Roadmap](docs/TODO.md)** - Current status and upcoming features
 
 ---
 
