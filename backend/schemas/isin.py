@@ -11,26 +11,17 @@ class ISINValidationRequest(BaseSchema):
     """Schema for ISIN validation requests."""
 
     isin: str = Field(
-        ..., min_length=12, max_length=12, description="ISIN code to validate"
+        ..., min_length=1, max_length=50, description="ISIN code to validate"
     )
 
     @field_validator("isin")
     @classmethod
     def validate_isin_format(cls, v: str) -> str:
-        """Basic ISIN format validation."""
-        if not v:
+        """Basic ISIN format validation - allow invalid ISINs for validation testing."""
+        if not v or not v.strip():
             raise ValueError("ISIN cannot be empty")
 
         v = v.upper().strip()
-
-        # Basic format validation
-        import re
-
-        if len(v) != 12 or not re.match(r"^[A-Z]{2}[A-Z0-9]{9}[0-9]$", v):
-            raise ValueError(
-                "ISIN must be 12 characters: 2 letters + 9 alphanumeric + 1 digit"
-            )
-
         return v
 
 

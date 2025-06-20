@@ -94,7 +94,7 @@ class TestISINValidationAPI:
             assert response.status_code == 200
             data = response.json()
             assert data["is_valid"] is False
-            assert "error" in data
+            assert data["validation_error"] is not None
 
     def test_validate_empty_isin(self, test_client):
         """Test validation with empty ISIN."""
