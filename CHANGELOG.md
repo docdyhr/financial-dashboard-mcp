@@ -2,6 +2,45 @@
 
 
 
+## v2.5.15 (2025-06-20)
+
+### Chore
+
+* chore: bump version to 2.5.14 [skip ci] ([`ed8d7ed`](https://github.com/docdyhr/financial-dashboard-mcp/commit/ed8d7ed450554b722d33e4283484a25c5a864089))
+
+### Fix
+
+* fix: correct Python version configurations corrupted by version bump 2.5.14
+
+- Fix mypy python_version from 2.5.14 to 3.11
+- Fix ruff target-version from 2.5.14 to py311
+- Fix pytest minversion from 2.5.14 to 6.0
+
+This completes all CI/CD pipeline fixes:
+- Added missing alembic.ini file for database migrations
+- Added psutil dependency for performance tests
+- Fixed all configuration corruptions from automated version bumps
+- Applied comprehensive PLC0415 ignore patterns for imports in local scope
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude &lt;noreply@anthropic.com&gt; ([`e2ba646`](https://github.com/docdyhr/financial-dashboard-mcp/commit/e2ba646ae98d7b7afac6bb9ac3f1d772cbc3db0e))
+
+* fix: add missing psutil dependency for performance tests
+
+The CI/CD pipeline was failing because tests/performance/test_isin_performance.py
+imports psutil but it wasn&#39;t included in requirements-dev.txt. This resolves
+the ModuleNotFoundError during test collection.
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude &lt;noreply@anthropic.com&gt; ([`c09d60e`](https://github.com/docdyhr/financial-dashboard-mcp/commit/c09d60ee73446fa9b15fa4b35190a93248edb288))
+
+### Unknown
+
+* Merge branch &#39;main&#39; of https://github.com/docdyhr/financial-dashboard-mcp ([`033f33f`](https://github.com/docdyhr/financial-dashboard-mcp/commit/033f33f758b5ae1007c1c90f3e4eff131fb3461c))
+
+
 ## v2.5.14 (2025-06-20)
 
 ### Chore

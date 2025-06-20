@@ -1,6 +1,6 @@
 """Financial Dashboard Backend Package."""
 
-__version__ = "2.5.14"
+__version__ = "2.5.15"
 __title__ = "Financial Dashboard MCP"
 __description__ = "A comprehensive financial dashboard system with AI integration"
 __author__ = "Financial Dashboard Team"
