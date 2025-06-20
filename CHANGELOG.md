@@ -2,6 +2,43 @@
 
 
 
+## v2.5.13 (2025-06-20)
+
+### Chore
+
+* chore: bump version to 2.5.12 [skip ci] ([`cf7e932`](https://github.com/docdyhr/financial-dashboard-mcp/commit/cf7e93271a2301c0af88278e1c5d7b401a009859))
+
+### Fix
+
+* fix: correct Python version configurations corrupted by version bump 2.5.12
+
+- Fix mypy python_version from 2.5.12 to 3.11
+- Fix ruff target-version from 2.5.12 to py311
+- Fix pytest minversion from 2.5.12 to 6.0
+- Add PLC0415 ignore for mcp_server/* directory
+
+The automated version bump continues to incorrectly change Python version settings.
+Complete CI/CD linting fixes now include all directories that need PLC0415 exceptions.
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude &lt;noreply@anthropic.com&gt; ([`c5c75c9`](https://github.com/docdyhr/financial-dashboard-mcp/commit/c5c75c913a8b5079f82816f71248934b8c7fedb1))
+
+* fix: add PLC0415 ignore for mcp_server/* directory
+
+Complete CI/CD linting fixes by ignoring PLC0415 (import in local scope)
+for MCP server files. This allows imports in exception handlers and
+function scopes as needed for optional imports and error handling.
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude &lt;noreply@anthropic.com&gt; ([`a079e7b`](https://github.com/docdyhr/financial-dashboard-mcp/commit/a079e7b9a08d42bd5a2601afa5b1fd1dfe5833a1))
+
+### Unknown
+
+* Merge branch &#39;main&#39; of https://github.com/docdyhr/financial-dashboard-mcp ([`fc122fd`](https://github.com/docdyhr/financial-dashboard-mcp/commit/fc122fdd489a875152f349b1494dba1ed0dfb573))
+
+
 ## v2.5.12 (2025-06-20)
 
 ### Chore
