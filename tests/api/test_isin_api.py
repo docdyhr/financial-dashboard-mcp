@@ -145,9 +145,9 @@ class TestISINResolverAPI:
 
             assert response.status_code == 200
             data = response.json()
-            assert data["found"] is True
-            assert data["result"]["ticker"] == "AAPL"
-            assert data["result"]["type"] == "isin"
+            assert data["success"] is True
+            assert data["resolved_ticker"] == "AAPL"
+            assert data["identifier_type"] == "isin"
 
     def test_resolve_ticker_identifier(self, test_client, mock_db_session):
         """Test resolving ticker identifier."""
@@ -158,8 +158,8 @@ class TestISINResolverAPI:
 
             assert response.status_code == 200
             data = response.json()
-            assert data["found"] is True
-            assert data["result"]["ticker"] == "AAPL"
+            assert data["success"] is True
+            assert data["resolved_ticker"] == "AAPL"
 
     def test_resolve_unknown_identifier(self, test_client):
         """Test resolving unknown identifier."""
@@ -176,7 +176,7 @@ class TestISINResolverAPI:
 
             assert response.status_code == 200
             data = response.json()
-            assert data["found"] is False
+            assert data["success"] is False
 
 
 class TestISINLookupAPI:
