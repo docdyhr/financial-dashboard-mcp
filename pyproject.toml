@@ -335,7 +335,7 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
 [tool.ruff.lint.per-file-ignores]
 # Tests can use magic values, assertions, etc.
-"tests/*" = ["PLR2004", "S101", "D", "ANN"]
+"tests/*" = ["PLR2004", "S101", "D", "ANN", "PLC0415"]
 # Migration files can be more lenient
 "*/migrations/*" = ["D", "N999", "E501"]
 # Config files can have broader imports
@@ -364,6 +364,8 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 "frontend/*" = ["PLC0415", "FURB162"]
 # Middleware can have logging patterns
 "backend/middleware/*" = ["PLC0415", "LOG014"]
+# MCP server can have imports in functions
+"mcp_server/*" = ["PLC0415"]
 
 [tool.ruff.lint.isort]
 # Use the same configuration as the standalone isort
