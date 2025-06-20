@@ -3,7 +3,8 @@
 from enum import Enum
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Enum as SQLEnum, Numeric, String
+from sqlalchemy import Enum as SQLEnum
+from sqlalchemy import Numeric, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
 from backend.models.base import Base

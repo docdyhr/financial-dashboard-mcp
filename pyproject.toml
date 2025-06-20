@@ -344,12 +344,15 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 "*/__init__.py" = ["F401", "D104"]
 # Scripts can be less strict
 "scripts/*" = ["T201", "S603", "S607"]
+# Models can have import formatting handled by standalone isort
+"backend/models/*" = ["I001"]
 
 [tool.ruff.lint.isort]
 # Use the same configuration as the standalone isort
-combine-as-imports = true
-split-on-trailing-comma = true
+# Force separate lines for different import types
 force-single-line = false
+split-on-trailing-comma = true
+force-sort-within-sections = true
 known-first-party = ["backend", "frontend", "mcp_server"]
 
 [tool.ruff.lint.flake8-quotes]
