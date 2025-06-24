@@ -1,30 +1,37 @@
 # CHANGELOG
 
-## v2.5.20 (2025-06-24) - DEMO CREDENTIALS FIX 🔧
+
+
+## v2.7.1 (2025-06-24)
+
+### Chore
+
+* chore: bump version to 2.7.0 [skip ci] ([`b44348c`](https://github.com/docdyhr/financial-dashboard-mcp/commit/b44348cfec7e0f4af9893dec75ec4726e24dbab8))
 
 ### Fix
 
 * fix: correct demo credentials display and configuration
 
-**🔑 DEMO CREDENTIALS UPDATES:**
-- Updated frontend login page demo credentials display from `demo123` to `demo123456`
+🔑 DEMO CREDENTIALS UPDATES:
+- Updated frontend login page demo credentials display from demo123 to demo123456
 - Fixed password length requirement (8+ characters minimum)
 - Updated all documentation to reflect correct working credentials
 - Synchronized .env and .env.example with working password
 
-**📋 FILES UPDATED:**
-- ✅ frontend/components/auth.py: Updated demo credentials popup
-- ✅ .env and .env.example: Updated DEMO_PASSWORD configuration
-- ✅ README.md: Updated demo login credentials section
-- ✅ docs/CLAUDE.md: Updated demo credentials documentation
+📋 FILES UPDATED:
+✅ frontend/components/auth.py: Updated demo credentials popup
+✅ .env and .env.example: Updated DEMO_PASSWORD configuration
+✅ README.md: Updated demo login credentials section
+✅ docs/CLAUDE.md: Updated demo credentials documentation
 
-**🚀 WORKING DEMO CREDENTIALS:**
+🚀 WORKING DEMO CREDENTIALS:
 - Username: user@example.com
 - Password: demo123456
 
 🤖 Generated with [Claude Code](https://claude.ai/code)
 
-Co-Authored-By: Claude <noreply@anthropic.com>
+Co-Authored-By: Claude &lt;noreply@anthropic.com&gt; ([`bc5cd7e`](https://github.com/docdyhr/financial-dashboard-mcp/commit/bc5cd7eabfcf04bef867153cbc290ae90e1073db))
+
 
 ## v2.7.0 (2025-06-24)
 
