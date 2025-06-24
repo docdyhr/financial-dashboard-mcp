@@ -1,28 +1,34 @@
 # CHANGELOG
 
-## v2.5.19 (2025-06-24) - COMPREHENSIVE ENVIRONMENT CONFIGURATION 🔧
 
-### Feat
+
+## v2.7.0 (2025-06-24)
+
+### Chore
+
+* chore: bump version to 2.6.0 [skip ci] ([`e68e489`](https://github.com/docdyhr/financial-dashboard-mcp/commit/e68e489287e28299bbdecc4a12da0cac29e557f3))
+
+### Feature
 
 * feat: comprehensive .env configuration with 80+ environment variables
 
-**📋 COMPLETE ENVIRONMENT SETUP:**
+📋 COMPLETE ENVIRONMENT SETUP:
 - Complete .env.example with all 80+ configuration options
 - Production-ready security key generation instructions
 - Comprehensive market data provider configurations
 - Advanced performance tuning and rate limiting settings
 - Demo credentials documentation and authentication setup
 
-**🔧 Configuration Categories:**
-- ✅ Core Settings: Database, Security, Environment
-- ✅ Service Configuration: Redis, Celery, API, Frontend, MCP
-- ✅ Market Data Providers: Alpha Vantage, Finnhub, Yahoo Finance
-- ✅ Performance & Limits: Rate limiting, timeouts, cache settings
-- ✅ ISIN Service: Batch processing, retry logic, sync intervals
-- ✅ Risk & Portfolio: Thresholds, diversification metrics
-- ✅ Demo Accounts: Working credentials for immediate testing
+🔧 Configuration Categories:
+✅ Core Settings: Database, Security, Environment
+✅ Service Configuration: Redis, Celery, API, Frontend, MCP
+✅ Market Data Providers: Alpha Vantage, Finnhub, Yahoo Finance
+✅ Performance &amp; Limits: Rate limiting, timeouts, cache settings
+✅ ISIN Service: Batch processing, retry logic, sync intervals
+✅ Risk &amp; Portfolio: Thresholds, diversification metrics
+✅ Demo Accounts: Working credentials for immediate testing
 
-**🚀 Documentation Updates:**
+🚀 Documentation Updates:
 - Updated README.md with LEGENDARY SUCCESS achievements
 - Enhanced CLAUDE.md with environment setup instructions
 - Complete .env.example with production security guidelines
@@ -30,7 +36,8 @@
 
 🤖 Generated with [Claude Code](https://claude.ai/code)
 
-Co-Authored-By: Claude <noreply@anthropic.com>
+Co-Authored-By: Claude &lt;noreply@anthropic.com&gt; ([`5083c39`](https://github.com/docdyhr/financial-dashboard-mcp/commit/5083c393574b07772fbfed8f330443c05a460ef4))
+
 
 ## v2.6.0 (2025-06-24)
 
