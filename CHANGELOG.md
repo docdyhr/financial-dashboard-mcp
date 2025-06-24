@@ -1,6 +1,30 @@
 # CHANGELOG
 
+## v2.5.20 (2025-06-24) - DEMO CREDENTIALS FIX 🔧
 
+### Fix
+
+* fix: correct demo credentials display and configuration
+
+**🔑 DEMO CREDENTIALS UPDATES:**
+- Updated frontend login page demo credentials display from `demo123` to `demo123456`
+- Fixed password length requirement (8+ characters minimum)
+- Updated all documentation to reflect correct working credentials
+- Synchronized .env and .env.example with working password
+
+**📋 FILES UPDATED:**
+- ✅ frontend/components/auth.py: Updated demo credentials popup
+- ✅ .env and .env.example: Updated DEMO_PASSWORD configuration
+- ✅ README.md: Updated demo login credentials section
+- ✅ docs/CLAUDE.md: Updated demo credentials documentation
+
+**🚀 WORKING DEMO CREDENTIALS:**
+- Username: user@example.com
+- Password: demo123456
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
 
 ## v2.7.0 (2025-06-24)
 

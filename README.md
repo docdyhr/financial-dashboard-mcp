@@ -169,7 +169,7 @@ make run-celery     # Terminal 3: Background tasks
 ### Demo Login Credentials
 
 - **Username**: `user@example.com`
-- **Password**: `demo123`
+- **Password**: `demo123456`
 
 ### MCP Server Authentication
 

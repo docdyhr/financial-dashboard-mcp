@@ -171,7 +171,7 @@ The project uses a comprehensive `.env` configuration file for all settings. Key
 
 ### Demo Credentials
 - **Username**: `user@example.com`
-- **Password**: `demo123`
+- **Password**: `demo123456`
 
 ### Environment Setup
 1. Copy `.env.example` to `.env`

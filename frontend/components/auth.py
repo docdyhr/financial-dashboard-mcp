@@ -129,7 +129,7 @@ def login_form():
             """
         **For testing purposes, use:**
         - **Username:** user@example.com
-        - **Password:** demo123
+        - **Password:** demo123456
 
         *Note: These are demo credentials for the default user created during database setup.*
         """
