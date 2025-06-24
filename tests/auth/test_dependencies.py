@@ -1,10 +1,12 @@
 """Tests for authentication dependencies and middleware."""
 
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 from fastapi import HTTPException
+from jose import JWTError
 
+from backend.auth.dependencies import get_current_active_user, get_current_user
 from backend.models.user import User
 
 
@@ -38,66 +40,79 @@ class TestAuthenticationDependencies:
     @pytest.fixture
     def mock_db_session(self):
         """Mock database session."""
-        session = AsyncMock()
+        session = Mock()
         return session
 
-    async def test_get_current_user_valid_token(self, mock_user, mock_db_session):
+    @patch("backend.auth.dependencies.verify_token")
+    async def test_get_current_user_valid_token(
+        self, mock_verify_token, mock_user, mock_db_session
+    ):
         """Test getting current user with valid token."""
-        # Mock the token verification and user lookup
+        # Mock the token verification
+        mock_verify_token.return_value = {"sub": 1}
 
-        # This would need to be mocked properly in a real test
-        # For now, we'll test the structure
+        # Mock the database query
+        mock_query = Mock()
+        mock_query.filter.return_value.first.return_value = mock_user
+        mock_db_session.query.return_value = mock_query
+
+        token = "valid.jwt.token"
+        result = await get_current_user(token, mock_db_session)
+
+        assert result == mock_user
+        mock_verify_token.assert_called_once_with(token)
+
+    @patch("backend.auth.dependencies.verify_token")
+    async def test_get_current_user_invalid_token(
+        self, mock_verify_token, mock_db_session
+    ):
+        """Test getting current user with invalid token."""
+        # Mock token verification failure
+        mock_verify_token.side_effect = JWTError("Invalid token")
+
+        token = "invalid.jwt.token"
+
+        with pytest.raises(HTTPException) as exc_info:
+            await get_current_user(token, mock_db_session)
+
+        assert exc_info.value.status_code == 401
+        assert "Could not validate credentials" in exc_info.value.detail
+
+    @patch("backend.auth.dependencies.verify_token")
+    async def test_get_current_user_user_not_found(
+        self, mock_verify_token, mock_db_session
+    ):
+        """Test getting current user when user doesn't exist in database."""
+        # Mock the token verification
+        mock_verify_token.return_value = {"sub": 999}
+
+        # Mock the database query to return None (user not found)
+        mock_query = Mock()
+        mock_query.filter.return_value.first.return_value = None
+        mock_db_session.query.return_value = mock_query
+
         token = "valid.jwt.token"
 
-        # The actual implementation would verify the token and fetch the user
-        # This test verifies the expected behavior structure
-        assert True  # Placeholder for actual implementation test
-
-    async def test_get_current_user_invalid_token(self, mock_db_session):
-        """Test getting current user with invalid token."""
         with pytest.raises(HTTPException) as exc_info:
-            # This would be tested with actual dependency injection
-            # For now, verify the expected exception structure
-            raise HTTPException(
-                status_code=401, detail="Could not validate credentials"
-            )
+            await get_current_user(token, mock_db_session)
 
         assert exc_info.value.status_code == 401
-        assert "credentials" in exc_info.value.detail.lower()
-
-    async def test_get_current_user_user_not_found(self, mock_db_session):
-        """Test getting current user when user doesn't exist in database."""
-        with pytest.raises(HTTPException) as exc_info:
-            raise HTTPException(
-                status_code=401, detail="Could not validate credentials"
-            )
-
-        assert exc_info.value.status_code == 401
+        assert "Could not validate credentials" in exc_info.value.detail
 
     async def test_get_current_active_user_active(self, mock_user):
         """Test getting current active user with active user."""
-        # Mock get_current_user to return active user
-        current_user = mock_user
-
-        # get_current_active_user should return the user if active
-        if current_user.is_active:
-            result = current_user
-        else:
-            raise HTTPException(status_code=400, detail="Inactive user")
+        result = await get_current_active_user(mock_user)
 
         assert result == mock_user
         assert result.is_active is True
 
     async def test_get_current_active_user_inactive(self, mock_inactive_user):
         """Test getting current active user with inactive user."""
-        current_user = mock_inactive_user
-
         with pytest.raises(HTTPException) as exc_info:
-            if not current_user.is_active:
-                raise HTTPException(status_code=400, detail="Inactive user")
+            await get_current_active_user(mock_inactive_user)
 
         assert exc_info.value.status_code == 400
-        assert "inactive" in exc_info.value.detail.lower()
+        assert "Inactive user" in exc_info.value.detail
 
 
 @pytest.mark.auth

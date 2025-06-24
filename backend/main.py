@@ -19,7 +19,7 @@ from backend.api import (
     user_settings,
 )
 from backend.config import get_settings
-from backend.core.exceptions import (
+from backend.exceptions import (
     FinancialDashboardException,
     financial_dashboard_exception_handler,
     generic_exception_handler,

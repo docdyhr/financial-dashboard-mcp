@@ -14,11 +14,9 @@ from typing import Any
 from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
+from backend.exceptions import ISINValidationError
+
 logger = logging.getLogger(__name__)
-
-
-class ISINValidationError(Exception):
-    """Exception raised for ISIN validation errors."""
 
 
 @dataclass

@@ -37,11 +37,11 @@ ENDPOINTS = {
 }
 
 # Request configuration
-DEFAULT_TIMEOUT = 30
-MAX_RETRIES = 3
+DEFAULT_TIMEOUT = int(os.getenv("DEFAULT_TIMEOUT", "30"))
+MAX_RETRIES = int(os.getenv("MAX_RETRIES", "3"))
 
 # Session configuration
-SESSION_TIMEOUT = 3600  # 1 hour
+SESSION_TIMEOUT = int(os.getenv("SESSION_TIMEOUT", "3600"))  # 1 hour
 
 
 def get_endpoint(category: str, action: str) -> str:

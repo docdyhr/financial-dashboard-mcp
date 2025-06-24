@@ -10,12 +10,12 @@ from unittest.mock import Mock, patch
 import pytest
 
 from backend.models.isin import ISINValidationCache
+from backend.exceptions import ISINValidationError
 from backend.services.isin_utils import (
     ISINMapping,
     ISINMappingService,
     ISINService,
     ISINUtils,
-    ISINValidationError,
 )
 
 

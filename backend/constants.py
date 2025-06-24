@@ -2,40 +2,45 @@
 
 from decimal import Decimal
 
+from backend.config import get_settings
+
+# Get settings instance
+settings = get_settings()
+
 # Default Values
 DEFAULT_CASH_BALANCE = Decimal("0")  # Default cash balance when no cash account exists
 
 # Time intervals (in seconds)
 HOUR_IN_SECONDS = 3600
-MARKET_DATA_UPDATE_INTERVAL = 300  # 5 minutes
-PORTFOLIO_SNAPSHOT_INTERVAL = HOUR_IN_SECONDS  # 1 hour
+MARKET_DATA_UPDATE_INTERVAL = settings.market_data_update_interval
+PORTFOLIO_SNAPSHOT_INTERVAL = settings.portfolio_snapshot_interval
 
 # API Limits
-MAX_API_LIMIT = 1000
-DEFAULT_API_LIMIT = 100
+MAX_API_LIMIT = settings.max_api_limit
+DEFAULT_API_LIMIT = settings.default_api_limit
 MIN_API_LIMIT = 1
 
 # Portfolio Analysis Thresholds
-CONCENTRATION_WARNING_THRESHOLD = 0.20  # 20% concentration in single asset
-CONCENTRATION_CRITICAL_THRESHOLD = 0.25  # 25% concentration in single asset
-MIN_DIVERSIFICATION_ASSETS = 5  # Minimum number of assets for good diversification
+CONCENTRATION_WARNING_THRESHOLD = settings.concentration_warning_threshold
+CONCENTRATION_CRITICAL_THRESHOLD = settings.concentration_critical_threshold
+MIN_DIVERSIFICATION_ASSETS = settings.min_diversification_assets
 
 # Performance Calculation
 ANNUALIZATION_FACTOR = 252  # Trading days in a year
-RISK_FREE_RATE = 0.02  # 2% annual risk-free rate
+RISK_FREE_RATE = settings.risk_free_rate
 
 # Cache Expiration Times (in seconds)
-MARKET_DATA_CACHE_TTL = 300  # 5 minutes
-PORTFOLIO_CACHE_TTL = 600  # 10 minutes
-ISIN_MAPPING_CACHE_TTL = 86400  # 24 hours
+MARKET_DATA_CACHE_TTL = settings.market_data_cache_ttl
+PORTFOLIO_CACHE_TTL = settings.portfolio_cache_ttl
+ISIN_MAPPING_CACHE_TTL = settings.isin_mapping_cache_ttl
 
 # Batch Processing
-DEFAULT_BATCH_SIZE = 100
-MAX_BATCH_SIZE = 500
+DEFAULT_BATCH_SIZE = settings.default_batch_size
+MAX_BATCH_SIZE = settings.max_batch_size
 
 # Retry Configuration
-MAX_RETRY_ATTEMPTS = 3
-RETRY_DELAY_SECONDS = 1
+MAX_RETRY_ATTEMPTS = settings.max_retries
+RETRY_DELAY_SECONDS = settings.isin_retry_delay
 
 # European Market Suffixes
 EUROPEAN_MARKET_SUFFIXES = {

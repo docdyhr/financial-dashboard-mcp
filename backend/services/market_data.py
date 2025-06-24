@@ -207,9 +207,10 @@ class AlphaVantageProvider(MarketDataProvider):
 
     def __init__(self, api_key: str):
         super().__init__("alpha_vantage")
+        settings = get_settings()
         self.api_key = api_key
-        self.base_url = "https://www.alphavantage.co/query"
-        self.rate_limit_delay = 12  # 5 calls per minute = 12 seconds between calls
+        self.base_url = settings.alpha_vantage_base_url
+        self.rate_limit_delay = settings.alpha_vantage_rate_limit_delay
         self.last_call_time = 0
 
     def _respect_rate_limit(self):
@@ -338,9 +339,10 @@ class FinnhubProvider(MarketDataProvider):
 
     def __init__(self, api_key: str):
         super().__init__("finnhub")
+        settings = get_settings()
         self.api_key = api_key
-        self.base_url = "https://finnhub.io/api/v1"
-        self.rate_limit_delay = 1  # 60 calls per minute = 1 second between calls
+        self.base_url = settings.finnhub_base_url
+        self.rate_limit_delay = settings.finnhub_rate_limit_delay
         self.last_call_time = 0
 
     def _respect_rate_limit(self):
