@@ -2,8 +2,8 @@
 
 from decimal import Decimal
 
-import pytest
 from fastapi.testclient import TestClient
+import pytest
 
 from backend.main import app
 
@@ -159,12 +159,19 @@ class TestEndToEndSystemValidation:
         assert response.status_code == 401
 
         # Test 4: Valid registration and auth flow
+        import time
+
+        timestamp = str(int(time.time()))
+        test_email = f"securitytest{timestamp}@example.com"
+        test_username = f"securitytest{timestamp}"
+
         register_response = client.post(
             "/api/v1/auth/register",
             json={
-                "email": "securitytest@example.com",
-                "username": "securitytest",
+                "email": test_email,
+                "username": test_username,
                 "password": "SecurePass123!",
+                "full_name": "Security Test User",
             },
         )
         assert register_response.status_code == 200
@@ -172,7 +179,7 @@ class TestEndToEndSystemValidation:
         login_response = client.post(
             "/api/v1/auth/login",
             data={
-                "username": "securitytest@example.com",
+                "username": test_email,
                 "password": "SecurePass123!",
             },
         )
@@ -246,7 +253,7 @@ class TestEndToEndSystemValidation:
         expected_balance = initial_balance
         for transaction in transactions:
             response = client.post(
-                "/api/v1/cash-accounts/transactions/",
+                "/api/v1/cash-accounts/transaction",
                 headers=auth_headers,
                 json={
                     "account_id": account_id,

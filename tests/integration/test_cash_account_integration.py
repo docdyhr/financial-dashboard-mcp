@@ -37,8 +37,15 @@ class TestCashAccountAPIIntegration:
                 "password": "cashpass123",
             },
         )
-        self.token = login_response.json()["access_token"]
+        login_data = login_response.json()
+        self.token = login_data["access_token"]
         self.auth_headers = {"Authorization": f"Bearer {self.token}"}
+
+        # Get actual user_id from auth test endpoint since login doesn't return it
+        auth_test_response = client.get(
+            "/api/v1/portfolio/auth-test", headers=self.auth_headers
+        )
+        self.user_id = auth_test_response.json()["user_id"]
 
     def test_create_cash_account_via_api(self):
         """Test creating cash account through API endpoint."""
@@ -118,7 +125,7 @@ class TestCashAccountAPIIntegration:
 
         # Deposit money
         deposit_response = client.post(
-            "/api/v1/cash-accounts/transactions/",
+            "/api/v1/cash-accounts/transaction",
             headers=self.auth_headers,
             json={
                 "account_id": account_id,
@@ -133,7 +140,7 @@ class TestCashAccountAPIIntegration:
 
         # Withdraw money
         withdraw_response = client.post(
-            "/api/v1/cash-accounts/transactions/",
+            "/api/v1/cash-accounts/transaction",
             headers=self.auth_headers,
             json={
                 "account_id": account_id,
@@ -163,7 +170,7 @@ class TestCashAccountAPIIntegration:
 
         # Try to withdraw more than available
         response = client.post(
-            "/api/v1/cash-accounts/transactions/",
+            "/api/v1/cash-accounts/transaction",
             headers=self.auth_headers,
             json={
                 "account_id": account_id,
@@ -173,7 +180,17 @@ class TestCashAccountAPIIntegration:
         )
 
         assert response.status_code == 400
-        assert "insufficient funds" in response.json()["detail"].lower()
+        response_data = response.json()
+        # Check different possible error response formats
+        if "detail" in response_data:
+            assert "insufficient funds" in response_data["detail"].lower()
+        elif "message" in response_data:
+            assert "insufficient funds" in response_data["message"].lower()
+        elif "error" in response_data:
+            assert "insufficient funds" in response_data["error"].lower()
+        else:
+            # If none of the expected fields, print structure and fail
+            assert False, f"Unexpected error response structure: {response_data}"
 
 
 @pytest.mark.integration
@@ -202,8 +219,15 @@ class TestCashAccountPortfolioIntegration:
                 "password": "portfoliopass123",
             },
         )
-        self.token = login_response.json()["access_token"]
+        login_data = login_response.json()
+        self.token = login_data["access_token"]
         self.auth_headers = {"Authorization": f"Bearer {self.token}"}
+
+        # Get actual user_id from auth test endpoint since login doesn't return it
+        auth_test_response = client.get(
+            "/api/v1/portfolio/auth-test", headers=self.auth_headers
+        )
+        self.user_id = auth_test_response.json()["user_id"]
 
     def test_portfolio_includes_cash_balance(self):
         """Test that portfolio summary includes cash balances."""
@@ -221,20 +245,21 @@ class TestCashAccountPortfolioIntegration:
 
         # Get portfolio summary
         response = client.get(
-            "/api/v1/portfolio/summary",
+            f"/api/v1/portfolio/summary/{self.user_id}",
             headers=self.auth_headers,
         )
 
         assert response.status_code == 200
         portfolio = response.json()
+        portfolio_data = portfolio["data"]  # API response is wrapped in BaseResponse
 
         # Portfolio should include cash balance
-        assert "cash_balance" in portfolio or "total_cash" in portfolio
+        assert "cash_balance" in portfolio_data or "total_cash" in portfolio_data
 
         # Check if cash is included in total value
-        if "total_value" in portfolio:
+        if "total_value" in portfolio_data:
             # Total value should include cash
-            assert Decimal(str(portfolio["total_value"])) >= Decimal("10000.00")
+            assert Decimal(str(portfolio_data["total_value"])) >= Decimal("10000.00")
 
     def test_cash_allocation_in_portfolio(self):
         """Test cash allocation calculation in portfolio."""
@@ -268,23 +293,37 @@ class TestCashAccountPortfolioIntegration:
 
         # Get portfolio allocation
         response = client.get(
-            "/api/v1/portfolio/allocation",
+            f"/api/v1/portfolio/allocation/{self.user_id}",
             headers=self.auth_headers,
         )
 
         # Should return allocation including cash
         if response.status_code == 200:
-            allocation = response.json()
-            # Should have cash as one of the allocation categories
-            cash_allocation = None
-            for item in allocation:
-                if "cash" in item.get("category", "").lower():
-                    cash_allocation = item
-                    break
+            allocation_response = response.json()
+            allocation = allocation_response[
+                "data"
+            ]  # API response is wrapped in BaseResponse
 
-            # If we have only cash, it should be 100% allocation
-            if cash_allocation:
-                assert Decimal(str(cash_allocation["percentage"])) > 0
+            # Check if allocation includes cash percentage
+            if isinstance(allocation, dict):
+                # Check for cash_percent field
+                if "cash_percent" in allocation:
+                    cash_percent = Decimal(str(allocation["cash_percent"]))
+                    assert (
+                        cash_percent > 0
+                    ), f"Expected cash allocation > 0, got {cash_percent}"
+                # Alternative: check if any field contains "cash" with percentage > 0
+                else:
+                    cash_found = False
+                    for key, value in allocation.items():
+                        if "cash" in key.lower() and isinstance(
+                            value, (str, int, float)
+                        ):
+                            cash_value = Decimal(str(value))
+                            if cash_value > 0:
+                                cash_found = True
+                                break
+                    assert cash_found, f"No cash allocation found in {allocation}"
 
     def test_multi_currency_cash_handling(self):
         """Test handling of multiple currencies in portfolio."""
@@ -304,16 +343,17 @@ class TestCashAccountPortfolioIntegration:
 
         # Get portfolio summary
         response = client.get(
-            "/api/v1/portfolio/summary",
+            f"/api/v1/portfolio/summary/{self.user_id}",
             headers=self.auth_headers,
         )
 
         assert response.status_code == 200
         portfolio = response.json()
+        portfolio_data = portfolio["data"]  # API response is wrapped in BaseResponse
 
         # Portfolio should handle multiple currencies
         # This might convert to base currency or show breakdown
-        assert portfolio is not None
+        assert portfolio_data is not None
 
 
 @pytest.mark.integration
