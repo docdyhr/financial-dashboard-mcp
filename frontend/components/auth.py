@@ -146,6 +146,28 @@ def require_authentication():
     return True
 
 
+def with_authentication(func):
+    """Decorator to require authentication for a function."""
+
+    def wrapper(*args, **kwargs):
+        if not is_authenticated():
+            st.error("Please log in to access this feature.")
+            login_form()
+            return None
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
+def check_auth_or_redirect():
+    """Check authentication and show login form if not authenticated."""
+    if not is_authenticated():
+        st.error("Please log in to access this feature.")
+        login_form()
+        return False
+    return True
+
+
 def show_user_info():
     """Display current user information in sidebar."""
     if is_authenticated() and "user_info" in st.session_state:

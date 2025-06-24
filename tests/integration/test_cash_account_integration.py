@@ -2,8 +2,8 @@
 
 from decimal import Decimal
 
-import pytest
 from fastapi.testclient import TestClient
+import pytest
 
 from backend.main import app
 from backend.models import CashAccount, User
@@ -262,7 +262,7 @@ class TestCashAccountPortfolioIntegration:
                     "purchase_date": "2024-01-01",
                 },
             )
-        except:
+        except Exception:
             # Position creation might not be available in API yet
             pass
 

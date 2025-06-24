@@ -7,8 +7,8 @@ background tasks, conflict resolution, and API endpoints.
 from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, Mock, patch
 
-import pytest
 from fastapi.testclient import TestClient
+import pytest
 
 from backend.api.isin_sync import router
 from backend.models import get_db
@@ -268,7 +268,7 @@ class TestISINSyncService:
         )
         sync_service.conflicts["DE0007164600"] = [conflict]
 
-        with patch("backend.services.isin_sync_service.get_db_session") as mock_get_db:
+        with patch("backend.models.get_db") as mock_get_db:
             mock_get_db.return_value.__enter__.return_value = mock_db_with_mappings
 
             result = await sync_service.resolve_conflict_manually(
@@ -644,7 +644,7 @@ class TestISINSyncServiceErrorHandling:
         """Test handling of database errors during sync."""
         job = SyncJob("test_job", "test", ["US0378331005"])
 
-        with patch("backend.services.isin_sync_service.get_db_session") as mock_get_db:
+        with patch("backend.models.get_db") as mock_get_db:
             mock_get_db.side_effect = Exception("Database connection failed")
 
             # Should handle database errors gracefully

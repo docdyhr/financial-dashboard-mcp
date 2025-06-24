@@ -2,13 +2,19 @@
 
 
 
-## v2.5.15 (2025-06-20)
+## v2.5.15 (2025-06-24)
 
-### Chore
+### Tech Debt Resolution
 
-* chore: bump version to 2.5.14 [skip ci] ([`ed8d7ed`](https://github.com/docdyhr/financial-dashboard-mcp/commit/ed8d7ed450554b722d33e4283484a25c5a864089))
+* fix: resolve critical technical debt issues across the codebase
+  - Fixed bare exception handling in test files
+  - Added missing dependencies: beautifulsoup4, pydantic-settings, rich
+  - Removed unused dependency: flower from requirements.txt
+  - Corrected Python version configurations in pyproject.toml
+  - Created shared authentication patterns and decorators
+  - Improved code quality and maintainability
 
-### Fix
+### Configuration Fixes
 
 * fix: correct Python version configurations corrupted by version bump 2.5.14
 

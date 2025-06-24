@@ -1,12 +1,12 @@
 """Test configuration and fixtures."""
 
-import os
 from decimal import Decimal
+import os
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock
 
-import pytest
 from faker import Faker
+import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -586,3 +586,29 @@ def integration_test_markers():
         not pytest.config.getoption("--run-integration"),
         reason="Integration tests require --run-integration flag",
     )
+
+
+@pytest.fixture
+def isin_service():
+    """Mock ISIN service for testing."""
+    from backend.services.isin_utils import ISINService
+
+    service = MagicMock(spec=ISINService)
+    service.resolve_identifier.return_value = ("AAPL", "ticker", None)
+    service.add_manual_mapping.return_value = True
+    service.get_asset_info.return_value = {
+        "ticker": "AAPL",
+        "is_valid": True,
+        "country_code": "US",
+    }
+    return service
+
+
+@pytest.fixture
+def mapping_service():
+    """Mock mapping service for testing."""
+    from backend.services.enhanced_market_data import EnhancedMarketDataService
+
+    service = MagicMock(spec=EnhancedMarketDataService)
+    service.get_market_data.return_value = {"price": 150.00, "currency": "USD"}
+    return service

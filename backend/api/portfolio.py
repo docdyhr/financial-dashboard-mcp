@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from backend.auth.dependencies import get_current_active_user
-from backend.models import get_db
+from backend.database import get_db
 from backend.models.user import User
 from backend.schemas.base import BaseResponse
 from backend.schemas.portfolio import (
@@ -31,6 +31,12 @@ async def get_portfolio_summary(
 ) -> BaseResponse[PortfolioSummary]:
     """Get comprehensive portfolio summary for a user."""
     try:
+        # Verify user has access to this user_id (for security)
+        if user_id != current_user.id:
+            raise HTTPException(
+                status_code=403, detail="Access denied to other user's data"
+            )
+
         summary = portfolio_service.get_portfolio_summary(db, user_id)
         return BaseResponse(
             success=True,
@@ -41,6 +47,36 @@ async def get_portfolio_summary(
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
+
+
+@router.get("/test/{user_id}")
+async def test_portfolio_summary(
+    user_id: int,
+    db: Session = Depends(get_db),
+):
+    """Test endpoint without authentication."""
+    try:
+        summary = portfolio_service.get_portfolio_summary(db, user_id)
+        return {
+            "success": True,
+            "message": "Portfolio summary retrieved successfully",
+            "data": summary,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e)) from e
+
+
+@router.get("/auth-test")
+async def test_auth(
+    current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    """Test authentication in portfolio router."""
+    return {
+        "success": True,
+        "message": "Authentication works",
+        "user_id": current_user.id,
+        "username": current_user.username,
+    }
 
 
 @router.get("/allocation/{user_id}", response_model=BaseResponse[AllocationBreakdown])

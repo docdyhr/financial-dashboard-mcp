@@ -19,10 +19,32 @@ def safe_float(value, default=0.0):
 def get_portfolio_data(backend_url: str) -> dict | None:
     """Fetch portfolio data from the backend API."""
     try:
-        response = requests.get(f"{backend_url}/api/v1/portfolio/summary/5", timeout=10)
+        from frontend.components.auth import check_auth_or_redirect, get_auth_headers
+
+        if not check_auth_or_redirect():
+            return None
+
+        # Get current user info to get user ID
+        if "user_info" not in st.session_state:
+            st.error("User information not available. Please log in again.")
+            return None
+
+        user_id = st.session_state.user_info.get("id")
+        if not user_id:
+            st.error("User ID not found. Please log in again.")
+            return None
+
+        response = requests.get(
+            f"{backend_url}/api/v1/portfolio/summary/{user_id}",
+            headers=get_auth_headers(),
+            timeout=10,
+        )
         if response.status_code == 200:
             data = response.json()
             return data.get("data") if data.get("success") else None
+        if response.status_code == 401:
+            st.error("Authentication failed. Please log in again.")
+            return None
         st.error(f"Failed to fetch portfolio data: {response.status_code}")
         return None
     except requests.exceptions.RequestException as e:
@@ -33,12 +55,28 @@ def get_portfolio_data(backend_url: str) -> dict | None:
 def get_positions_data(backend_url: str) -> list[dict] | None:
     """Fetch positions data from the backend API."""
     try:
+        from frontend.components.auth import get_auth_headers, is_authenticated
+
+        if not is_authenticated():
+            st.error("Please log in to view positions data.")
+            return None
+
+        user_id = st.session_state.user_info.get("id")
+        if not user_id:
+            st.error("User ID not found. Please log in again.")
+            return None
+
         response = requests.get(
-            f"{backend_url}/api/v1/positions/?user_id=5", timeout=10
+            f"{backend_url}/api/v1/positions/?user_id={user_id}",
+            headers=get_auth_headers(),
+            timeout=10,
         )
         if response.status_code == 200:
             data = response.json()
             return data.get("data") if data.get("success") else None
+        if response.status_code == 401:
+            st.error("Authentication failed. Please log in again.")
+            return None
         st.error(f"Failed to fetch positions data: {response.status_code}")
         return None
     except requests.exceptions.RequestException as e:
@@ -1206,7 +1244,22 @@ def portfolio_summary_metrics(backend_url: str):
     import requests
 
     try:
-        response = requests.get(f"{backend_url}/api/v1/portfolio/summary", timeout=10)
+        from frontend.components.auth import get_auth_headers, is_authenticated
+
+        if not is_authenticated():
+            st.error("Please log in to view portfolio summary.")
+            return None
+
+        user_id = st.session_state.user_info.get("id")
+        if not user_id:
+            st.error("User ID not found. Please log in again.")
+            return None
+
+        response = requests.get(
+            f"{backend_url}/api/v1/portfolio/summary/{user_id}",
+            headers=get_auth_headers(),
+            timeout=10,
+        )
 
         if response.status_code == 200:
             data = response.json()
@@ -1242,6 +1295,8 @@ def portfolio_summary_metrics(backend_url: str):
 
                 return summary
             st.error("Failed to fetch portfolio summary")
+        elif response.status_code == 401:
+            st.error("Authentication failed. Please log in again.")
         else:
             st.error(f"Failed to fetch portfolio summary: {response.status_code}")
 

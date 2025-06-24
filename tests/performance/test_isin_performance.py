@@ -5,11 +5,11 @@ for the ISIN validation, mapping, and sync services.
 """
 
 import asyncio
+from collections.abc import Callable
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import gc
 import statistics
 import time
-from collections.abc import Callable
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from unittest.mock import Mock, patch
 
 import psutil
@@ -156,7 +156,7 @@ class TestISINMappingPerformance:
         """Benchmark mapping lookup performance."""
         isin = ISINFactory.get_known_valid_isin()
 
-        with patch("backend.services.isin_utils.get_db_session") as mock_get_db:
+        with patch("backend.models.get_db") as mock_get_db:
             mock_session = Mock()
             mock_mapping = Mock()
             mock_mapping.ticker = "AAPL"
@@ -175,7 +175,7 @@ class TestISINMappingPerformance:
         """Test bulk mapping lookup performance."""
         large_batch = performance_test_data["large_batch"][:500]  # Limit for test
 
-        with patch("backend.services.isin_utils.get_db_session") as mock_get_db:
+        with patch("backend.models.get_db") as mock_get_db:
             mock_session = Mock()
             mock_mapping = Mock()
             mock_mapping.ticker = "TEST"

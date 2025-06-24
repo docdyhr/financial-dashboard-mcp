@@ -223,7 +223,7 @@ class TestISINMappingService:
         assert len(errors) > 0
         assert any("ISIN" in error for error in errors)
 
-    @patch("backend.services.isin_utils.get_db_session")
+    @patch("backend.models.get_db")
     def test_save_mapping_to_db(self, mock_get_db, mapping_service, mock_db_session):
         """Test saving mapping to database."""
         mock_get_db.return_value.__enter__.return_value = mock_db_session
@@ -245,7 +245,7 @@ class TestISINMappingService:
         mock_db_session.add.assert_called_once()
         mock_db_session.commit.assert_called_once()
 
-    @patch("backend.services.isin_utils.get_db_session")
+    @patch("backend.models.get_db")
     def test_get_mappings_from_db(self, mock_get_db, mapping_service, mock_db_session):
         """Test retrieving mappings from database."""
         # Mock database results
@@ -280,7 +280,7 @@ class TestISINService:
         """Create ISIN service instance."""
         return ISINService()
 
-    @patch("backend.services.isin_utils.get_db_session")
+    @patch("backend.models.get_db")
     def test_get_ticker_for_isin(self, mock_get_db, isin_service):
         """Test getting ticker for ISIN."""
         # Mock database session and mapping
@@ -299,7 +299,7 @@ class TestISINService:
 
         assert ticker == "AAPL"
 
-    @patch("backend.services.isin_utils.get_db_session")
+    @patch("backend.models.get_db")
     def test_get_ticker_for_isin_not_found(self, mock_get_db, isin_service):
         """Test getting ticker for ISIN when not found."""
         mock_session = Mock()
@@ -319,7 +319,7 @@ class TestISINService:
         assert len(suggestions) > 0
         assert any("XETR" in suggestion for suggestion in suggestions)
 
-    @patch("backend.services.isin_utils.get_db_session")
+    @patch("backend.models.get_db")
     def test_resolve_identifier_isin(self, mock_get_db, isin_service):
         """Test resolving ISIN identifier."""
         mock_session = Mock()
