@@ -2,6 +2,37 @@
 
 
 
+## v2.8.1 (2025-06-24)
+
+### Chore
+
+* chore: bump version to 2.8.0 [skip ci] ([`150d2e7`](https://github.com/docdyhr/financial-dashboard-mcp/commit/150d2e7d8f1c7960aa75db56b112cd57f4b17773))
+
+### Fix
+
+* fix: clarify demo credentials configuration vs actual login credentials
+
+🔧 CONFIGURATION CLARIFICATION:
+- Added clear comments distinguishing between system configuration variables and actual login credentials
+- DEMO_USERNAME/DEMO_PASSWORD are backend system configuration variables
+- Actual demo login credentials are: user@example.com / demo123456
+- Updated both .env and .env.example with clarifying comments
+
+📋 FILES UPDATED:
+✅ .env: Added clarifying comments about demo credentials
+✅ .env.example: Added clarifying comments and actual login credentials section
+✅ Quick start section: Added demo login credentials information
+
+🎯 USER CLARITY:
+- Eliminates confusion between configuration variables and login credentials
+- Provides clear guidance on actual working demo credentials
+- Improves developer onboarding experience
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude &lt;noreply@anthropic.com&gt; ([`4c2fbf1`](https://github.com/docdyhr/financial-dashboard-mcp/commit/4c2fbf124516463a2497f456b5a18ddc8ae32a27))
+
+
 ## v2.8.0 (2025-06-24)
 
 ### Chore
