@@ -20,6 +20,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
 COPY backend/ /app/backend/
+COPY database/ /app/database/
+COPY alembic.ini /app/
 COPY .env* /app/
 
 # Create logs directory

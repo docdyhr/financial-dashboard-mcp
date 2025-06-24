@@ -140,7 +140,7 @@ services:
     volumes:
       - ./frontend:/app/frontend
       - ./logs:/app/logs
-    command: streamlit run frontend/app_no_auth.py --server.port 8501 --server.address 0.0.0.0
+    command: streamlit run frontend/app.py --server.port 8501 --server.address 0.0.0.0
 
   mcp_server:
     build:
