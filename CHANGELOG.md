@@ -1,6 +1,39 @@
 # CHANGELOG
 
+## v2.5.21 (2025-06-24) - ADD SAMPLE DATA FEATURE IMPLEMENTATION 🚀
 
+### Feat
+
+* feat: implement "Add Sample Data" functionality for portfolio dashboard
+
+**📊 NEW PORTFOLIO FEATURES:**
+- Fully functional "Add Sample Data" button that creates realistic portfolio positions
+- Automatically creates 6 sample assets (AAPL, GOOGL, MSFT, SPY, VTI, BND) if they don't exist
+- Creates 6 diverse sample positions across technology stocks, ETFs, and bonds
+- Sample portfolio includes different account types (Main Portfolio, Core Holdings, Conservative)
+- Realistic position sizes and cost basis for demonstration purposes
+
+**🏗️ TECHNICAL IMPLEMENTATION:**
+- Smart asset creation with duplicate checking (reuses existing assets)
+- Complete API integration with backend assets and positions endpoints
+- Proper authentication handling with JWT tokens
+- Error handling and user feedback for failed operations
+- Auto-refresh of dashboard after successful data creation
+
+**💰 SAMPLE PORTFOLIO BREAKDOWN:**
+- Technology Stocks: AAPL ($7,512), GOOGL ($68,750), MSFT ($28,912)
+- Market ETFs: SPY ($45,000), VTI ($33,000)
+- Bond Allocation: BND ($15,700)
+- Total Sample Portfolio Value: ~$198,874
+
+**🎯 USER EXPERIENCE:**
+- Replaces "Feature coming soon!" message with working functionality
+- Instant portfolio visualization with charts, metrics, and allocation analysis
+- Perfect for demo environments and new user onboarding
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
 
 ## v2.7.1 (2025-06-24)
 

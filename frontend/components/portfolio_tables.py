@@ -3,6 +3,7 @@
 import pandas as pd
 import requests
 import streamlit as st
+from decimal import Decimal
 
 from .portfolio_data import get_positions_data, safe_float
 
@@ -241,9 +242,11 @@ def holdings_table(backend_url: str):
         st.info("No holdings found. Add some positions to see your portfolio.")
 
         if st.button("Add Sample Data"):
-            st.info(
-                "Feature coming soon! You'll be able to add positions through the UI."
-            )
+            if add_sample_portfolio_data(backend_url):
+                st.success("Sample portfolio data added successfully! Refresh the page to see your new positions.")
+                st.rerun()
+            else:
+                st.error("Failed to add sample data. Please try again.")
 
 
 def delete_positions(backend_url: str, df: pd.DataFrame, selected_indices: list[int]):
@@ -725,3 +728,216 @@ def view_position_transactions(
 
     except requests.exceptions.RequestException as e:
         st.error(f"Error fetching transactions: {e}")
+
+
+def add_sample_portfolio_data(backend_url: str) -> bool:
+    """Add sample portfolio data for demonstration purposes."""
+    try:
+        # Get authentication token
+        if "token" not in st.session_state or not st.session_state.token:
+            st.error("Authentication required. Please log in first.")
+            return False
+        
+        headers = {"Authorization": f"Bearer {st.session_state.token}"}
+        
+        # Sample assets to create
+        sample_assets = [
+            {
+                "ticker": "AAPL",
+                "name": "Apple Inc.",
+                "description": "Technology company specializing in consumer electronics and software",
+                "asset_type": "STOCK",
+                "category": "EQUITY",
+                "sector": "Technology",
+                "industry": "Consumer Electronics",
+                "exchange": "NASDAQ",
+                "currency": "USD",
+                "country": "US"
+            },
+            {
+                "ticker": "GOOGL",
+                "name": "Alphabet Inc.",
+                "description": "Internet search and advertising technology company",
+                "asset_type": "STOCK",
+                "category": "EQUITY",
+                "sector": "Technology",
+                "industry": "Internet Services",
+                "exchange": "NASDAQ",
+                "currency": "USD",
+                "country": "US"
+            },
+            {
+                "ticker": "MSFT",
+                "name": "Microsoft Corporation",
+                "description": "Software and cloud computing services company",
+                "asset_type": "STOCK",
+                "category": "EQUITY",
+                "sector": "Technology",
+                "industry": "Software",
+                "exchange": "NASDAQ",
+                "currency": "USD",
+                "country": "US"
+            },
+            {
+                "ticker": "SPY",
+                "name": "SPDR S&P 500 ETF Trust",
+                "description": "ETF tracking the S&P 500 Index",
+                "asset_type": "ETF",
+                "category": "EQUITY",
+                "sector": "Diversified",
+                "industry": "ETF",
+                "exchange": "NYSE",
+                "currency": "USD",
+                "country": "US"
+            },
+            {
+                "ticker": "VTI",
+                "name": "Vanguard Total Stock Market ETF",
+                "description": "ETF tracking the entire US stock market",
+                "asset_type": "ETF",
+                "category": "EQUITY",
+                "sector": "Diversified",
+                "industry": "ETF",
+                "exchange": "NYSE",
+                "currency": "USD",
+                "country": "US"
+            },
+            {
+                "ticker": "BND",
+                "name": "Vanguard Total Bond Market ETF",
+                "description": "ETF tracking the US bond market",
+                "asset_type": "ETF",
+                "category": "BONDS",
+                "sector": "Fixed Income",
+                "industry": "ETF",
+                "exchange": "NYSE",
+                "currency": "USD",
+                "country": "US"
+            }
+        ]
+        
+        # Create assets and collect their IDs
+        asset_ids = {}
+        
+        for asset_data in sample_assets:
+            # First, check if asset already exists
+            response = requests.get(
+                f"{backend_url}/api/v1/assets",
+                headers=headers,
+                params={"query": asset_data["ticker"], "page_size": 1}
+            )
+            
+            if response.status_code == 200:
+                assets = response.json().get("data", [])
+                if assets:
+                    # Asset exists, use existing ID
+                    asset_ids[asset_data["ticker"]] = assets[0]["id"]
+                    continue
+            
+            # Asset doesn't exist, create it
+            response = requests.post(
+                f"{backend_url}/api/v1/assets",
+                headers=headers,
+                json=asset_data
+            )
+            
+            if response.status_code == 201:
+                asset_data_response = response.json().get("data", {})
+                asset_ids[asset_data["ticker"]] = asset_data_response["id"]
+            else:
+                st.warning(f"Could not create asset {asset_data['ticker']}: {response.text}")
+                continue
+        
+        # Sample positions to create
+        sample_positions = [
+            {
+                "ticker": "AAPL",
+                "quantity": "50.0",
+                "average_cost_per_share": "150.25",
+                "total_cost_basis": "7512.50",
+                "account_name": "Main Portfolio",
+                "notes": "Technology growth position"
+            },
+            {
+                "ticker": "GOOGL", 
+                "quantity": "25.0",
+                "average_cost_per_share": "2750.00",
+                "total_cost_basis": "68750.00",
+                "account_name": "Main Portfolio",
+                "notes": "Large cap technology"
+            },
+            {
+                "ticker": "MSFT",
+                "quantity": "75.0", 
+                "average_cost_per_share": "385.50",
+                "total_cost_basis": "28912.50",
+                "account_name": "Main Portfolio",
+                "notes": "Cloud computing exposure"
+            },
+            {
+                "ticker": "SPY",
+                "quantity": "100.0",
+                "average_cost_per_share": "450.00", 
+                "total_cost_basis": "45000.00",
+                "account_name": "Core Holdings",
+                "notes": "Broad market index exposure"
+            },
+            {
+                "ticker": "VTI",
+                "quantity": "150.0",
+                "average_cost_per_share": "220.00",
+                "total_cost_basis": "33000.00", 
+                "account_name": "Core Holdings",
+                "notes": "Total market diversification"
+            },
+            {
+                "ticker": "BND",
+                "quantity": "200.0",
+                "average_cost_per_share": "78.50",
+                "total_cost_basis": "15700.00",
+                "account_name": "Conservative",
+                "notes": "Bond allocation for stability"
+            }
+        ]
+        
+        # Create positions
+        positions_created = 0
+        
+        for position_data in sample_positions:
+            ticker = position_data["ticker"]
+            
+            if ticker not in asset_ids:
+                st.warning(f"Skipping position for {ticker} - asset not available")
+                continue
+            
+            position_create = {
+                "asset_id": asset_ids[ticker],
+                "user_id": 1,  # Will be overridden by backend with current user
+                "quantity": position_data["quantity"],
+                "average_cost_per_share": position_data["average_cost_per_share"],
+                "total_cost_basis": position_data["total_cost_basis"],
+                "account_name": position_data["account_name"],
+                "notes": position_data["notes"]
+            }
+            
+            response = requests.post(
+                f"{backend_url}/api/v1/positions",
+                headers=headers,
+                json=position_create
+            )
+            
+            if response.status_code == 201:
+                positions_created += 1
+            else:
+                st.warning(f"Could not create position for {ticker}: {response.text}")
+        
+        if positions_created > 0:
+            st.info(f"Successfully created {positions_created} sample positions!")
+            return True
+        else:
+            st.error("No positions were created.")
+            return False
+            
+    except Exception as e:
+        st.error(f"Error adding sample data: {str(e)}")
+        return False
