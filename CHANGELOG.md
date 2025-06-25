@@ -2,6 +2,29 @@
 
 
 
+## v2.8.2 (2025-06-25)
+
+### Chore
+
+* chore: bump version to 2.8.1 [skip ci] ([`4b75b9e`](https://github.com/docdyhr/financial-dashboard-mcp/commit/4b75b9e60e161efa60b2b92652565b2a630e2154))
+
+### Fix
+
+* fix: resolve test failures and improve code quality
+
+- Fix naming conflicts by renaming test files in scripts to manual_test_*
+- Fix ISIN performance test mocking in tests/performance/test_isin_performance.py
+- Fix e2e system test endpoint paths in tests/test_e2e_system.py
+- Run linting with ruff and apply auto-fixes
+- Add test documentation and VS Code testing guides
+- All core API and auth tests (122) now passing
+- 486 out of 502 total tests passing
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude &lt;noreply@anthropic.com&gt; ([`87e9642`](https://github.com/docdyhr/financial-dashboard-mcp/commit/87e9642b1b3f1fd8af3fcb0917d0c2869ff178cb))
+
+
 ## v2.8.1 (2025-06-24)
 
 ### Chore
