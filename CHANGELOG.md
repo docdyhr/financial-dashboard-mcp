@@ -2,6 +2,50 @@
 
 
 
+## v2.8.3 (2025-06-25)
+
+### Chore
+
+* chore: bump version to 2.8.2 [skip ci] ([`aa62737`](https://github.com/docdyhr/financial-dashboard-mcp/commit/aa62737aa73f15e4d6a84612e2cfc186dfdc6823))
+
+### Fix
+
+* fix: resolve JWT authentication and test database issues
+
+- Fix JWT token user ID conversion from string to integer in auth dependencies
+- Update test configuration with proper database fixtures and model imports
+- Refactor auth tests to use client fixture with isolated test databases
+- Fix test function signatures to properly accept client parameter
+- Update test expectations for protected endpoint authentication validation
+- Improve test database setup with proper table creation and cleanup
+- Apply code formatting and import organization
+
+Resolves authentication failures and improves test reliability
+29/33 auth tests now passing (88% success rate)
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude &lt;noreply@anthropic.com&gt; ([`b238c61`](https://github.com/docdyhr/financial-dashboard-mcp/commit/b238c616212817967a1eebb3ff80335102c6de13))
+
+### Refactor
+
+* refactor: improve test infrastructure and enhance service implementations
+
+- Add comprehensive test documentation (TESTING.md, TEST_FIXES_SUMMARY.md, VS_CODE_TESTING_FIX.md)
+- Enhance ISIN utilities with improved validation and error handling
+- Expand position service with better transaction support and error management
+- Update test configurations and fixtures for better isolation and reliability
+- Add pytest wrapper script and health check utilities
+- Improve MCP backend integration tests
+- Update pyproject.toml with enhanced test configuration
+- Add test diagnostic and verification scripts
+- Apply automatic code formatting and import organization
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude &lt;noreply@anthropic.com&gt; ([`599bda4`](https://github.com/docdyhr/financial-dashboard-mcp/commit/599bda4e510b1ace4b09115da4264f3dd83079c5))
+
+
 ## v2.8.2 (2025-06-25)
 
 ### Chore
