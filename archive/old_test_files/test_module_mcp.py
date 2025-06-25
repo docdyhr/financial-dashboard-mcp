@@ -3,10 +3,13 @@
 
 import sys
 
+import pytest
+
 # Add project root to Python path
 sys.path.insert(0, "/Users/thomas/Programming/financial-dashboard-mcp")
 
 
+@pytest.mark.integration
 def test_portfolio_tools():
     """Test if portfolio tools use the correct user ID."""
     from mcp_server.tools.portfolio import PortfolioTools
@@ -30,7 +33,7 @@ def test_portfolio_tools():
             print("✅ Portfolio tools configured with user_id=3")
         elif "user_id=5" in source:
             print("❌ Portfolio tools still have user_id=5")
-            return False
+            assert False, "Portfolio tools still have user_id=5"
         else:
             print("⚠️  Could not verify user_id in portfolio tools")
     except Exception as e:
@@ -44,13 +47,13 @@ def test_portfolio_tools():
             source = inspect.getsource(method)
             if "/5" in source and "/3" not in source:
                 print(f"❌ Method {method_name} still has hardcoded user_id=5")
-                return False
+                assert False, f"Method {method_name} still has hardcoded user_id=5"
             if "/3" in source:
                 print(f"✅ Method {method_name} using user_id=3")
         except Exception as e:
             print(f"⚠️  Could not check method {method_name}: {e}")
 
-    return True
+    assert True
 
 
 def main():

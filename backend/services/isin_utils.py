@@ -241,6 +241,10 @@ class ISINUtils:
         if not isin:
             return False, "ISIN cannot be empty"
 
+        # Handle non-string inputs
+        if not isinstance(isin, str):
+            return False, "ISIN must be a string"
+
         isin = isin.upper().strip()
 
         # Check cache first if enabled
@@ -436,6 +440,41 @@ class ISINMappingService:
             sleep_time = self.rate_limit_delay - time_since_last_call
             time.sleep(sleep_time)
         self.last_call_time = time.time()
+
+    def validate_mapping(self, mapping: ISINMapping) -> tuple[bool, list[str]]:
+        """Validate an ISIN mapping object.
+
+        Args:
+            mapping: ISINMapping object to validate
+
+        Returns:
+            Tuple of (is_valid, errors) where errors is a list of error messages
+        """
+        errors = []
+
+        # Validate ISIN
+        if not mapping.isin:
+            errors.append("ISIN is required")
+        else:
+            is_valid, error = ISINUtils.validate_isin(mapping.isin)
+            if not is_valid:
+                errors.append(f"Invalid ISIN: {error}")
+
+        # Validate ticker
+        if not mapping.ticker:
+            errors.append("Ticker is required")
+        elif len(mapping.ticker.strip()) == 0:
+            errors.append("Ticker cannot be empty")
+
+        # Validate confidence
+        if mapping.confidence < 0.0 or mapping.confidence > 1.0:
+            errors.append("Confidence must be between 0.0 and 1.0")
+
+        # Validate source
+        if not mapping.source:
+            errors.append("Source is required")
+
+        return len(errors) == 0, errors
 
     def get_mappings_from_db(
         self,
@@ -724,6 +763,20 @@ class ISINService:
 
         return self.mapping_service.save_mapping_to_db(db, mapping)
 
+    def suggest_ticker_formats(
+        self, isin: str, base_ticker: str = "TICKER"
+    ) -> list[str]:
+        """Suggest possible ticker formats based on ISIN country.
+
+        Args:
+            isin: ISIN code
+            base_ticker: Base ticker symbol (default: "TICKER")
+
+        Returns:
+            List of suggested ticker formats
+        """
+        return ISINUtils.suggest_ticker_formats(isin, base_ticker)
+
     def get_ticker_for_isin(self, isin: str) -> str | None:
         """Get ticker symbol for a given ISIN.
 
@@ -733,10 +786,14 @@ class ISINService:
         Returns:
             Ticker symbol if found, None otherwise
         """
-        from backend.models import get_db
+        try:
+            from backend.models import get_db
 
-        db = next(get_db())
-        return self.mapping_service.resolve_isin_to_ticker(db, isin)
+            db = next(get_db())
+            return self.mapping_service.resolve_isin_to_ticker(db, isin)
+        except Exception as e:
+            logger.error(f"Database error while getting ticker for ISIN {isin}: {e}")
+            return None
 
     def get_asset_info(self, db: Session, identifier: str) -> dict[str, Any]:
         """Get comprehensive asset information from identifier.

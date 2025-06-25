@@ -49,39 +49,39 @@ lint:
 type-check:
 	mypy .
 
-# Testing commands
+# Testing commands - optimized for both CLI and VS Code
 test:
-	pytest -v --tb=short
+	.venv/bin/pytest
 
 test-cov:
-	pytest --cov=backend --cov=frontend --cov=mcp_server --cov-report=html --cov-report=xml --cov-report=term-missing --cov-fail-under=80
+	.venv/bin/pytest --cov=backend --cov=frontend --cov=mcp_server --cov-report=html --cov-report=xml --cov-report=term-missing --cov-fail-under=80
 
 test-unit:
-	pytest tests/unit/ -v -m "unit and not slow"
+	.venv/bin/pytest tests/unit/ -v -m "unit and not slow"
 
 test-integration:
-	pytest tests/integration/ -v -m "integration" --run-integration
+	.venv/bin/pytest tests/integration/ -v -m "integration" --run-integration
 
 test-api:
-	pytest tests/api/ -v -m "api"
+	.venv/bin/pytest tests/api/ -v -m "api"
 
 test-frontend:
-	pytest tests/frontend/ -v -m "frontend" || echo "Frontend tests not yet implemented"
+	.venv/bin/pytest tests/frontend/ -v -m "frontend" || echo "Frontend tests not yet implemented"
 
 test-isin:
-	pytest -v -m "isin or validation or mapping or sync"
+	.venv/bin/pytest -v -m "isin or validation or mapping or sync"
 
 test-benchmark:
-	pytest -v -m "benchmark" --benchmark-only
+	.venv/bin/pytest -v -m "benchmark" --benchmark-only
 
 test-fast:
-	pytest -v -m "fast or (not slow)"
+	.venv/bin/pytest -v -m "fast or (not slow)"
 
 test-slow:
-	pytest -v -m "slow"
+	.venv/bin/pytest -v -m "slow"
 
 test-smoke:
-	pytest -v -m "smoke"
+	.venv/bin/pytest -v -m "smoke"
 
 test-all:
 	pytest tests/ -v --run-integration --cov=backend --cov=frontend --cov-report=html --cov-report=term-missing

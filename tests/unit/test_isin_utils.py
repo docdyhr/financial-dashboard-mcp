@@ -9,7 +9,6 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from backend.exceptions import ISINValidationError
 from backend.models.isin import ISINValidationCache
 from backend.services.isin_utils import (
     ISINMapping,
@@ -272,12 +271,15 @@ class TestISINMappingService:
         mock_mapping.confidence = 0.95
         mock_mapping.is_active = True
 
-        mock_db_session.query.return_value.filter.return_value.all.return_value = [
-            mock_mapping
-        ]
+        # Set up the mock query chain properly
+        mock_query = Mock()
+        mock_query.filter.return_value = mock_query
+        mock_query.order_by.return_value = mock_query
+        mock_query.all.return_value = [mock_mapping]
+        mock_db_session.query.return_value = mock_query
         mock_get_db.return_value.__enter__.return_value = mock_db_session
 
-        mappings = mapping_service.get_mappings_from_db("US0378331005")
+        mappings = mapping_service.get_mappings_from_db(mock_db_session, "US0378331005")
 
         assert len(mappings) == 1
         assert mappings[0].isin == "US0378331005"
@@ -295,21 +297,29 @@ class TestISINService:
     @patch("backend.models.get_db")
     def test_get_ticker_for_isin(self, mock_get_db, isin_service):
         """Test getting ticker for ISIN."""
-        # Mock database session and mapping
+        # Mock database session
         mock_session = Mock()
-        mock_mapping = Mock()
-        mock_mapping.ticker = "AAPL"
-        mock_mapping.exchange_code = "XNAS"
-        mock_mapping.confidence = 0.95
+        mock_get_db.return_value = iter([mock_session])
 
-        mock_session.query.return_value.filter.return_value.order_by.return_value.first.return_value = (
-            mock_mapping
+        # Mock the mapping service's get_mappings_from_db method
+        mock_mapping = ISINMapping(
+            isin="US0378331005",
+            ticker="AAPL",
+            exchange_code="XNAS",
+            exchange_name="NASDAQ",
+            security_name="Apple Inc.",
+            currency="USD",
+            source="test",
+            confidence=0.95,
+            is_active=True,
         )
-        mock_get_db.return_value.__enter__.return_value = mock_session
 
-        ticker = isin_service.get_ticker_for_isin("US0378331005")
-
-        assert ticker == "AAPL"
+        with patch.object(
+            isin_service.mapping_service, "get_mappings_from_db"
+        ) as mock_get_mappings:
+            mock_get_mappings.return_value = [mock_mapping]
+            ticker = isin_service.get_ticker_for_isin("US0378331005")
+            assert ticker == "AAPL"
 
     @patch("backend.models.get_db")
     def test_get_ticker_for_isin_not_found(self, mock_get_db, isin_service):
@@ -326,38 +336,43 @@ class TestISINService:
 
     def test_suggest_ticker_formats(self, isin_service):
         """Test ticker format suggestions."""
-        suggestions = isin_service.suggest_ticker_formats("DE0007164600")
+        suggestions = isin_service.suggest_ticker_formats("DE0007164600", "SAP")
 
         assert len(suggestions) > 0
-        assert any("XETR" in suggestion for suggestion in suggestions)
+        assert any(".DE" in suggestion for suggestion in suggestions)  # XETRA format
+        assert "SAP" in suggestions  # Base ticker should be included
 
     @patch("backend.models.get_db")
     def test_resolve_identifier_isin(self, mock_get_db, isin_service):
         """Test resolving ISIN identifier."""
         mock_session = Mock()
-        mock_mapping = Mock()
-        mock_mapping.ticker = "SAP"
-        mock_mapping.exchange_code = "XETR"
 
-        mock_session.query.return_value.filter.return_value.order_by.return_value.first.return_value = (
-            mock_mapping
-        )
-        mock_get_db.return_value.__enter__.return_value = mock_session
+        # Mock the mapping service's resolve_isin_to_ticker method
+        with patch.object(
+            isin_service.mapping_service, "resolve_isin_to_ticker"
+        ) as mock_resolve:
+            mock_resolve.return_value = "SAP"
 
-        result = isin_service.resolve_identifier("DE0007164600")
+            result = isin_service.resolve_identifier(mock_session, "DE0007164600")
 
-        assert result["found"] is True
-        assert result["result"]["ticker"] == "SAP"
-        assert result["result"]["type"] == "isin"
+            resolved_ticker, identifier_type, isin_info = result
+
+            assert resolved_ticker == "SAP"
+            assert identifier_type == "isin"
+            assert isin_info is not None
+            assert isin_info.country_code == "DE"
 
     def test_resolve_identifier_ticker(self, isin_service):
         """Test resolving ticker identifier."""
         # For ticker, it should return as-is if no ISIN mapping exists
-        result = isin_service.resolve_identifier("AAPL")
+        mock_session = Mock()
+        result = isin_service.resolve_identifier(mock_session, "AAPL")
 
-        assert result["found"] is True
-        assert result["result"]["ticker"] == "AAPL"
-        assert result["result"]["type"] == "ticker"
+        resolved_ticker, identifier_type, isin_info = result
+
+        assert resolved_ticker == "AAPL"
+        assert identifier_type == "ticker"
+        assert isin_info is None
 
 
 class TestISINValidationCache:
@@ -458,17 +473,21 @@ class TestISINErrorHandling:
         invalid_inputs = [123, [], {}, object(), True, False]
 
         for invalid_input in invalid_inputs:
-            with pytest.raises((TypeError, ISINValidationError)):
-                ISINUtils.validate_isin(invalid_input)
+            is_valid, error = ISINUtils.validate_isin(invalid_input)
+            assert not is_valid
+            assert error is not None
 
-    def test_database_error_handling(self, isin_service):
+    def test_database_error_handling(self):
         """Test handling of database errors."""
-        with patch("backend.services.isin_utils.get_db_session") as mock_get_db:
+        # Create a real service instance for this test
+        real_service = ISINService()
+
+        with patch("backend.models.get_db") as mock_get_db:
             # Simulate database connection error
             mock_get_db.side_effect = Exception("Database connection failed")
 
             # Should handle error gracefully
-            ticker = isin_service.get_ticker_for_isin("US0378331005")
+            ticker = real_service.get_ticker_for_isin("US0378331005")
             assert ticker is None
 
     def test_external_api_error_handling(self, mapping_service):

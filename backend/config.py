@@ -16,6 +16,8 @@ class Settings(BaseSettings):
         env_file_encoding="utf-8",
         case_sensitive=False,
         extra="ignore",  # Ignore extra environment variables
+        env_parse_none_str="",  # Parse empty strings as None
+        env_prefix="",  # No prefix for environment variables
     )
 
     # Application
@@ -45,7 +47,7 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 43200  # 30 days
 
     # CORS
-    cors_origins: list[str] = ["http://localhost:8501", "http://localhost:3000"]
+    cors_origins: list[str] | str = ["http://localhost:8501", "http://localhost:3000"]
 
     @field_validator("cors_origins", mode="before")
     @classmethod
@@ -160,7 +162,7 @@ def read_secret_file(secret_name: str) -> str | None:
     # First try environment variable with _FILE suffix
     file_path = os.getenv(f"{secret_name}_FILE")
     if file_path and Path(file_path).exists():
-        return Path(file_path).read_text().strip()
+        return Path(file_path).read_text(encoding="utf-8").strip()
 
     # Fall back to regular environment variable
     return os.getenv(secret_name)

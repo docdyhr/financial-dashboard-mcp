@@ -178,7 +178,7 @@ class PositionService(BaseService[Position, PositionCreate, PositionUpdate]):
         self, db: Session, position_id: int, adjustment: PositionAdjustment
     ) -> Position:
         """Adjust a position by adding or reducing shares."""
-        position = db.query(Position).get(position_id)
+        position = db.get(Position, position_id)
         if not position:
             raise ValueError(f"Position {position_id} not found")
         position = cast("Position", position)
@@ -206,7 +206,7 @@ class PositionService(BaseService[Position, PositionCreate, PositionUpdate]):
 
     def close_position(self, db: Session, position_id: int) -> Position:
         """Close a position by setting quantity to 0 and marking inactive."""
-        position = db.query(Position).get(position_id)
+        position = db.get(Position, position_id)
         if not position:
             raise ValueError(f"Position {position_id} not found")
         position = cast("Position", position)
@@ -274,11 +274,85 @@ class PositionService(BaseService[Position, PositionCreate, PositionUpdate]):
 
         return total_value
 
+    def get_position_summary(
+        self, db: Session, user_id: int, account_name: str | None = None
+    ) -> dict[str, Any]:
+        """Get position summary for a user."""
+        # Check if user exists
+        user = db.query(User).filter(User.id == user_id).first()
+        if not user:
+            raise HTTPException(
+                status_code=404, detail=f"User with ID {user_id} not found"
+            )
+
+        # Build query for positions
+        query = (
+            db.query(Position)
+            .filter(and_(Position.user_id == user_id, Position.is_active.is_(True)))
+            .options(joinedload(Position.asset))
+        )
+
+        if account_name:
+            query = query.filter(Position.account_name == account_name)
+
+        positions = query.all()
+
+        # Convert to PositionSummary objects
+        position_summaries = []
+        total_value = Decimal("0")
+
+        for position in positions:
+            # Calculate unrealized gain/loss
+            unrealized_gain_loss = None
+            unrealized_gain_loss_percent = None
+
+            if position.current_value and position.cost_basis:
+                unrealized_gain_loss = position.current_value - position.cost_basis
+                if position.cost_basis > 0:
+                    unrealized_gain_loss_percent = (
+                        unrealized_gain_loss / position.cost_basis
+                    ) * 100
+
+            # Calculate weight in portfolio (will be updated after we know total value)
+            if position.current_value:
+                total_value += position.current_value
+
+            position_summary = {
+                "id": position.id,
+                "asset": {
+                    "id": position.asset.id,
+                    "ticker": position.asset.ticker,
+                    "name": position.asset.name,
+                    "asset_type": position.asset.asset_type,
+                    "currency": position.asset.currency,
+                },
+                "quantity": position.quantity,
+                "current_value": position.current_value,
+                "unrealized_gain_loss": unrealized_gain_loss,
+                "unrealized_gain_loss_percent": unrealized_gain_loss_percent,
+                "weight_in_portfolio": None,  # Will be calculated below
+            }
+            position_summaries.append(position_summary)
+
+        # Calculate portfolio weights
+        if total_value > 0:
+            for summary in position_summaries:
+                if summary["current_value"]:
+                    summary["weight_in_portfolio"] = (
+                        summary["current_value"] / total_value
+                    ) * 100
+
+        return {
+            "positions": position_summaries,
+            "total_value": total_value,
+            "total_positions": len(position_summaries),
+        }
+
     def get_position_performance(
         self, db: Session, position_id: int
     ) -> dict[str, Decimal]:
         """Get performance metrics for a specific position."""
-        position = db.query(Position).get(position_id)
+        position = db.get(Position, position_id)
         if not position:
             raise ValueError(f"Position {position_id} not found")
         position = cast("Position", position)
@@ -429,7 +503,7 @@ class PositionService(BaseService[Position, PositionCreate, PositionUpdate]):
         notes: str | None = None,
     ) -> Position:
         """Handle stock split for a position."""
-        position = db.query(Position).get(position_id)
+        position = db.get(Position, position_id)
         if not position:
             raise ValueError(f"Position {position_id} not found")
         position = cast("Position", position)

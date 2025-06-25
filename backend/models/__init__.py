@@ -3,6 +3,7 @@
 from backend.models.asset import Asset, AssetCategory, AssetType
 from backend.models.base import Base, drop_db, get_db, init_db
 from backend.models.cash_account import CashAccount
+from backend.models.isin import ISINTickerMapping
 from backend.models.portfolio_snapshot import PortfolioSnapshot
 from backend.models.position import Position
 from backend.models.price_history import PriceHistory
@@ -17,6 +18,7 @@ __all__ = [
     "AssetType",
     "Base",
     "CashAccount",
+    "ISINTickerMapping",
     "PortfolioSnapshot",
     "Position",
     "PriceHistory",

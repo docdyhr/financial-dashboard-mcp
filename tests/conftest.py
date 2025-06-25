@@ -1,11 +1,38 @@
 """Test configuration and fixtures."""
 
 import os
+from pathlib import Path
+import sys
+
+# Add project root to Python path for proper imports
+project_root = Path(__file__).parent.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
 
 # Set test environment variables before any imports
 os.environ.setdefault("ENVIRONMENT", "test")
+os.environ.setdefault("PYTHONPATH", str(project_root))
+
+# Force test environment values to avoid parsing errors from .env
+os.environ["TESTING"] = "true"
+os.environ["DEBUG"] = "true"
+os.environ["DATABASE_URL"] = "sqlite:///test.db"
+os.environ["SECRET_KEY"] = "test-secret-key-for-testing-only"
+os.environ["ACCESS_TOKEN_EXPIRE_MINUTES"] = "60"
+os.environ["MARKET_DATA_UPDATE_INTERVAL"] = "300"
+os.environ["PORTFOLIO_SNAPSHOT_INTERVAL"] = "3600"
+os.environ["SESSION_TIMEOUT"] = "3600"
+os.environ["MARKET_DATA_CACHE_TTL"] = "300"
+os.environ["PORTFOLIO_CACHE_TTL"] = "600"
+os.environ["ISIN_MAPPING_CACHE_TTL"] = "86400"
+os.environ["CONCENTRATION_WARNING_THRESHOLD"] = "0.20"
+os.environ["CONCENTRATION_CRITICAL_THRESHOLD"] = "0.25"
+os.environ["RISK_FREE_RATE"] = "0.02"
+os.environ["MCP_AUTH_TOKEN"] = "test-mcp-token"
+os.environ["CORS_ORIGINS"] = "*"
+
 # Use test-specific env file if running tests
-if "pytest" in os.environ.get("_", ""):
+if "pytest" in os.environ.get("_", "") or "pytest" in sys.argv[0]:
     os.environ.setdefault("SETTINGS_FILE", ".env.test")
 
 from decimal import Decimal
@@ -73,7 +100,7 @@ def pytest_addoption(parser):
 @pytest.fixture(scope="session", autouse=True)
 def setup_test_environment():
     """Set up the test environment."""
-    # Set test environment variables
+    # Set test environment variables with in-memory database
     os.environ["ENVIRONMENT"] = "test"
     os.environ["DATABASE_URL"] = "sqlite:///:memory:"
     os.environ["REDIS_URL"] = "redis://localhost:6379/15"
@@ -82,34 +109,97 @@ def setup_test_environment():
     os.environ["DEBUG"] = "true"
 
 
-@pytest.fixture(scope="session")
-def engine():
-    """Create test database engine."""
-    return create_engine("sqlite:///:memory:", echo=False)
+@pytest.fixture(scope="function", autouse=True)
+def setup_test_database():
+    """Initialize the main application database for integration tests."""
+    # Import here to ensure environment variables are set first
+    import os
+    import tempfile
+
+    # Create a temporary in-memory database for each test
+    # Use a unique connection string to ensure complete isolation
+    import uuid
+
+    test_db_name = f"test_{uuid.uuid4().hex}.db"
+    test_db_path = os.path.join(tempfile.gettempdir(), test_db_name)
+
+    # Create a new engine for this specific test
+
+    engine = create_engine(
+        f"sqlite:///{test_db_path}",
+        echo=False,
+        connect_args={"check_same_thread": False},
+    )
+
+    # Override the database dependency to use our test engine
+
+    from backend.database import get_db
+
+    # Create new session factory for this test
+    TestSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+    def override_get_db():
+        db = TestSessionLocal()
+        try:
+            yield db
+        finally:
+            db.close()
+
+    # Apply the dependency override
+    from backend.main import app
+
+    app.dependency_overrides[get_db] = override_get_db
+
+    try:
+        # Create all tables in the test database
+        Base.metadata.create_all(engine)
+        yield engine
+    finally:
+        # Clean up after each test
+        try:
+            Base.metadata.drop_all(engine)
+            engine.dispose()
+            # Remove the temporary database file
+            if os.path.exists(test_db_path):
+                os.unlink(test_db_path)
+        except Exception:
+            pass  # Ignore cleanup errors in tests
+
+        # Remove dependency override
+        if get_db in app.dependency_overrides:
+            del app.dependency_overrides[get_db]
 
 
-@pytest.fixture(scope="session")
-def tables(engine):
-    """Create all tables for testing."""
-    Base.metadata.create_all(engine)
-    yield
-    Base.metadata.drop_all(engine)
+# Legacy fixtures - commented out to prevent conflicts with new isolated database approach
+# @pytest.fixture(scope="session")
+# def engine():
+#     """Create test database engine."""
+#     return create_engine(
+#         "sqlite:///test.db",
+#         echo=False,
+#         connect_args={"check_same_thread": False, "isolation_level": None}
+#     )
 
 
-@pytest.fixture
-def db_session(engine, tables):
-    """Create a database session for testing."""
-    connection = engine.connect()
-    transaction = connection.begin()
+# @pytest.fixture(scope="session")
+# def tables(engine):
+#     """Create all tables for testing."""
+#     Base.metadata.create_all(engine)
+#     yield
+#     Base.metadata.drop_all(engine)
 
-    SessionLocal = sessionmaker(bind=connection)
-    session = SessionLocal()
 
-    yield session
-
-    session.close()
-    transaction.rollback()
-    connection.close()
+# @pytest.fixture
+# def db_session(engine, tables):
+#     """Create a database session for testing."""
+#     connection = engine.connect()
+#     transaction = connection.begin()
+#     SessionLocal = sessionmaker(bind=connection)
+#     session = SessionLocal()
+#     yield session
+#     session.close()
+#     transaction.rollback()
+#     connection.close()
 
 
 @pytest.fixture
@@ -587,10 +677,10 @@ def performance_test_data() -> dict[str, Any]:
 
 
 @pytest.fixture
-def integration_test_markers():
+def integration_test_markers(request):
     """Pytest markers for integration tests."""
     return pytest.mark.skipif(
-        not pytest.config.getoption("--run-integration"),
+        not request.config.getoption("--run-integration"),
         reason="Integration tests require --run-integration flag",
     )
 
@@ -617,5 +707,6 @@ def mapping_service():
     from backend.services.enhanced_market_data import EnhancedMarketDataService
 
     service = MagicMock(spec=EnhancedMarketDataService)
-    service.get_market_data.return_value = {"price": 150.00, "currency": "USD"}
+    # Mock async methods that exist
+    service.get_quote_by_isin.return_value = {"price": 150.00, "currency": "USD"}
     return service

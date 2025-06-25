@@ -170,13 +170,10 @@ class ISINValidationCache(Base):
 
         isin = isin.upper().strip()
 
-        # Basic format validation
-        import re
-
-        if len(isin) != 12 or not re.match(r"^[A-Z]{2}[A-Z0-9]{9}[0-9]$", isin):
-            raise ValueError(
-                "ISIN must be 12 characters: 2 letters + 9 alphanumeric + 1 digit"
-            )
+        # For a validation cache, we need to allow storing invalid ISINs
+        # Only perform basic sanity checks
+        if len(isin) > 50:  # Reasonable upper limit to prevent abuse
+            raise ValueError("ISIN too long")
 
         return isin
 

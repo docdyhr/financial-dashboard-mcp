@@ -4,10 +4,13 @@
 import asyncio
 import sys
 
+import pytest
+
 # Add project root to Python path
 sys.path.insert(0, "/Users/thomas/Programming/financial-dashboard-mcp")
 
 
+@pytest.mark.asyncio
 async def test_portfolio_tools_with_auth():
     """Test portfolio tools with authentication."""
     from mcp_server.tools.portfolio import PortfolioTools

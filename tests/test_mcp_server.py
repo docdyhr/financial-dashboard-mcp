@@ -33,7 +33,7 @@ def test_list_tools_unauthorized():
 
 def test_list_tools_authorized():
     """Test listing tools with proper authorization."""
-    headers = {"Authorization": "Bearer development-token"}
+    headers = {"Authorization": "Bearer test-mcp-token"}
     response = client.post("/tools/list", headers=headers)
     assert response.status_code == 200  # nosec
     data = response.json()
@@ -55,7 +55,7 @@ def test_execute_tool_unauthorized():
 
 def test_execute_get_positions():
     """Test executing the get_positions tool."""
-    headers = {"Authorization": "Bearer development-token"}
+    headers = {"Authorization": "Bearer test-mcp-token"}
     response = client.post("/tools/execute/get_positions", json={}, headers=headers)
     assert response.status_code == 200  # nosec
     data = response.json()
@@ -66,7 +66,7 @@ def test_execute_get_positions():
 
 def test_execute_get_asset_price():
     """Test executing the get_asset_price tool."""
-    headers = {"Authorization": "Bearer development-token"}
+    headers = {"Authorization": "Bearer test-mcp-token"}
     payload = {"ticker": "AAPL"}
     response = client.post(
         "/tools/execute/get_asset_price", json=payload, headers=headers
@@ -80,6 +80,6 @@ def test_execute_get_asset_price():
 
 def test_execute_nonexistent_tool():
     """Test executing a non-existent tool."""
-    headers = {"Authorization": "Bearer development-token"}
+    headers = {"Authorization": "Bearer test-mcp-token"}
     response = client.post("/tools/execute/nonexistent_tool", json={}, headers=headers)
     assert response.status_code == 404  # nosec

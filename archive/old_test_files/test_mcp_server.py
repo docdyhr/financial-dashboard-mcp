@@ -3,35 +3,41 @@
 
 import sys
 
+import pytest
 import requests
 
 
+@pytest.mark.integration
 def test_api_availability():
     """Test if the Financial Dashboard API is available."""
     try:
         response = requests.get("http://localhost:8000/health", timeout=5)
         if response.status_code == 200:
             print("✅ Financial Dashboard API is running")
-            return True
+            assert True
+            return
         print(f"❌ API returned status {response.status_code}")
-        return False
+        assert False, f"API returned status {response.status_code}"
     except requests.exceptions.RequestException as e:
         print(f"❌ Cannot connect to API: {e}")
-        return False
+        assert False, f"Cannot connect to API: {e}"
 
 
+@pytest.mark.integration
 def test_mcp_server_import():
     """Test if MCP server can be imported."""
     try:
         import mcp_server.financial_dashboard_server  # noqa: F401
 
         print("✅ MCP server imports successfully")
-        return True
+        assert True
+        return
     except ImportError as e:
         print(f"❌ MCP server import failed: {e}")
-        return False
+        assert False, f"MCP server import failed: {e}"
 
 
+@pytest.mark.integration
 def test_dependencies():
     """Test if required dependencies are available."""
     try:
@@ -39,10 +45,11 @@ def test_dependencies():
         import mcp  # noqa: F401
 
         print("✅ All MCP dependencies available")
-        return True
+        assert True
+        return
     except ImportError as e:
         print(f"❌ Missing dependencies: {e}")
-        return False
+        assert False, f"Missing dependencies: {e}"
 
 
 def main():

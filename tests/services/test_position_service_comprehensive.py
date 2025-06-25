@@ -289,7 +289,7 @@ class TestPositionService:
             quantity=Decimal("5"), price_per_share=Decimal("160.00"), notes="Buy more"
         )
 
-        mock_db.query.return_value.get.return_value = mock_position
+        mock_db.get.return_value = mock_position
 
         result = position_service.adjust_position(mock_db, 1, adjustment)
 
@@ -309,7 +309,7 @@ class TestPositionService:
             quantity=Decimal("-3"), price_per_share=Decimal("160.00"), notes="Sell some"
         )
 
-        mock_db.query.return_value.get.return_value = mock_position
+        mock_db.get.return_value = mock_position
 
         result = position_service.adjust_position(mock_db, 1, adjustment)
 
@@ -323,7 +323,7 @@ class TestPositionService:
             quantity=Decimal("5"), price_per_share=Decimal("160.00")
         )
 
-        mock_db.query.return_value.get.return_value = None
+        mock_db.get.return_value = None
 
         with pytest.raises(ValueError, match="Position 1 not found"):
             position_service.adjust_position(mock_db, 1, adjustment)
@@ -337,14 +337,14 @@ class TestPositionService:
         )
 
         mock_position.quantity = Decimal("10")
-        mock_db.query.return_value.get.return_value = mock_position
+        mock_db.get.return_value = mock_position
 
         with pytest.raises(ValueError, match="Cannot sell more shares"):
             position_service.adjust_position(mock_db, 1, adjustment)
 
     def test_close_position_success(self, position_service, mock_db, mock_position):
         """Test successfully closing a position."""
-        mock_db.query.return_value.get.return_value = mock_position
+        mock_db.get.return_value = mock_position
 
         result = position_service.close_position(mock_db, 1)
 
@@ -356,7 +356,7 @@ class TestPositionService:
 
     def test_close_position_not_found(self, position_service, mock_db):
         """Test closing position that doesn't exist."""
-        mock_db.query.return_value.get.return_value = None
+        mock_db.get.return_value = None
 
         with pytest.raises(ValueError, match="Position 1 not found"):
             position_service.close_position(mock_db, 1)
@@ -426,7 +426,7 @@ class TestPositionService:
 
     def test_get_position_performance_not_found(self, position_service, mock_db):
         """Test getting position performance when position doesn't exist."""
-        mock_db.query.return_value.get.return_value = None
+        mock_db.get.return_value = None
 
         with pytest.raises(ValueError, match="Position 1 not found"):
             position_service.get_position_performance(mock_db, 1)
@@ -447,7 +447,7 @@ class TestPositionService:
         dividend_transaction.transaction_type = TransactionType.DIVIDEND
         dividend_transaction.total_amount = Decimal("25.00")
 
-        mock_db.query.return_value.get.return_value = mock_position
+        mock_db.get.return_value = mock_position
         mock_db.query.return_value.filter.return_value.order_by.return_value.all.return_value = [
             buy_transaction,
             dividend_transaction,
@@ -466,7 +466,7 @@ class TestPositionService:
         self, position_service, mock_db, mock_position
     ):
         """Test getting position performance with no transactions."""
-        mock_db.query.return_value.get.return_value = mock_position
+        mock_db.get.return_value = mock_position
 
         # Mock empty transactions
         mock_db.query.return_value.filter.return_value.order_by.return_value.all.return_value = (
@@ -601,7 +601,7 @@ class TestPositionService:
         mock_position.average_cost_per_share = Decimal("100.00")
         mock_position.notes = "Original position"
 
-        mock_db.query.return_value.get.return_value = mock_position
+        mock_db.get.return_value = mock_position
 
         result = position_service.split_position(
             mock_db, 1, Decimal("2"), notes="2:1 stock split"
@@ -615,7 +615,7 @@ class TestPositionService:
 
     def test_split_position_not_found(self, position_service, mock_db):
         """Test stock split when position doesn't exist."""
-        mock_db.query.return_value.get.return_value = None
+        mock_db.get.return_value = None
 
         with pytest.raises(ValueError, match="Position 1 not found"):
             position_service.split_position(mock_db, 1, Decimal("2"))
@@ -623,7 +623,7 @@ class TestPositionService:
     def test_split_position_no_notes(self, position_service, mock_db, mock_position):
         """Test stock split without additional notes."""
         mock_position.notes = None
-        mock_db.query.return_value.get.return_value = mock_position
+        mock_db.get.return_value = mock_position
 
         # The split_position method only updates notes if the `notes` parameter is provided
         # When notes=None, it doesn't change the existing notes

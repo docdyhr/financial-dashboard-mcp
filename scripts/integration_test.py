@@ -5,6 +5,7 @@ from datetime import datetime
 import sys
 import time
 
+import pytest
 import requests
 
 # Configuration
@@ -13,10 +14,10 @@ FRONTEND_URL = "http://localhost:8501"
 FLOWER_URL = "http://localhost:5555"
 
 
-def check_service(name, url, endpoint=""):
+def check_service(name, url, endpoint="", headers=None):
     """Check if a service is accessible."""
     try:
-        response = requests.get(f"{url}{endpoint}", timeout=5)
+        response = requests.get(f"{url}{endpoint}", timeout=5, headers=headers or {})
         if response.status_code == 200:
             print(f"✅ {name}: Accessible")
             return True
@@ -27,36 +28,67 @@ def check_service(name, url, endpoint=""):
         return False
 
 
+@pytest.mark.integration
 def test_api_endpoints():
     """Test key API endpoints."""
+    # Get authentication token
+    auth_headers = {}
+    try:
+        login_response = requests.post(
+            f"{BACKEND_URL}/api/v1/auth/login",
+            data={"username": "demo", "password": "demo123"},
+            timeout=5,
+        )
+        if login_response.status_code == 200:
+            token = login_response.json()["access_token"]
+            auth_headers = {"Authorization": f"Bearer {token}"}
+    except Exception:
+        pass  # Continue without auth for basic endpoints
+
     endpoints = [
-        ("/health", "Health Check"),
-        ("/api/portfolio/summary", "Portfolio Summary"),
-        ("/api/portfolio/positions", "Portfolio Positions"),
-        ("/api/tasks/active", "Active Tasks"),
+        ("/health", "Health Check", None),
+        ("/api/v1/portfolio/summary/47", "Portfolio Summary", auth_headers),
+        ("/api/v1/positions/summary/47", "Portfolio Positions", auth_headers),
+        ("/api/v1/tasks/active", "Active Tasks", auth_headers),
     ]
 
     print("\n🔍 Testing API Endpoints:")
     print("-" * 40)
 
-    for endpoint, name in endpoints:
-        success = check_service(name, BACKEND_URL, endpoint)
+    for endpoint, name, headers in endpoints:
+        success = check_service(name, BACKEND_URL, endpoint, headers)
         if not success:
-            return False
+            assert False, f"API endpoint {name} failed"
 
-    return True
+    assert True
 
 
+@pytest.mark.integration
 def test_task_submission():
     """Test task submission and monitoring."""
     print("\n🔄 Testing Task System:")
     print("-" * 40)
 
+    # Get authentication token
+    auth_headers = {}
+    try:
+        login_response = requests.post(
+            f"{BACKEND_URL}/api/v1/auth/login",
+            data={"username": "demo", "password": "demo123"},
+            timeout=5,
+        )
+        if login_response.status_code == 200:
+            token = login_response.json()["access_token"]
+            auth_headers = {"Authorization": f"Bearer {token}"}
+    except Exception:
+        pass
+
     # Submit a market data task
     try:
         response = requests.post(
-            f"{BACKEND_URL}/api/tasks/market-data/fetch",
+            f"{BACKEND_URL}/api/v1/tasks/market-data",
             json={"symbols": ["AAPL"]},
+            headers=auth_headers,
             timeout=10,
         )
 
@@ -69,23 +101,27 @@ def test_task_submission():
             time.sleep(2)
 
             status_response = requests.get(
-                f"{BACKEND_URL}/api/tasks/{task_id}/status", timeout=5
+                f"{BACKEND_URL}/api/v1/tasks/status/{task_id}",
+                headers=auth_headers,
+                timeout=5,
             )
 
             if status_response.status_code == 200:
                 status_data = status_response.json()
                 print(f"✅ Task status: {status_data.get('status', 'Unknown')}")
-                return True
+                assert True
+                return
             print("❌ Could not check task status")
-            return False
+            assert False, "Could not check task status"
         print(f"❌ Task submission failed: {response.status_code}")
-        return False
+        assert False, f"Task submission failed: {response.status_code}"
 
     except requests.exceptions.RequestException as e:
         print(f"❌ Task submission error: {e}")
-        return False
+        assert False, f"Task submission error: {e}"
 
 
+@pytest.mark.integration
 def test_frontend_components():
     """Test frontend component functionality."""
     print("\n🎨 Testing Frontend Integration:")
@@ -94,18 +130,32 @@ def test_frontend_components():
     # Test if Streamlit is accessible
     if not check_service("Streamlit Frontend", FRONTEND_URL):
         print("❌ Frontend is not accessible")
-        return False
+        assert False, "Frontend is not accessible"
+
+    # Get authentication token
+    auth_headers = {}
+    try:
+        login_response = requests.post(
+            f"{BACKEND_URL}/api/v1/auth/login",
+            data={"username": "demo", "password": "demo123"},
+            timeout=5,
+        )
+        if login_response.status_code == 200:
+            token = login_response.json()["access_token"]
+            auth_headers = {"Authorization": f"Bearer {token}"}
+    except Exception:
+        pass
 
     # Test component data sources
     data_tests = [
-        ("Portfolio Data", f"{BACKEND_URL}/api/portfolio/summary"),
-        ("Positions Data", f"{BACKEND_URL}/api/portfolio/positions"),
-        ("Tasks Data", f"{BACKEND_URL}/api/tasks/active"),
+        ("Portfolio Data", f"{BACKEND_URL}/api/v1/portfolio/summary/47"),
+        ("Positions Data", f"{BACKEND_URL}/api/v1/positions/summary/47"),
+        ("Tasks Data", f"{BACKEND_URL}/api/v1/tasks/active"),
     ]
 
     for name, url in data_tests:
         try:
-            response = requests.get(url, timeout=5)
+            response = requests.get(url, headers=auth_headers, timeout=5)
             if response.status_code == 200:
                 data = response.json()
                 print(f"✅ {name}: Available ({type(data).__name__})")
@@ -114,7 +164,7 @@ def test_frontend_components():
         except requests.exceptions.RequestException as e:
             print(f"❌ {name}: {e}")
 
-    return True
+    assert True
 
 
 def run_full_system_test():

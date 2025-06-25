@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Simple pytest command that can be used from anywhere in the project.
+# Usage: Just type 'pytest' in the project directory.
+
+# Find the project root by looking for pyproject.toml
+current_dir=$(pwd)
+while [[ "$current_dir" != "/" ]]; do
+    if [[ -f "$current_dir/pyproject.toml" && -f "$current_dir/.venv/bin/pytest" ]]; then
+        project_root="$current_dir"
+        break
+    fi
+    current_dir=$(dirname "$current_dir")
+done
+
+if [[ -z "$project_root" ]]; then
+    echo "Error: Could not find project root with .venv/bin/pytest"
+    echo "Please run from within the project directory"
+    exit 1
+fi
+
+# Change to project root and run pytest from venv
+cd "$project_root"
+exec ./.venv/bin/pytest "$@"

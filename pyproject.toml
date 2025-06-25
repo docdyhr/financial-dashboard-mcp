@@ -25,7 +25,7 @@ skip_glob = ["*/migrations/*", "*/venv/*"]
 
 # MyPy configuration - currently relaxed for gradual typing adoption
 [tool.mypy]
-python_version = "2.8.2"
+python_version = "3.11"
 warn_return_any = false
 warn_unused_configs = false
 disallow_untyped_defs = false
@@ -70,25 +70,57 @@ module = [
 ignore_errors = true
 
 [tool.pytest.ini_options]
-minversion = "2.8.2"
+minversion = "7.4.0"
 testpaths = ["tests"]
-python_files = "test_*.py"
-python_classes = "Test*"
-python_functions = "test_*"
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
 addopts = [
     "--strict-markers",
     "--strict-config",
     "--tb=short",
-    "--durations=10",
-    "-ra",
+    "-v",
+]
+markers = [
+    "unit: Unit tests that test individual components in isolation",
+    "integration: Integration tests that test multiple components together",
+    "api: API endpoint tests",
+    "frontend: Frontend component tests",
+    "slow: Tests that take more than 5 seconds to run",
+    "fast: Tests that run quickly (under 1 second)",
+    "database: Tests that require database access",
+    "external: Tests that make external API calls",
+    "benchmark: Performance benchmark tests",
+    "regression: Regression tests for previously fixed bugs",
+    "smoke: Basic smoke tests for critical functionality",
+    "isin: Tests specifically for ISIN functionality",
+    "sync: Tests for ISIN sync service",
+    "validation: Tests for ISIN validation",
+    "mapping: Tests for ISIN mapping functionality",
+    "portfolio: Tests for portfolio functionality",
+    "market_data: Tests for market data functionality",
+    "auth: Authentication and authorization tests",
+    "security: Security-related tests",
+    "performance: Performance and load tests",
+    "config: Configuration and environment tests",
+    "mock: Tests that use extensive mocking",
+    "real_data: Tests that use real external data",
+    "celery: Tests for Celery background tasks",
+    "financial: Tests for financial calculations and data tests",
 ]
 filterwarnings = [
     "ignore::DeprecationWarning",
     "ignore::PendingDeprecationWarning",
-    "ignore::UserWarning",
+    "ignore::UserWarning:yfinance.*",
+    "ignore::UserWarning:urllib3.*",
+    "ignore::RuntimeWarning:asyncio.*",
     "error::pytest.PytestConfigWarning",
 ]
 asyncio_mode = "auto"
+env = [
+    "ENVIRONMENT = test",
+    "PYTHONPATH = .",
+]
 
 [tool.coverage.run]
 source = ["backend", "frontend", "mcp_server"]
@@ -118,7 +150,7 @@ exclude_lines = [
 line-length = 88
 
 # Python 3.11
-target-version = "2.8.2"
+target-version = "py311"
 
 # Exclude directories
 exclude = [
