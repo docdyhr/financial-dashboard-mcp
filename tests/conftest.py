@@ -44,7 +44,10 @@ import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from backend.models import Base
+# Import all models to ensure they're registered with Base metadata
+from backend.models import (
+    Base,
+)
 
 
 def pytest_configure(config):
@@ -109,31 +112,26 @@ def setup_test_environment():
     os.environ["DEBUG"] = "true"
 
 
-@pytest.fixture(scope="function", autouse=True)
-def setup_test_database():
-    """Initialize the main application database for integration tests."""
+@pytest.fixture(scope="function")
+def test_db():
+    """Create a test database for each test."""
     # Import here to ensure environment variables are set first
     import os
     import tempfile
-
-    # Create a temporary in-memory database for each test
-    # Use a unique connection string to ensure complete isolation
     import uuid
 
     test_db_name = f"test_{uuid.uuid4().hex}.db"
     test_db_path = os.path.join(tempfile.gettempdir(), test_db_name)
 
     # Create a new engine for this specific test
-
     engine = create_engine(
         f"sqlite:///{test_db_path}",
         echo=False,
         connect_args={"check_same_thread": False},
     )
 
-    # Override the database dependency to use our test engine
-
-    from backend.database import get_db
+    # Create all tables in the test database
+    Base.metadata.create_all(engine)
 
     # Create new session factory for this test
     TestSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -145,26 +143,36 @@ def setup_test_database():
         finally:
             db.close()
 
-    # Apply the dependency override
+    yield override_get_db, engine
+
+    # Clean up after each test
+    try:
+        Base.metadata.drop_all(engine)
+        engine.dispose()
+        # Remove the temporary database file
+        if os.path.exists(test_db_path):
+            os.unlink(test_db_path)
+    except Exception:
+        pass  # Ignore cleanup errors in tests
+
+
+@pytest.fixture(scope="function")
+def client(test_db):
+    """Create a test client with a test database."""
+    from fastapi.testclient import TestClient
+
+    from backend.database import get_db
     from backend.main import app
 
+    override_get_db, engine = test_db
+
+    # Apply the dependency override
     app.dependency_overrides[get_db] = override_get_db
 
     try:
-        # Create all tables in the test database
-        Base.metadata.create_all(engine)
-        yield engine
+        with TestClient(app) as test_client:
+            yield test_client
     finally:
-        # Clean up after each test
-        try:
-            Base.metadata.drop_all(engine)
-            engine.dispose()
-            # Remove the temporary database file
-            if os.path.exists(test_db_path):
-                os.unlink(test_db_path)
-        except Exception:
-            pass  # Ignore cleanup errors in tests
-
         # Remove dependency override
         if get_db in app.dependency_overrides:
             del app.dependency_overrides[get_db]
