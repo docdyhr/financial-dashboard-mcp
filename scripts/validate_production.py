@@ -5,9 +5,9 @@ This script validates that the production environment is properly configured
 and secure before deployment.
 """
 
+from pathlib import Path
 import re
 import sys
-from pathlib import Path
 
 # ANSI color codes
 RED = "\033[0;31m"

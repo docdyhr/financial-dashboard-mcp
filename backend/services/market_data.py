@@ -1,15 +1,15 @@
 """Multi-provider market data service with fallback capabilities."""
 
-import logging
-import time
 from dataclasses import dataclass
 from datetime import date, datetime
 from decimal import Decimal
+import logging
+import time
 from typing import Any
 
 import requests
-import yfinance as yf
 from sqlalchemy.orm import Session
+import yfinance as yf
 
 from backend.config import get_settings
 from backend.models.asset import Asset

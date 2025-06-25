@@ -1,7 +1,7 @@
 """Comprehensive tests for MarketDataService and providers."""
 
-import time
 from decimal import Decimal
+import time
 from unittest.mock import Mock, patch
 
 import pytest

@@ -3,9 +3,9 @@
 import asyncio
 from unittest.mock import patch
 
+from fastapi.testclient import TestClient
 import httpx
 import pytest
-from fastapi.testclient import TestClient
 
 from backend.main import app as backend_app
 from mcp_server.server import app as mcp_app
@@ -291,6 +291,7 @@ class TestMCPFullIntegration:
         "not config.getoption('--run-integration')",
         reason="requires --run-integration option and running backend",
     )
+    @pytest.mark.asyncio
     async def test_full_mcp_backend_integration(self):
         """Test full MCP integration with running backend server."""
         from mcp_server.tools.portfolio import PortfolioTools

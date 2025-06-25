@@ -6,13 +6,13 @@ actionable recommendations for improving the test suite.
 """
 
 import argparse
+from dataclasses import dataclass
+from datetime import datetime
 import json
+from pathlib import Path
 import subprocess
 import sys
 import xml.etree.ElementTree as ET
-from dataclasses import dataclass
-from datetime import datetime
-from pathlib import Path
 
 # Add project root to path
 PROJECT_ROOT = Path(__file__).parent.parent

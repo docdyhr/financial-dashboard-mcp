@@ -161,14 +161,33 @@ class TestISINMappingPerformance:
             mock_mapping = Mock()
             mock_mapping.ticker = "AAPL"
             mock_mapping.confidence = 0.95
+            mock_mapping.exchange_code = "XNAS"
+            # Mock both query patterns: single result and list result
             mock_session.query.return_value.filter.return_value.order_by.return_value.first.return_value = (
                 mock_mapping
             )
-            mock_get_db.return_value.__enter__.return_value = mock_session
+            mock_session.query.return_value.filter.return_value.order_by.return_value.all.return_value = [
+                mock_mapping
+            ]
+            mock_session.query.return_value.filter.return_value.limit.return_value.all.return_value = [
+                mock_mapping
+            ]
+
+            # Create a generator function that can be called multiple times
+            def get_db_generator():
+                yield mock_session
+
+            mock_get_db.side_effect = lambda: get_db_generator()
 
             service = ISINService()
-            result = benchmark(service.get_ticker_for_isin, isin)
-            assert result == "AAPL"
+
+            # Mock the get_mappings_from_db method to return our mock mapping
+            with patch.object(
+                service.mapping_service, "get_mappings_from_db"
+            ) as mock_get_mappings:
+                mock_get_mappings.return_value = [mock_mapping]
+                result = benchmark(service.get_ticker_for_isin, isin)
+                assert result == "AAPL"
 
     @pytest.mark.slow
     def test_bulk_mapping_lookup_performance(self, performance_test_data):
@@ -225,6 +244,8 @@ class TestISINSyncServicePerformance:
         job_id = await benchmark(create_job)
         assert job_id in sync_service.active_jobs
 
+    @pytest.mark.asyncio
+    @pytest.mark.asyncio
     @pytest.mark.asyncio
     @pytest.mark.slow
     async def test_concurrent_sync_jobs_performance(self):
@@ -309,6 +330,8 @@ class TestMarketDataPerformance:
                 assert result is not None
                 assert result.symbol == "AAPL"
 
+    @pytest.mark.asyncio
+    @pytest.mark.asyncio
     @pytest.mark.asyncio
     @pytest.mark.slow
     async def test_batch_quote_retrieval_performance(self):

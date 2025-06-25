@@ -1,7 +1,7 @@
 """Utility functions for handling ticker symbols, especially European and international tickers."""
 
-import re
 from dataclasses import dataclass
+import re
 
 
 @dataclass

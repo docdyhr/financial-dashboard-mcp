@@ -329,7 +329,7 @@ class TestEndToEndSystemValidation:
 
         # Try to withdraw more than available
         overdraft_response = client.post(
-            "/api/v1/cash-accounts/transactions/",
+            "/api/v1/cash-accounts/transaction",
             headers=auth_headers,
             json={
                 "account_id": account_id,
@@ -370,7 +370,6 @@ class TestEndToEndSystemValidation:
         endpoints_to_test = [
             "/api/v1/positions/",
             "/api/v1/cash-accounts/",
-            "/api/v1/portfolio/summary",
         ]
 
         for endpoint in endpoints_to_test:

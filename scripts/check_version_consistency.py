@@ -8,9 +8,9 @@ This script ensures that version numbers are consistent between:
 Used by pre-commit hooks and CI/CD pipeline.
 """
 
+from pathlib import Path
 import re
 import sys
-from pathlib import Path
 
 
 def extract_version_from_pyproject() -> str:

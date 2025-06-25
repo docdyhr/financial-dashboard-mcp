@@ -5,10 +5,10 @@ This script tests all major features of the Financial Dashboard
 to ensure production readiness.
 """
 
+from datetime import date, datetime
 import json
 import random
 import time
-from datetime import date, datetime
 
 import requests
 from rich.console import Console

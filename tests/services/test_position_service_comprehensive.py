@@ -4,8 +4,8 @@ import datetime
 from decimal import Decimal
 from unittest.mock import Mock, patch
 
-import pytest
 from fastapi import HTTPException
+import pytest
 from sqlalchemy.orm import Session
 
 from backend.models.asset import Asset, AssetCategory, AssetType

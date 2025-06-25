@@ -1,8 +1,8 @@
 """Position service for position management operations."""
 
 import datetime
-import logging
 from decimal import Decimal
+import logging
 from typing import Any, cast
 
 from fastapi import HTTPException

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Comprehensive ISIN integration test script for Financial Dashboard."""
 
+from pathlib import Path
 import sys
 import time
-from pathlib import Path
 
 # Add the project root to the Python path
 project_root = Path(__file__).parent.parent

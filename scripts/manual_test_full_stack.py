@@ -21,9 +21,9 @@ import asyncio
 import json
 import logging
 import os
+from pathlib import Path
 import sys
 import time
-from pathlib import Path
 
 import psutil
 import redis

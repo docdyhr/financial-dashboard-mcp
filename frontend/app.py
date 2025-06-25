@@ -1,9 +1,9 @@
 """Enhanced Streamlit application for Financial Dashboard with complete UI."""
 
-import os
-import sys
 from datetime import datetime
+import os
 from pathlib import Path
+import sys
 
 # Add project root to Python path
 project_root = Path(__file__).parent.parent

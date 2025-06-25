@@ -1,6 +1,7 @@
 """ISIN Analytics widget components."""
 
 import streamlit as st
+
 from .isin_analytics_data import get_isin_statistics, get_system_health
 
 
@@ -67,9 +68,12 @@ def overview_metrics_widget():
         last_sync = stats.get("last_sync", "Never")
         if last_sync != "Never":
             import datetime
+
             try:
-                sync_time = datetime.datetime.fromisoformat(last_sync.replace('Z', '+00:00'))
-                last_sync = sync_time.strftime('%Y-%m-%d %H:%M')
+                sync_time = datetime.datetime.fromisoformat(
+                    last_sync.replace("Z", "+00:00")
+                )
+                last_sync = sync_time.strftime("%Y-%m-%d %H:%M")
             except Exception:
                 pass
         st.metric("Last Sync", last_sync)
@@ -197,6 +201,7 @@ def dashboard_footer():
 
     with col1:
         from datetime import datetime
+
         st.caption(f"📅 Last updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
     with col2:

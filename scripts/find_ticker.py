@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Simple ticker finder script to help users find correct ticker symbols."""
 
-import sys
 from pathlib import Path
+import sys
 
 # Add the project root to the Python path
 project_root = Path(__file__).parent.parent

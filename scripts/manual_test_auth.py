@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Test authentication flow."""
 
-import sys
 from pathlib import Path
+import sys
 
 import requests
 

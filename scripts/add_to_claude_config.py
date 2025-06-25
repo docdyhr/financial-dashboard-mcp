@@ -4,8 +4,8 @@ Adds or updates the financial-dashboard MCP server while preserving all other ex
 """
 
 import json
-import sys
 from pathlib import Path
+import sys
 from typing import Any
 
 

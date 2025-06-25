@@ -5,12 +5,12 @@ infrastructure for European and international securities.
 """
 
 import asyncio
-import logging
-import time
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
+import logging
+import time
 from typing import Any
 
 import numpy as np

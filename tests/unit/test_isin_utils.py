@@ -76,27 +76,30 @@ class TestISINValidation:
         """Test ISIN check digit calculation."""
         # Known valid ISINs with correct check digits
         test_cases = [
-            ("US0378331005", "5"),  # Apple
-            ("DE0007164600", "0"),  # SAP
-            ("GB0002162385", "5"),  # BP
+            ("US0378331005", True),  # Apple
+            ("DE0007164600", True),  # SAP
+            ("GB0002162385", True),  # BP
+            ("US0378331006", False),  # Apple with wrong check digit
+            ("DE0007164601", False),  # SAP with wrong check digit
         ]
 
-        for isin, expected_check_digit in test_cases:
-            calculated_digit = ISINUtils._calculate_check_digit(isin[:-1])
-            assert (
-                calculated_digit == expected_check_digit
-            ), f"Check digit mismatch for {isin}"
+        for isin, expected_valid in test_cases:
+            is_valid, check_digit = ISINUtils.validate_isin_checksum(isin)
+            assert is_valid == expected_valid, f"Checksum validation failed for {isin}"
 
     def test_format_normalization(self):
         """Test ISIN format normalization."""
-        # Test lowercase conversion
-        assert ISINUtils._normalize_isin("us0378331005") == "US0378331005"
+        # Test lowercase conversion - validate_isin should handle it
+        is_valid, error = ISINUtils.validate_isin("us0378331005")
+        assert is_valid, "Lowercase ISIN should be accepted and normalized"
 
         # Test whitespace removal
-        assert ISINUtils._normalize_isin(" US0378331005 ") == "US0378331005"
+        is_valid, error = ISINUtils.validate_isin(" US0378331005 ")
+        assert is_valid, "ISIN with whitespace should be accepted and trimmed"
 
         # Test mixed case
-        assert ISINUtils._normalize_isin("uS0378331005") == "US0378331005"
+        is_valid, error = ISINUtils.validate_isin("uS0378331005")
+        assert is_valid, "Mixed case ISIN should be accepted and normalized"
 
 
 class TestISINParsing:
@@ -121,8 +124,11 @@ class TestISINParsing:
         invalid_cases = isin_test_cases["invalid_cases"]
 
         for isin, _, description in invalid_cases:
-            with pytest.raises(ISINValidationError):
-                ISINUtils.parse_isin(isin)
+            isin_info = ISINUtils.parse_isin(isin)
+            assert not isin_info.is_valid, f"ISIN should be invalid: {description}"
+            assert (
+                isin_info.validation_error is not None
+            ), f"Should have validation error: {description}"
 
     def test_parse_country_extraction(self):
         """Test country code extraction from ISINs."""

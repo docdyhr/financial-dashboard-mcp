@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Analyze ISIN support feasibility for the Financial Dashboard, specifically for CLIQ.DE/Click Digital."""
 
+from pathlib import Path
 import sys
 import time
-from pathlib import Path
 
 import requests
 

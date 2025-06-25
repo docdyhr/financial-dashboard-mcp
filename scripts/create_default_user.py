@@ -8,18 +8,18 @@ Usage:
     python scripts/create_default_user.py
 """
 
-import sys
 from pathlib import Path
+import sys
 
 # Add project root to Python path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
+from datetime import datetime
 import hashlib
 import logging
 import secrets
 import string
-from datetime import datetime
 
 from backend.database import get_db_session
 from backend.models.user import User

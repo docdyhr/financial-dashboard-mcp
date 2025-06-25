@@ -2,8 +2,8 @@
 
 from datetime import UTC, datetime, timedelta
 
-import pytest
 from jose import jwt
+import pytest
 
 from backend.auth.jwt import ALGORITHM, create_access_token, verify_token
 from backend.config import get_settings

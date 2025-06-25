@@ -4,12 +4,12 @@ This script starts both the backend (FastAPI) and frontend (Streamlit) services.
 """
 
 import logging
+from pathlib import Path
 import signal
 import subprocess
 import sys
 import threading
 import time
-from pathlib import Path
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

@@ -1,7 +1,7 @@
 """Enhanced charting and visualization components."""
 
-import random
 from datetime import datetime
+import random
 
 import pandas as pd
 import plotly.express as px

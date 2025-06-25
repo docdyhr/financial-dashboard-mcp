@@ -10,8 +10,8 @@ It provides a clean entry point with proper error handling and logging.
 import asyncio
 import logging
 import os
-import sys
 from pathlib import Path
+import sys
 
 # Ensure the project root is in the Python path
 project_root = Path(__file__).parent.parent

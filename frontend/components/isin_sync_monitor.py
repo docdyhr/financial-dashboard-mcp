@@ -5,9 +5,9 @@ synchronization service including job status, conflict resolution, and
 service health monitoring.
 """
 
+from datetime import datetime
 import logging
 import time
-from datetime import datetime
 
 import pandas as pd
 import requests

@@ -1,7 +1,14 @@
 """Test configuration and fixtures."""
 
-from decimal import Decimal
 import os
+
+# Set test environment variables before any imports
+os.environ.setdefault("ENVIRONMENT", "test")
+# Use test-specific env file if running tests
+if "pytest" in os.environ.get("_", ""):
+    os.environ.setdefault("SETTINGS_FILE", ".env.test")
+
+from decimal import Decimal
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock
 
@@ -542,6 +549,7 @@ def isin_test_cases() -> dict[str, list[tuple[str, bool, str]]]:
             ("CH0012005267", True, "Nestlé - Valid Swiss ISIN"),
             ("JP3902900004", True, "Nintendo - Valid Japanese ISIN"),
             ("CA0679011084", True, "Barrick Gold - Valid Canadian ISIN"),
+            ("us0378331005", True, "Lowercase Apple ISIN - should be normalized"),
         ],
         "invalid_cases": [
             ("US037833100", False, "Too short - 11 characters"),
@@ -551,13 +559,12 @@ def isin_test_cases() -> dict[str, list[tuple[str, bool, str]]]:
             ("US03783310055", False, "Too long - 13 characters"),
             ("", False, "Empty string"),
             ("INVALIDFORMAT", False, "Completely wrong format"),
-            ("us0378331005", False, "Lowercase characters"),
             ("US-378331005", False, "Invalid separator character"),
             ("US 378331005", False, "Space character in ISIN"),
         ],
         "edge_cases": [
-            ("XS0000000000", True, "International ISIN"),
-            ("EU0000000000", True, "European ISIN"),
+            ("XS0000000009", True, "International ISIN"),
+            ("EU0009695212", True, "European ISIN"),
             ("QS0000000000", False, "Non-existent country code"),
             ("US000000000A", False, "Letter in check digit position"),
         ],

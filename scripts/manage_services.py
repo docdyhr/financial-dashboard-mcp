@@ -14,15 +14,15 @@ Usage:
 """
 
 import argparse
+from dataclasses import dataclass
+from enum import Enum
 import logging
 import os
+from pathlib import Path
 import signal
 import subprocess
 import sys
 import time
-from dataclasses import dataclass
-from enum import Enum
-from pathlib import Path
 
 import psutil
 import redis

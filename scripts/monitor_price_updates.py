@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Monitor price updates happening in real-time."""
 
-import sys
-import time
 from datetime import datetime
 from pathlib import Path
+import sys
+import time
 
 # Add parent directory to Python path
 sys.path.insert(0, str(Path(__file__).parent.parent))

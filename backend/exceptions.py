@@ -188,6 +188,7 @@ class RateLimitError(ExternalServiceError):
 
 # FastAPI Exception Handling
 
+
 class ErrorDetail(BaseModel):
     """Standard error response model."""
 
@@ -218,9 +219,9 @@ async def financial_dashboard_exception_handler(
         "CONFIG_ERROR": status.HTTP_500_INTERNAL_SERVER_ERROR,
         "INSUFFICIENT_FUNDS": status.HTTP_400_BAD_REQUEST,
     }
-    
+
     status_code = status_code_map.get(exc.code, status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
+
     error_detail = ErrorDetail(
         error=exc.code or "INTERNAL_ERROR",
         message=exc.message,

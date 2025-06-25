@@ -4,10 +4,10 @@ This module provides core ISIN functionality including validation, parsing,
 and basic ticker mapping capabilities for the Financial Dashboard.
 """
 
+from dataclasses import dataclass
 import logging
 import re
 import time
-from dataclasses import dataclass
 
 import requests
 

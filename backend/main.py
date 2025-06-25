@@ -1,7 +1,7 @@
 """Main FastAPI application for Financial Dashboard."""
 
-import logging
 from contextlib import asynccontextmanager
+import logging
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -19,13 +19,13 @@ from backend.api import (
     user_settings,
 )
 from backend.config import get_settings
+from backend.database import get_db_session
 from backend.exceptions import (
     FinancialDashboardException,
     financial_dashboard_exception_handler,
     generic_exception_handler,
     validation_exception_handler,
 )
-from backend.database import get_db_session
 
 # Configure logging
 settings = get_settings()

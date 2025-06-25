@@ -1,8 +1,8 @@
 """Portfolio service for portfolio operations and calculations."""
 
-import logging
 from datetime import date, timedelta
 from decimal import Decimal
+import logging
 
 from fastapi import HTTPException
 from sqlalchemy.orm import Session, joinedload

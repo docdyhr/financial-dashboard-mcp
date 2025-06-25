@@ -1,8 +1,8 @@
 """Security utilities for configuration and secret management."""
 
+from pathlib import Path
 import secrets
 import string
-from pathlib import Path
 
 
 def generate_secret_key(length: int = 32) -> str:

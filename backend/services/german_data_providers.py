@@ -5,15 +5,15 @@ including Deutsche Börse, Börse Frankfurt, and other European exchanges.
 """
 
 import asyncio
+from dataclasses import dataclass
+from datetime import datetime
 import logging
 import re
 import time
-from dataclasses import dataclass
-from datetime import datetime
 from typing import Any
 
-import requests
 from bs4 import BeautifulSoup
+import requests
 
 logger = logging.getLogger(__name__)
 

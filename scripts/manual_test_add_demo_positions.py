@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Script to add demo positions directly to the database for testing."""
 
-import sys
 from datetime import datetime
 from decimal import Decimal
 from pathlib import Path
+import sys
 
 # Add parent directory to Python path
 sys.path.insert(0, str(Path(__file__).parent.parent))

@@ -4,9 +4,9 @@ import logging
 import os
 from typing import Any
 
-import uvicorn
 from fastapi import FastAPI, Header, HTTPException
 from fastapi.responses import JSONResponse
+import uvicorn
 
 # Configure logging
 logging.basicConfig(

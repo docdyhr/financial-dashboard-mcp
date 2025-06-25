@@ -1,9 +1,9 @@
 """Mock market data task for demonstration when yfinance is unavailable."""
 
-import logging
-import random
 from datetime import datetime
 from decimal import Decimal
+import logging
+import random
 from typing import Any
 
 from celery import current_task

@@ -1,12 +1,12 @@
 """Market data fetching tasks."""
 
-import logging
 from datetime import datetime
 from decimal import Decimal
+import logging
 from typing import Any
 
-import yfinance as yf
 from celery import current_task
+import yfinance as yf
 
 from backend.database import get_db_session
 from backend.models.asset import Asset

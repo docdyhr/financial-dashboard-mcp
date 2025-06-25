@@ -7,8 +7,8 @@ It ensures proper environment setup and handles graceful startup/shutdown.
 
 import asyncio
 import logging
-import sys
 from pathlib import Path
+import sys
 
 # Add the project root to Python path
 project_root = Path(__file__).parent.parent

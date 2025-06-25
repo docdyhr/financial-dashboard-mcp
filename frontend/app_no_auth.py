@@ -1,9 +1,9 @@
 """Non-authenticated version of the Financial Dashboard for development/demo."""
 
-import os
-import sys
 from datetime import datetime
+import os
 from pathlib import Path
+import sys
 
 # Add project root to Python path
 project_root = Path(__file__).parent.parent

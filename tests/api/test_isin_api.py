@@ -7,8 +7,8 @@ lookup, mapping management, and statistics.
 from datetime import datetime
 from unittest.mock import Mock, patch
 
-import pytest
 from fastapi.testclient import TestClient
+import pytest
 
 from backend.api.isin import router
 

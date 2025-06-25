@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Test script to validate frontend components without starting Streamlit server."""
 
-import sys
 from pathlib import Path
+import sys
 
 # Add project root to Python path
 project_root = Path(__file__).parent.parent

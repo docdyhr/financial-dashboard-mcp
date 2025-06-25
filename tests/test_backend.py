@@ -1,7 +1,7 @@
 """Tests for FastAPI backend."""
 
-import pytest
 from fastapi.testclient import TestClient
+import pytest
 
 from backend.main import app
 

@@ -4,11 +4,11 @@ This module provides comprehensive mapping functionality for European stocks
 including major exchanges like Deutsche Börse, Euronext, LSE, and others.
 """
 
-import logging
-import re
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
+import logging
+import re
 from typing import Any
 
 logger = logging.getLogger(__name__)

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Setup initial production data for testing."""
 
-import sys
 from pathlib import Path
+import sys
 
 # Add project root to path
 PROJECT_ROOT = Path(__file__).parent.parent

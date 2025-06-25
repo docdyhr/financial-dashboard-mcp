@@ -6,7 +6,8 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from backend.auth.dependencies import get_current_active_user
-from backend.exceptions import ResourceNotFoundError as NotFoundError, ValidationError
+from backend.exceptions import ResourceNotFoundError as NotFoundError
+from backend.exceptions import ValidationError
 from backend.models import get_db
 from backend.models.user import User
 from backend.schemas.base import BaseResponse, PaginatedResponse

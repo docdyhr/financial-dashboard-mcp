@@ -4,11 +4,11 @@ This module provides comprehensive ISIN functionality including validation, pars
 caching, and database integration for the Financial Dashboard.
 """
 
+from dataclasses import dataclass
+from datetime import datetime
 import logging
 import re
 import time
-from dataclasses import dataclass
-from datetime import datetime
 from typing import Any
 
 from sqlalchemy import and_
@@ -104,6 +104,8 @@ class ISINUtils:
         "TW": "Taiwan",
         "US": "United States",
         "ZA": "South Africa",
+        "XS": "International Securities",
+        "EU": "European Union Securities",
     }
 
     # Exchange code mappings for better ticker resolution
@@ -721,6 +723,20 @@ class ISINService:
         )
 
         return self.mapping_service.save_mapping_to_db(db, mapping)
+
+    def get_ticker_for_isin(self, isin: str) -> str | None:
+        """Get ticker symbol for a given ISIN.
+
+        Args:
+            isin: ISIN code
+
+        Returns:
+            Ticker symbol if found, None otherwise
+        """
+        from backend.models import get_db
+
+        db = next(get_db())
+        return self.mapping_service.resolve_isin_to_ticker(db, isin)
 
     def get_asset_info(self, db: Session, identifier: str) -> dict[str, Any]:
         """Get comprehensive asset information from identifier.

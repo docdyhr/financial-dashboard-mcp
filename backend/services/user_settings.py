@@ -1,7 +1,7 @@
 """User settings service for business logic and database operations."""
 
-import logging
 from datetime import datetime
+import logging
 from typing import Any
 
 from sqlalchemy.orm import Session

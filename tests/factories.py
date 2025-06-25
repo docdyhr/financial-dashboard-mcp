@@ -6,10 +6,10 @@ test data for the ISIN system and financial dashboard components.
 
 # ruff: noqa: S311, B007, RUF009
 
-import random
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from decimal import Decimal
+import random
 from typing import Any
 
 import factory

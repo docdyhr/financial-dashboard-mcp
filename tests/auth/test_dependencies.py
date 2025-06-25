@@ -1,10 +1,10 @@
 """Tests for authentication dependencies and middleware."""
 
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import Mock, patch
 
-import pytest
 from fastapi import HTTPException
 from jose import JWTError
+import pytest
 
 from backend.auth.dependencies import get_current_active_user, get_current_user
 from backend.models.user import User
@@ -44,6 +44,7 @@ class TestAuthenticationDependencies:
         return session
 
     @patch("backend.auth.dependencies.verify_token")
+    @pytest.mark.asyncio
     async def test_get_current_user_valid_token(
         self, mock_verify_token, mock_user, mock_db_session
     ):
@@ -63,6 +64,7 @@ class TestAuthenticationDependencies:
         mock_verify_token.assert_called_once_with(token)
 
     @patch("backend.auth.dependencies.verify_token")
+    @pytest.mark.asyncio
     async def test_get_current_user_invalid_token(
         self, mock_verify_token, mock_db_session
     ):
@@ -79,6 +81,7 @@ class TestAuthenticationDependencies:
         assert "Could not validate credentials" in exc_info.value.detail
 
     @patch("backend.auth.dependencies.verify_token")
+    @pytest.mark.asyncio
     async def test_get_current_user_user_not_found(
         self, mock_verify_token, mock_db_session
     ):
@@ -99,6 +102,7 @@ class TestAuthenticationDependencies:
         assert exc_info.value.status_code == 401
         assert "Could not validate credentials" in exc_info.value.detail
 
+    @pytest.mark.asyncio
     async def test_get_current_active_user_active(self, mock_user):
         """Test getting current active user with active user."""
         result = await get_current_active_user(mock_user)
@@ -106,6 +110,7 @@ class TestAuthenticationDependencies:
         assert result == mock_user
         assert result.is_active is True
 
+    @pytest.mark.asyncio
     async def test_get_current_active_user_inactive(self, mock_inactive_user):
         """Test getting current active user with inactive user."""
         with pytest.raises(HTTPException) as exc_info:
@@ -120,6 +125,7 @@ class TestAuthenticationDependencies:
 class TestAuthenticationFlow:
     """Test complete authentication flow integration."""
 
+    @pytest.mark.asyncio
     async def test_full_authentication_flow(self):
         """Test complete authentication flow from login to protected access."""
         # This would test:
@@ -138,6 +144,7 @@ class TestAuthenticationFlow:
 
         assert len(steps_completed) == 4
 
+    @pytest.mark.asyncio
     async def test_token_refresh_flow(self):
         """Test token refresh functionality."""
         # This would test:
@@ -157,6 +164,7 @@ class TestAuthenticationFlow:
 
         assert len(refresh_steps) == 5
 
+    @pytest.mark.asyncio
     async def test_concurrent_authentication(self):
         """Test multiple concurrent authentication requests."""
         # This would test:

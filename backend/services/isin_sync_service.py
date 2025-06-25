@@ -6,11 +6,11 @@ data sources, automatic conflict resolution, and background sync tasks.
 
 import asyncio
 import contextlib
-import logging
-import time
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
+import logging
+import time
 from typing import Any
 
 from sqlalchemy import or_
@@ -61,6 +61,15 @@ class SyncJob:
     total: int = 0
     results: dict[str, Any] = field(default_factory=dict)
     errors: list[str] = field(default_factory=list)
+
+    def __post_init__(self):
+        """Validate job data after initialization."""
+        if not self.isins:
+            raise ValueError("ISIN list cannot be empty")
+        if not self.job_id:
+            raise ValueError("Job ID cannot be empty")
+        if not self.source:
+            raise ValueError("Source cannot be empty")
 
 
 @dataclass
@@ -214,28 +223,35 @@ class ISINSyncService:
 
     async def _sync_single_isin(self, db: Session, job: SyncJob, isin: str):
         """Sync a single ISIN."""
-        # Get current mapping from database
-        existing = (
-            db.query(ISINTickerMapping)
-            .filter(ISINTickerMapping.isin == isin, ISINTickerMapping.is_active)
-            .first()
-        )
+        try:
+            # Get current mapping from database
+            existing = (
+                db.query(ISINTickerMapping)
+                .filter(ISINTickerMapping.isin == isin, ISINTickerMapping.is_active)
+                .first()
+            )
 
-        # Get updated data from external sources
-        new_data = await self._fetch_external_data(isin, job.source)
+            # Get updated data from external sources
+            new_data = await self._fetch_external_data(isin, job.source)
 
-        if not new_data:
-            return
-
-        # Check for conflicts
-        if existing:
-            conflict = self._detect_conflict(existing, new_data)
-            if conflict:
-                await self._handle_conflict(db, conflict)
+            if not new_data:
                 return
 
-        # Create or update mapping
-        await self._create_or_update_mapping(db, isin, new_data)
+            # Check for conflicts
+            if existing:
+                conflict = self._detect_conflict(existing, new_data)
+                if conflict:
+                    await self._handle_conflict(db, conflict)
+                    return
+
+            # Create or update mapping
+            await self._create_or_update_mapping(db, isin, new_data)
+        except Exception as e:
+            logger.error(f"Error syncing ISIN {isin}: {e}")
+            # Add error to job if provided
+            if hasattr(job, "errors"):
+                job.errors.append(f"Failed to sync {isin}: {e!s}")
+            # Don't re-raise the exception - handle gracefully
 
     async def _fetch_external_data(
         self, isin: str, source: str
@@ -527,7 +543,9 @@ class ISINSyncService:
 
     async def queue_sync_job(self, isins: list[str], source: str = "manual") -> str:
         """Queue a new sync job."""
-        job_id = f"sync_{int(time.time())}_{len(isins)}"
+        import uuid
+
+        job_id = f"sync_{int(time.time())}_{uuid.uuid4().hex[:8]}"
 
         job = SyncJob(job_id=job_id, source=source, isins=isins.copy())
 

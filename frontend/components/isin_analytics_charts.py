@@ -3,12 +3,12 @@
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-import streamlit as st
 from plotly.subplots import make_subplots
+import streamlit as st
 
 from .isin_analytics_data import (
     get_country_distribution,
-    get_exchange_distribution, 
+    get_exchange_distribution,
     get_sync_activity,
 )
 
@@ -190,8 +190,8 @@ def sync_activity_analysis():
         return
 
     # Convert date column to datetime
-    sync_df['date'] = pd.to_datetime(sync_df['date'])
-    
+    sync_df["date"] = pd.to_datetime(sync_df["date"])
+
     # Create subplot with secondary y-axis
     fig = make_subplots(
         rows=2,
@@ -200,77 +200,79 @@ def sync_activity_analysis():
             "Daily Sync Volume",
             "Success Rate Trend",
             "Performance Metrics",
-            "Activity Distribution"
+            "Activity Distribution",
         ),
         specs=[
             [{"secondary_y": False}, {"secondary_y": True}],
-            [{"secondary_y": False}, {"type": "pie"}]
-        ]
+            [{"secondary_y": False}, {"type": "pie"}],
+        ],
     )
 
     # Daily sync volume
     fig.add_trace(
         go.Scatter(
-            x=sync_df['date'],
-            y=sync_df['total_syncs'],
-            mode='lines+markers',
-            name='Total Syncs',
-            line=dict(color='blue', width=2)
+            x=sync_df["date"],
+            y=sync_df["total_syncs"],
+            mode="lines+markers",
+            name="Total Syncs",
+            line=dict(color="blue", width=2),
         ),
-        row=1, col=1
+        row=1,
+        col=1,
     )
 
     # Success rate trend
     fig.add_trace(
         go.Scatter(
-            x=sync_df['date'],
-            y=sync_df['success_rate'],
-            mode='lines+markers',
-            name='Success Rate (%)',
-            line=dict(color='green', width=2)
+            x=sync_df["date"],
+            y=sync_df["success_rate"],
+            mode="lines+markers",
+            name="Success Rate (%)",
+            line=dict(color="green", width=2),
         ),
-        row=1, col=2
+        row=1,
+        col=2,
     )
 
     # Performance metrics (response time)
     fig.add_trace(
         go.Scatter(
-            x=sync_df['date'],
-            y=sync_df['avg_duration_ms'],
-            mode='lines+markers',
-            name='Avg Duration (ms)',
-            line=dict(color='orange', width=2)
+            x=sync_df["date"],
+            y=sync_df["avg_duration_ms"],
+            mode="lines+markers",
+            name="Avg Duration (ms)",
+            line=dict(color="orange", width=2),
         ),
-        row=2, col=1
+        row=2,
+        col=1,
     )
 
     # Activity distribution pie chart
-    total_successful = sync_df['successful_syncs'].sum()
-    total_failed = sync_df['failed_syncs'].sum()
-    
+    total_successful = sync_df["successful_syncs"].sum()
+    total_failed = sync_df["failed_syncs"].sum()
+
     fig.add_trace(
         go.Pie(
-            labels=['Successful', 'Failed'],
+            labels=["Successful", "Failed"],
             values=[total_successful, total_failed],
-            name='Sync Results',
-            marker_colors=['green', 'red']
+            name="Sync Results",
+            marker_colors=["green", "red"],
         ),
-        row=2, col=2
+        row=2,
+        col=2,
     )
 
     fig.update_layout(
-        height=800,
-        title_text="ISIN Sync Activity Dashboard",
-        showlegend=False
+        height=800, title_text="ISIN Sync Activity Dashboard", showlegend=False
     )
 
     # Update axes labels
     fig.update_xaxes(title_text="Date", row=1, col=1)
     fig.update_yaxes(title_text="Number of Syncs", row=1, col=1)
-    
+
     fig.update_xaxes(title_text="Date", row=1, col=2)
     fig.update_yaxes(title_text="Success Rate (%)", row=1, col=2)
-    
+
     fig.update_xaxes(title_text="Date", row=2, col=1)
     fig.update_yaxes(title_text="Duration (ms)", row=2, col=1)
 
@@ -280,19 +282,19 @@ def sync_activity_analysis():
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:
-        avg_syncs = sync_df['total_syncs'].mean()
+        avg_syncs = sync_df["total_syncs"].mean()
         st.metric("Avg Daily Syncs", f"{avg_syncs:,.0f}")
 
     with col2:
-        avg_success = sync_df['success_rate'].mean()
+        avg_success = sync_df["success_rate"].mean()
         st.metric("Avg Success Rate", f"{avg_success:.1f}%")
 
     with col3:
-        avg_duration = sync_df['avg_duration_ms'].mean()
+        avg_duration = sync_df["avg_duration_ms"].mean()
         st.metric("Avg Duration", f"{avg_duration:.0f}ms")
 
     with col4:
-        total_processed = sync_df['total_syncs'].sum()
+        total_processed = sync_df["total_syncs"].sum()
         st.metric("Total Processed", f"{total_processed:,}")
 
 
@@ -300,33 +302,34 @@ def create_quality_charts(quality_metrics):
     """Create quality analysis charts."""
     if not quality_metrics:
         st.error("No quality metrics available")
-        return
+        return None
 
     # Quality scores radar chart
-    categories = ['Overall Score', 'Validation Accuracy', 'Completeness', 'Timeliness', 'Consistency']
+    categories = [
+        "Overall Score",
+        "Validation Accuracy",
+        "Completeness",
+        "Timeliness",
+        "Consistency",
+    ]
     values = [
-        quality_metrics.get('overall_score', 0),
-        quality_metrics.get('validation_accuracy', 0),
-        quality_metrics.get('completeness', 0),
-        quality_metrics.get('timeliness', 0),
-        quality_metrics.get('consistency', 0),
+        quality_metrics.get("overall_score", 0),
+        quality_metrics.get("validation_accuracy", 0),
+        quality_metrics.get("completeness", 0),
+        quality_metrics.get("timeliness", 0),
+        quality_metrics.get("consistency", 0),
     ]
 
-    fig = go.Figure(data=go.Scatterpolar(
-        r=values,
-        theta=categories,
-        fill='toself',
-        name='Quality Metrics'
-    ))
+    fig = go.Figure(
+        data=go.Scatterpolar(
+            r=values, theta=categories, fill="toself", name="Quality Metrics"
+        )
+    )
 
     fig.update_layout(
-        polar=dict(
-            radialaxis=dict(
-                visible=True,
-                range=[0, 100]
-            )),
+        polar=dict(radialaxis=dict(visible=True, range=[0, 100])),
         showlegend=False,
-        title="Data Quality Score Breakdown"
+        title="Data Quality Score Breakdown",
     )
 
     st.plotly_chart(fig, use_container_width=True)

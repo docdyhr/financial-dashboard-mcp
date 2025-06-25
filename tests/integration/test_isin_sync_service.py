@@ -129,9 +129,13 @@ class TestISINSyncService:
         self, sync_service, mock_db_with_mappings
     ):
         """Test syncing a single ISIN - creating new mapping."""
-        mock_db_with_mappings.query.return_value.filter.return_value.order_by.return_value.first.return_value = (
-            None
-        )
+        # Mock both query chains to return None (no existing mappings)
+        mock_query = Mock()
+        mock_filter = Mock()
+        mock_filter.first.return_value = None
+        mock_filter.order_by.return_value.first.return_value = None
+        mock_query.filter.return_value = mock_filter
+        mock_db_with_mappings.query.return_value = mock_query
 
         job = SyncJob(job_id="test_job", source="test", isins=["US0378331005"])
 
@@ -501,9 +505,12 @@ class TestISINSyncAPI:
                     mapping.isin = f"DE{str(i).zfill(9)}0"
                     mock_mappings.append(mapping)
 
-                mock_db.query.return_value.filter.return_value.limit.return_value.all.return_value = (
-                    mock_mappings
-                )
+                # Mock the complete query chain
+                mock_query = Mock()
+                mock_query.filter.return_value = mock_query  # Chain filters
+                mock_query.limit.return_value = mock_query  # Chain limit
+                mock_query.all.return_value = mock_mappings  # Final result
+                mock_db.query.return_value = mock_query
                 yield mock_db
 
             test_client.app.dependency_overrides[get_db] = mock_get_db
@@ -662,14 +669,11 @@ class TestISINSyncServiceErrorHandling:
             mock_fetch.side_effect = Exception("API unavailable")
 
             # Should handle API errors gracefully
-            with patch(
-                "backend.services.isin_sync_service.get_db_session"
-            ) as mock_get_db:
-                mock_db = Mock()
-                mock_get_db.return_value.__enter__.return_value = mock_db
+            mock_db = Mock()
+            mock_db.query.return_value.filter.return_value.first.return_value = None
 
-                await sync_service._sync_single_isin(mock_db, job, "US0378331005")
-                # Should not crash, error should be logged
+            await sync_service._sync_single_isin(mock_db, job, "US0378331005")
+            # Should not crash, error should be logged
 
     def test_invalid_job_data_handling(self, sync_service):
         """Test handling of invalid job data."""

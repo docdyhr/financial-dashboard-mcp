@@ -1,7 +1,7 @@
 """Configuration settings for the Financial Dashboard backend."""
 
-import os
 from functools import lru_cache
+import os
 from pathlib import Path
 
 from pydantic import field_validator, model_validator
@@ -51,9 +51,17 @@ class Settings(BaseSettings):
     @classmethod
     def parse_cors_origins(cls, v):
         """Parse CORS origins from string or list."""
+        if v is None:
+            return ["http://localhost:8501", "http://localhost:3000"]
         if isinstance(v, str):
-            return [origin.strip() for origin in v.split(",")]
-        return v
+            # Handle special case for single asterisk
+            if v.strip() == "*":
+                return ["*"]
+            # Handle comma-separated values
+            return [origin.strip() for origin in v.split(",") if origin.strip()]
+        if isinstance(v, list):
+            return v
+        return ["http://localhost:8501", "http://localhost:3000"]
 
     # Market Data
     alpha_vantage_api_key: str | None = None
@@ -85,19 +93,19 @@ class Settings(BaseSettings):
     default_request_timeout: int = 30
     max_retries: int = 3
     session_timeout: int = 3600
-    
+
     # Market Data Rate Limits (seconds between requests)
     yfinance_rate_limit_delay: float = 1.0
     alpha_vantage_rate_limit_delay: float = 12.0
     finnhub_rate_limit_delay: float = 1.0
     deutsche_borse_rate_limit_delay: float = 2.0
     boerse_frankfurt_rate_limit_delay: float = 1.5
-    
+
     # Cache TTL (Time To Live in seconds)
     market_data_cache_ttl: int = 300
     portfolio_cache_ttl: int = 600
     isin_mapping_cache_ttl: int = 86400
-    
+
     # ISIN Service Configuration
     isin_batch_size: int = 50
     isin_max_concurrent_jobs: int = 3
@@ -105,19 +113,19 @@ class Settings(BaseSettings):
     isin_retry_delay: float = 5.0
     isin_sync_check_interval: int = 60
     isin_error_sleep_interval: int = 30
-    
+
     # API Limits
     max_api_limit: int = 1000
     default_api_limit: int = 100
     default_batch_size: int = 100
     max_batch_size: int = 500
-    
+
     # Risk and Portfolio Thresholds
     concentration_warning_threshold: float = 0.20
     concentration_critical_threshold: float = 0.25
     min_diversification_assets: int = 5
     risk_free_rate: float = 0.02
-    
+
     # External API URLs
     alpha_vantage_base_url: str = "https://www.alphavantage.co/query"
     finnhub_base_url: str = "https://finnhub.io/api/v1"
@@ -125,9 +133,11 @@ class Settings(BaseSettings):
     xetra_search_url: str = "https://www.xetra.com/xetra-en/instruments/shares"
     boerse_frankfurt_base_url: str = "https://www.boerse-frankfurt.de"
     boerse_frankfurt_quote_url: str = "https://www.boerse-frankfurt.de/equity"
-    
+
     # User Agent
-    user_agent: str = "Financial-Dashboard/1.0 (https://github.com/yourusername/financial-dashboard)"
+    user_agent: str = (
+        "Financial-Dashboard/1.0 (https://github.com/yourusername/financial-dashboard)"
+    )
 
     @model_validator(mode="after")
     def validate_production_settings(self):

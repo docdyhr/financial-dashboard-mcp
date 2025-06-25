@@ -1,8 +1,8 @@
 """Test the task queue with simulated market data to demonstrate functionality."""
 
-import sys
 from decimal import Decimal
 from pathlib import Path
+import sys
 
 # Add the project root to Python path
 project_root = Path(__file__).parent.parent
