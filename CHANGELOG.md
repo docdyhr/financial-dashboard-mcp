@@ -2,6 +2,33 @@
 
 
 
+## v2.9.0 (2025-07-03)
+
+### Chore
+
+* chore: bump version to 2.8.3 [skip ci] ([`ced5607`](https://github.com/docdyhr/financial-dashboard-mcp/commit/ced5607f3ba4fba9d869d5462d0c774864a4502e))
+
+### Feature
+
+* feat: enhance development automation and fix high priority issues
+
+- Add comprehensive Claude Code hooks configuration with security scanning
+- Fix critical test database initialization issues in conftest.py
+- Integrate Bandit and Safety security tools with automated scanning
+- Add CLAUDE.md with complete project documentation and development guidelines
+- Update Makefile with security commands (make security, make security-strict)
+- Fix pyproject.toml Ruff configuration for proper Python version targeting
+- Enhance development workflow with automated formatting, linting, and testing hooks
+- Resolve high priority test failures through improved database fixture setup
+
+This significantly improves development experience, code quality assurance, and addresses
+the critical testing infrastructure issues outlined in the TODO.md.
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude &lt;noreply@anthropic.com&gt; ([`ab4f562`](https://github.com/docdyhr/financial-dashboard-mcp/commit/ab4f56229c745267195f754c267762f886eb07f4))
+
+
 ## v2.8.3 (2025-06-25)
 
 ### Chore
