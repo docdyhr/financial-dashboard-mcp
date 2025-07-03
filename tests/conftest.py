@@ -45,9 +45,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 # Import all models to ensure they're registered with Base metadata
-from backend.models import (
-    Base,
-)
+from backend.models import Base
 
 
 def pytest_configure(config):
@@ -112,23 +110,26 @@ def setup_test_environment():
     os.environ["DEBUG"] = "true"
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def test_db():
     """Create a test database for each test."""
-    # Import here to ensure environment variables are set first
-    import os
+    # Import here to avoid import order issues
     import tempfile
     import uuid
+    from pathlib import Path
 
+    # Create unique test database file
     test_db_name = f"test_{uuid.uuid4().hex}.db"
-    test_db_path = os.path.join(tempfile.gettempdir(), test_db_name)
+    test_db_path = Path(tempfile.gettempdir()) / test_db_name
 
-    # Create a new engine for this specific test
+    # Use file-based SQLite database for better reliability
     engine = create_engine(
         f"sqlite:///{test_db_path}",
         echo=False,
         connect_args={"check_same_thread": False},
     )
+
+    # Import all models to ensure they're loaded before creating tables
 
     # Create all tables in the test database
     Base.metadata.create_all(engine)
@@ -149,14 +150,14 @@ def test_db():
     try:
         Base.metadata.drop_all(engine)
         engine.dispose()
-        # Remove the temporary database file
-        if os.path.exists(test_db_path):
-            os.unlink(test_db_path)
+        # Remove the test database file
+        if test_db_path.exists():
+            test_db_path.unlink()
     except Exception:
         pass  # Ignore cleanup errors in tests
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def client(test_db):
     """Create a test client with a test database."""
     from fastapi.testclient import TestClient

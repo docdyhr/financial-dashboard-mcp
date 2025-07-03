@@ -150,7 +150,7 @@ exclude_lines = [
 line-length = 88
 
 # Python 3.11
-target-version = "2.8.3"
+target-version = "py311"
 
 # Exclude directories
 exclude = [

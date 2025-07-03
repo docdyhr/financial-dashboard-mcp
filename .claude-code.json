@@ -1,0 +1,105 @@
+{
+  "hooks": {
+    "pre_edit": [
+      {
+        "name": "lint-check",
+        "description": "Run linting before editing Python files",
+        "command": "make lint",
+        "condition": "file.endswith('.py')"
+      }
+    ],
+    "post_edit": [
+      {
+        "name": "format",
+        "description": "Format code after editing",
+        "command": "make format",
+        "condition": "file.endswith('.py')"
+      },
+      {
+        "name": "type-check",
+        "description": "Run type checking after editing backend files",
+        "command": "make type-check",
+        "condition": "file.startswith('backend/') and file.endswith('.py')"
+      },
+      {
+        "name": "security-scan",
+        "description": "Run security scan on edited Python files",
+        "command": "bandit -r $(dirname {file}) -f json",
+        "condition": "file.endswith('.py') and (file.startswith('backend/') or file.startswith('mcp_server/'))",
+        "allow_failure": true
+      },
+      {
+        "name": "test-unit",
+        "description": "Run unit tests after editing source files",
+        "command": "make test-unit",
+        "condition": "(file.startswith('backend/') or file.startswith('frontend/')) and file.endswith('.py') and not file.startswith('tests/')"
+      }
+    ],
+    "pre_commit": [
+      {
+        "name": "format-check",
+        "description": "Ensure code is properly formatted",
+        "command": "make format"
+      },
+      {
+        "name": "lint-check",
+        "description": "Run comprehensive linting",
+        "command": "make lint"
+      },
+      {
+        "name": "security-scan-full",
+        "description": "Run full security scan",
+        "command": "bandit -r backend/ mcp_server/ -ll",
+        "allow_failure": true
+      },
+      {
+        "name": "dependency-check",
+        "description": "Check for vulnerable dependencies",
+        "command": "safety check --json",
+        "allow_failure": true
+      },
+      {
+        "name": "full-test",
+        "description": "Run all tests before commit",
+        "command": "make test"
+      },
+      {
+        "name": "coverage-check",
+        "description": "Check test coverage meets minimum",
+        "command": "make test-cov"
+      }
+    ],
+    "post_bash": [
+      {
+        "name": "db-migration-check",
+        "description": "Check for pending migrations after database changes",
+        "command": "echo 'Remember to create migrations if you modified database models'",
+        "condition": "command.includes('alembic') or command.includes('migrate')"
+      }
+    ],
+    "pre_task": [
+      {
+        "name": "env-check",
+        "description": "Ensure virtual environment is activated",
+        "command": "python -c \"import sys; sys.exit(0 if hasattr(sys, 'real_prefix') or (hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix) else 1)\"",
+        "error_message": "Virtual environment not activated. Run: source .venv/bin/activate"
+      }
+    ]
+  },
+  "settings": {
+    "auto_format": true,
+    "run_tests_on_save": true,
+    "strict_type_checking": false,
+    "test_timeout": 300,
+    "hooks_enabled": true
+  },
+  "custom_commands": {
+    "dev": "make run-backend & make run-frontend",
+    "test-fast": "make test-fast",
+    "reset-db": "make db-reset && make migrate-up",
+    "check-all": "make format && make lint && make type-check && make security && make test",
+    "security-check": "make security",
+    "security-full": "make security-strict",
+    "docker-dev": "make docker-up && docker-compose logs -f"
+  }
+}

@@ -1,4 +1,4 @@
-.PHONY: help install install-dev format lint type-check test test-cov test-unit test-integration test-api test-frontend test-isin test-benchmark test-fast test-slow test-smoke test-all test-quality clean run-backend run-frontend run-celery run-all docker-build docker-up docker-down migrate-create migrate-up migrate-down test-db-setup test-db-teardown
+.PHONY: help install install-dev format lint type-check security security-strict test test-cov test-unit test-integration test-api test-frontend test-isin test-benchmark test-fast test-slow test-smoke test-all test-quality clean run-backend run-frontend run-celery run-all docker-build docker-up docker-down migrate-create migrate-up migrate-down test-db-setup test-db-teardown
 
 help:
 	@echo "Available commands:"
@@ -7,6 +7,8 @@ help:
 	@echo "  make format        - Format code with black and isort"
 	@echo "  make lint          - Run linting with ruff and flake8"
 	@echo "  make type-check    - Run type checking with mypy"
+	@echo "  make security      - Run security checks (bandit + safety)"
+	@echo "  make security-strict - Run strict security checks (fails on issues)"
 	@echo "  make test          - Run all tests"
 	@echo "  make test-cov      - Run tests with coverage report"
 	@echo "  make test-unit     - Run unit tests only"
@@ -48,6 +50,19 @@ lint:
 
 type-check:
 	mypy .
+
+security:
+	@echo "🔒 Running security checks..."
+	@echo "Running Bandit security scan..."
+	bandit -r backend/ mcp_server/ -ll -f json -o bandit-report.json || true
+	@echo "Running dependency vulnerability check..."
+	safety check --json --output safety-report.json || true
+	@echo "Security checks complete. Reports saved to bandit-report.json and safety-report.json"
+
+security-strict:
+	@echo "🔒 Running strict security checks (will fail on any issues)..."
+	bandit -r backend/ mcp_server/ -ll
+	safety check
 
 # Testing commands - optimized for both CLI and VS Code
 test:
